@@ -1,10 +1,19 @@
 module hashmap
+  use, intrinsic :: iso_c_binding
   implicit none
+
+
   private
 
-  public :: say_hello
+
+  interface
+
+
+  end interface
+
+
 contains
-  subroutine say_hello
-    print *, "Hello, hashmap_f90!"
-  end subroutine say_hello
+
+
+
 end module hashmap
