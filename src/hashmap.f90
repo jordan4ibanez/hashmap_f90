@@ -3,10 +3,12 @@ module hashmap
   implicit none
 
 
-  private
+  ! private
 
-  public :: hashmap_sip
-  public :: hashmap_murmur
+  ! public :: hashmap_sip
+  ! public :: hashmap_murmur
+
+  public :: internal_hashmap_new
 
 
   interface
@@ -51,13 +53,14 @@ module hashmap
     end function hashmap_xxhash3
 
 
-    function internal_hashmap_new(element_size, initial_capacity, seed_0, seed_1, hash_function, compare_function, element_free_function, udata) result(struct_pointer)
+    function internal_hashmap_new(element_size, initial_capacity, seed_0, seed_1, hash_function, compare_function, element_free_function, udata) result(struct_pointer) bind(c, name = "hashmap_new")
       use, intrinsic :: iso_c_binding
       implicit none
 
-      integer(c_size_t), intent(in), value :: element_size, initial_capacity, seed_0, seed_1
+      integer(c_size_t), intent(in), value :: element_size, initial_capacity
+      integer(c_int64_t), intent(in), value :: seed_0, seed_1
       type(c_funptr), intent(in), value :: hash_function, compare_function
-      type(c_funptr), intent(in), value, optional :: element_free_function
+      type(c_funptr), intent(in), value :: element_free_function
       type(c_ptr), intent(in), value :: udata
       type(c_ptr) :: struct_pointer
     end function internal_hashmap_new
@@ -115,6 +118,27 @@ module hashmap
       logical(c_bool), intent(in), value :: update_capacity
       type(c_ptr) :: void_pointer
     end function internal_hashmap_clear
+
+!? BEGIN FUNCTION BLUEPRINTS.
+
+
+    recursive function hash_function_c_interface(item_pointer, seed_0, seed_1) result(hash) bind(c)
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: item_pointer
+      integer(c_int), intent(in), value :: seed_0, seed_1
+      integer(c_int64_t) :: hash
+    end function hash_function_c_interface
+
+
+    recursive function compare_function_c_interface(a, b, udata) result(comparitor) bind(c)
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: a, b, udata
+      logical(c_bool) :: comparitor
+    end function compare_function_c_interface
 
 
   end interface
