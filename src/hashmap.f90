@@ -1,4 +1,4 @@
-module hashmap_f90
+module hashmap
   implicit none
   private
 
@@ -7,4 +7,4 @@ contains
   subroutine say_hello
     print *, "Hello, hashmap_f90!"
   end subroutine say_hello
-end module hashmap_f90
+end module hashmap
