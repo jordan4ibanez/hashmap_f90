@@ -14,6 +14,9 @@ module hashmap
   interface
 
 
+!? HASHING FUNCTIONS. ===========================================================================
+
+
     function hashmap_sip(data, len, seed_0, seed_1) result(value) bind(c, name = "hashmap_sip")
       use, intrinsic :: iso_c_binding
       implicit none
@@ -51,6 +54,9 @@ module hashmap
       integer(c_int64_t), intent(in), value :: seed_0, seed_1
       integer(c_int64_t) :: value
     end function hashmap_xxhash3
+
+
+!? HASHMAP FUNCTIONS. ===========================================================================
 
 
     function internal_hashmap_new(element_size, initial_capacity, seed_0, seed_1, hash_function, compare_function, element_free_function, udata) result(struct_pointer) bind(c, name = "hashmap_new")
@@ -119,7 +125,8 @@ module hashmap
       type(c_ptr) :: void_pointer
     end function internal_hashmap_clear
 
-!? BEGIN FUNCTION BLUEPRINTS.
+
+!? FUNCTION BLUEPRINTS. ===========================================================================
 
 
     recursive function hash_function_c_interface(item_pointer, seed_0, seed_1) result(hash) bind(c)

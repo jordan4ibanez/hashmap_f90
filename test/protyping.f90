@@ -2,6 +2,10 @@ module yep
   use, intrinsic :: iso_c_binding
   implicit none
 
+  type :: cool
+    integer(c_int) :: i = 0
+  end type cool
+
 contains
 
   recursive function debug_hash_function(item_pointer, seed_0, seed_1) result(hash) bind(c)
@@ -10,6 +14,7 @@ contains
     type(c_ptr), intent(in), value :: item_pointer
     integer(c_int), intent(in), value :: seed_0, seed_1
     integer(c_int64_t) :: hash
+
 
 
   end function debug_hash_function
@@ -34,17 +39,19 @@ program prototyping
   use, intrinsic :: iso_c_binding
   implicit none
 
-  type :: cool
-    integer(c_int) :: i = 0
-  end type cool
+  type(c_ptr) :: map, hash_data_loc
+  character(len = :, kind = c_char), allocatable, target :: hash_key
+  integer(c_int64_t) :: hash_result
 
-  type(c_ptr) :: map
-
-
-  print*,"hi"
 
   map = internal_hashmap_new(sizeof(cool()), 0_8, 0_8, 0_8, c_funloc(debug_hash_function), c_funloc(debug_compare_function), c_null_ptr, c_null_ptr)
 
+  hash_key = "hi there"
+
+  hash_result = hashmap_xxhash3(c_loc(hash_key), int(len(hash_key), c_size_t), 0_8, 0_8)
+
+  
+  print*,hash_result
 
   call internal_hashmap_free(map)
 
