@@ -51,7 +51,16 @@ module hashmap
     end function hashmap_xxhash3
 
 
-    ! function internal_hashmap_new(element_size, initial_capacity, seed_0, seed_1, )
+    function internal_hashmap_new(element_size, initial_capacity, seed_0, seed_1, hash_function, compare_function, element_free_function, udata) result(struct_pointer)
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      integer(c_size_t), intent(in), value :: element_size, initial_capacity, seed_0, seed_1
+      type(c_funptr), intent(in), value :: hash_function, compare_function
+      type(c_funptr), intent(in), value, optional :: element_free_function
+      type(c_ptr), intent(in), value :: udata
+      type(c_ptr) :: struct_pointer
+    end function internal_hashmap_new
 
 
   end interface
