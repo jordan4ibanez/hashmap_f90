@@ -63,6 +63,60 @@ module hashmap
     end function internal_hashmap_new
 
 
+    subroutine internal_hashmap_free(map) bind(c, name = "hashmap_free")
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: map
+    end subroutine internal_hashmap_free
+
+
+    function internal_hashmap_count(map) result(count) bind(c, name = "hashmap_count")
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: map
+      integer(c_size_t) :: count
+    end function internal_hashmap_count
+
+
+    function internal_hashmap_set(map, item) result(void_pointer) bind(c, name = "hashmap_set")
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: map, item
+      type(c_ptr) :: void_pointer
+    end function internal_hashmap_set
+
+
+    function internal_hashmap_get(map, key) result(void_pointer) bind(c, name = "hashmap_get")
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: map, key
+      type(c_ptr) :: void_pointer
+    end function internal_hashmap_get
+
+
+    function internal_hashmap_delete(map, key) result(void_pointer) bind(c, name = "hashmap_delete")
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: map, key
+      type(c_ptr) :: void_pointer
+    end function internal_hashmap_delete
+
+
+    function internal_hashmap_clear(map, update_capacity) result(void_pointer) bind(c, name = "hashmap_clear")
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: map
+      logical(c_bool), intent(in), value :: update_capacity
+      type(c_ptr) :: void_pointer
+    end function internal_hashmap_clear
+
+
   end interface
 
 
