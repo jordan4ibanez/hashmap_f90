@@ -167,6 +167,7 @@ module hashmap_mod
     type(c_ptr) :: map = c_null_ptr
   contains
     procedure :: set => hashmap_set
+    procedure :: get => hashmap_get
 
   end type hashmap
 
@@ -231,10 +232,21 @@ contains
     class(*), intent(inout), target :: generic_pointer
     logical(c_bool) :: is_some
     type(c_ptr) :: gotten_data
+    integer(c_int) :: key_length
+    type(element), target :: element_key_on_stack
+
 
     is_some = .false.
 
-    gotten_data = internal_hashmap_get(this%map)
+    key_length = len(key)
+
+    allocate(character(len = key_length, kind = c_char) :: element_key_on_stack%key)
+    element_key_on_stack%key = key
+    element_key_on_stack%key_length = key_length
+
+    gotten_data = internal_hashmap_get(this%map, c_loc(element_key_on_stack))
+
+    ! print*,gotten_data
 
   end function hashmap_get
 
