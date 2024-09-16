@@ -14,10 +14,8 @@ module hashmap_mod
 
   type :: hashmap
 
+
   end type hashmap
-
-
-
 
   interface
 
