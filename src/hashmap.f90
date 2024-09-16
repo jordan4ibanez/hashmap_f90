@@ -156,7 +156,8 @@ module hashmap_mod
   !* Element in the hashmap.
   !* 48 bytes.
   type :: element
-    character(len = :, kind = c_char), allocatable :: key
+    character(len = :, kind = c_char), pointer :: key => null()
+    integer(c_int) :: key_length = 0
     class(*), pointer :: data => null()
   end type element
 
@@ -203,7 +204,7 @@ contains
 
 
     !? Safety check.
-    if (.not. allocated(element_pointer%key)) then
+    if (.not. associated(element_pointer%key)) then
       error stop "[Hashmap] FATAL ERROR: element_pointer key is NULL."
     end if
 
@@ -217,6 +218,8 @@ contains
 
     type(c_ptr), intent(in), value :: a, b, udata
     logical(c_bool) :: comparitor
+
+
   end function compare_function
 
 
