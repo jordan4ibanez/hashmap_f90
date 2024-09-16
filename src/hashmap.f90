@@ -195,10 +195,9 @@ contains
     character(len = *, kind = c_char), intent(in) :: key
     class(*), intent(in), target :: generic_pointer
     integer(c_int) :: key_length
-    type(element), pointer :: new_element
+    type(element), target :: new_element
     type(c_ptr) :: old_data
 
-    allocate(new_element)
 
     key_length = len(key)
 
@@ -207,15 +206,18 @@ contains
       error stop "[Hashmap] ERROR: key cannot be NULL."
     end if
 
+    !* ALLOCATE.
     allocate(character(len = key_length, kind = c_char) :: new_element%key)
 
     new_element%key = key
-
     new_element%key_length = key_length
-
     new_element%data => generic_pointer
 
+    !? Internally calls: memcpy.
     old_data = internal_hashmap_set(this%map, c_loc(new_element))
+
+    !* DEALLOCATE.
+    deallocate(new_element%key)
 
     ! The old data was a null pointer. We don't have to do anything.
     if (.not. c_associated(old_data)) then
@@ -235,22 +237,26 @@ contains
     logical(c_bool) :: is_some
     type(c_ptr) :: gotten_data
     integer(c_int) :: key_length
-    type(element), target :: element_key_on_stack
+    type(element), target :: element_key
 
 
     is_some = .false.
 
     key_length = len(key)
 
-    allocate(character(len = key_length, kind = c_char) :: element_key_on_stack%key)
-    element_key_on_stack%key = key
-    element_key_on_stack%key_length = key_length
+    !* ALLOCATE.
+    allocate(character(len = key_length, kind = c_char) :: element_key%key)
 
-    gotten_data = internal_hashmap_get(this%map, c_loc(element_key_on_stack))
+    element_key%key = key
+    element_key%key_length = key_length
 
-    deallocate(element_key_on_stack%key)
+    gotten_data = internal_hashmap_get(this%map, c_loc(element_key))
+
+    !* DEALLOCATE.
+    deallocate(element_key%key)
 
     print*,gotten_data
+
 
   end function hashmap_get
 
