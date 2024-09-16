@@ -106,16 +106,6 @@ module hashmap_mod
     end function internal_hashmap_set
 
 
-    ! function internal_hashmap_set_with_hash(map, item, hash) result(void_pointer) bind(c, name = "hashmap_set_with_hash")
-    !   use, intrinsic :: iso_c_binding
-    !   implicit none
-
-    !   type(c_ptr), intent(in), value :: map, item
-    !   integer(c_int64_t), intent(in), value :: hash
-    !   type(c_ptr) :: void_pointer
-    ! end function internal_hashmap_set_with_hash
-
-
     function internal_hashmap_get(map, key) result(void_pointer) bind(c, name = "hashmap_get")
       use, intrinsic :: iso_c_binding
       implicit none
@@ -123,17 +113,6 @@ module hashmap_mod
       type(c_ptr), intent(in), value :: map, key
       type(c_ptr) :: void_pointer
     end function internal_hashmap_get
-
-
-    ! function internal_hashmap_get_with_hash(map, key, hash) result(void_pointer) bind(c, name = "hashmap_get_with_hash")
-    !   use, intrinsic :: iso_c_binding
-    !   implicit none
-
-    !   type(c_ptr), intent(in), value :: map, key
-    !   integer(c_int64_t), intent(in), value :: hash
-    !   type(c_ptr) :: void_pointer
-    ! end function internal_hashmap_get_with_hash
-
 
 
     function internal_hashmap_delete(map, key) result(void_pointer) bind(c, name = "hashmap_delete")
