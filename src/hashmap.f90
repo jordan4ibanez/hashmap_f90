@@ -166,6 +166,7 @@ module hashmap_mod
     private
     type(c_ptr) :: data = c_null_ptr
   contains
+    procedure :: set => hashmap_set
 
   end type hashmap
 
@@ -184,6 +185,45 @@ contains
 
     h%data = internal_hashmap_new(48_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
   end function hashmap_constructor
+
+
+  subroutine hashmap_set(this, key, generic_pointer)
+    implicit none
+
+    class(hashmap), intent(inout) :: this
+    character(len = *, kind = c_char), intent(in) :: key
+    class(*), intent(in), target :: generic_pointer
+    integer(c_int) :: key_length
+    type(element), pointer :: new_element
+    type(c_ptr) :: old_data
+
+    allocate(new_element)
+
+    key_length = len(key)
+
+    !? Safety check.
+    if (key_length == 0) then
+      error stop "[Hashmap] ERROR: key cannot be NULL."
+    end if
+
+    allocate(character(len = key_length, kind = c_char) :: new_element%key)
+
+    new_element%key_length = key_length
+
+    new_element%data => generic_pointer
+
+    old_data = internal_hashmap_set(this%data, c_loc(new_element))
+
+    ! The old data was a null pointer. We don't have to do anything.
+    if (.not. c_associated(old_data)) then
+      return
+    end if
+
+    ! todo: make a function pointer, "thing" to automatically clean up memory, like a really fast GC.
+  end subroutine hashmap_set
+
+
+!? Very verbose intrinsic hashmap functions. ===========================================================================
 
 
   recursive function hashing_function(item_pointer, seed_0, seed_1) result(hash) bind(c)
