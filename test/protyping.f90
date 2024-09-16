@@ -41,12 +41,10 @@ program prototyping
 
 
   type(hashmap) :: map
-  type(cool), pointer :: test_data
+  type(cool) :: test_data
   class(*), pointer :: generic_pointer
 
   map = hashmap()
-
-  allocate(test_data)
 
   test_data%i = 123
 
