@@ -161,6 +161,7 @@ module hashmap_mod
   end type element
 
 
+  !* Fortran hashmap wrapper.
   type :: hashmap
     private
     type(c_ptr) :: data
@@ -168,8 +169,45 @@ module hashmap_mod
 
   end type hashmap
 
+  interface hashmap
+    module procedure :: new_hashmap
+  end interface hashmap
+
 
 contains
+
+
+  function new_hashmap() result(h)
+    implicit none
+
+    type(hashmap) :: h
+
+    h%data = internal_hashmap_new(48_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
+  end function new_hashmap
+
+
+  recursive function hashing_function(item_pointer, seed_0, seed_1) result(hash) bind(c)
+    implicit none
+
+    type(c_ptr), intent(in), value :: item_pointer
+    integer(c_int), intent(in), value :: seed_0, seed_1
+    integer(c_int64_t) :: hash
+
+
+
+  end function hashing_function
+
+
+  recursive function compare_function(a, b, udata) result(comparitor) bind(c)
+    use, intrinsic :: iso_c_binding
+    implicit none
+
+    type(c_ptr), intent(in), value :: a, b, udata
+    logical(c_bool) :: comparitor
+  end function compare_function
+
+
+
 
   subroutine testing()
 
