@@ -1,2 +1,4 @@
 # hashmap_f90
-My cool new project!
+Fortran bindings to hashmap.c 
+
+If you want to C the original github: https://github.com/tidwall/hashmap.c
