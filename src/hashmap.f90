@@ -3,12 +3,12 @@ module hashmap
   implicit none
 
 
-  ! private
+  type :: element
+    character(len = :, kind = c_char), allocatable :: key
+    class(*), pointer :: data => null()
+  end type element
 
-  ! public :: hashmap_sip
-  ! public :: hashmap_murmur
 
-  public :: internal_hashmap_new
 
 
   interface
