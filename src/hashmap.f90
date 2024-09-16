@@ -219,6 +219,38 @@ contains
     type(c_ptr), intent(in), value :: a, b, udata
     logical(c_bool) :: comparitor
 
+    type(element), pointer :: element_pointer_a, element_pointer_b
+
+    !* A transfer.
+
+    !? Safety check.
+    if (.not. c_associated(a)) then
+      error stop "[Hashmap] FATAL ERROR: a is NULL."
+    end if
+
+    call c_f_pointer(a, element_pointer_a)
+
+    !? Safety check.
+    if (.not. associated(element_pointer_a%key)) then
+      error stop "[Hashmap] FATAL ERROR: a key is NULL."
+    end if
+
+    !* B transfer.
+
+    !? Safety check.
+    if (.not. c_associated(b)) then
+      error stop "[Hashmap] FATAL ERROR: b is NULL."
+    end if
+
+    call c_f_pointer(a, element_pointer_b)
+
+    !? Safety check.
+    if (.not. associated(element_pointer_b%key)) then
+      error stop "[Hashmap] FATAL ERROR: b key is NULL."
+    end if
+
+
+
 
   end function compare_function
 
