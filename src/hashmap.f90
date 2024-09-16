@@ -146,7 +146,7 @@ module hashmap_mod
   end interface
 
 
-!? BEGIN ACTUAL IMPLEMENTATION. ===========================================================================
+!! BEGIN ACTUAL IMPLEMENTATION. ===========================================================================
 
 
   public :: hashmap
