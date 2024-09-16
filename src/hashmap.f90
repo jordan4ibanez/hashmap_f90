@@ -129,7 +129,7 @@ module hashmap_mod
       implicit none
 
       type(c_ptr), intent(in), value :: item_pointer
-      integer(c_int), intent(in), value :: seed_0, seed_1
+      integer(c_int64_t), intent(in), value :: seed_0, seed_1
       integer(c_int64_t) :: hash
     end function hash_function_c_interface
 
@@ -190,10 +190,11 @@ contains
     implicit none
 
     type(c_ptr), intent(in), value :: item_pointer
-    integer(c_int), intent(in), value :: seed_0, seed_1
+    integer(c_int64_t), intent(in), value :: seed_0, seed_1
     integer(c_int64_t) :: hash
     type(element), pointer :: element_pointer
 
+    !? Safety check.
     if (.not. c_associated(item_pointer)) then
       error stop "[Hashmap] FATAL ERROR: item_pointer is NULL."
     end if
@@ -201,7 +202,12 @@ contains
     call c_f_pointer(item_pointer, element_pointer)
 
 
+    !? Safety check.
+    if (.not. allocated(element_pointer%key)) then
+      error stop "[Hashmap] FATAL ERROR: element_pointer key is NULL."
+    end if
 
+    hash = hashmap_xxhash3(c_loc(element_pointer%key), int(len(element_pointer%key), c_int64_t), seed_0, seed_1)
   end function hashing_function
 
 
