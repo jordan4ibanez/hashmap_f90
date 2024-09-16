@@ -209,6 +209,8 @@ contains
 
     allocate(character(len = key_length, kind = c_char) :: new_element%key)
 
+    new_element%key = key
+
     new_element%key_length = key_length
 
     new_element%data => generic_pointer
