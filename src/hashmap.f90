@@ -5,22 +5,6 @@ module hashmap_mod
 
   private
 
-  public :: hashmap
-
-
-  type :: element
-    character(len = :, kind = c_char), allocatable :: key
-    class(*), pointer :: data => null()
-  end type element
-
-
-  type :: hashmap
-    private
-    type(c_ptr) :: data
-  contains
-
-  end type hashmap
-
 
   interface
 
@@ -160,6 +144,26 @@ module hashmap_mod
 
 
   end interface
+
+
+!? BEGIN ACTUAL IMPLEMENTATION. ===========================================================================
+
+
+  public :: hashmap
+
+
+  type :: element
+    character(len = :, kind = c_char), allocatable :: key
+    class(*), pointer :: data => null()
+  end type element
+
+
+  type :: hashmap
+    private
+    type(c_ptr) :: data
+  contains
+
+  end type hashmap
 
 
 contains
