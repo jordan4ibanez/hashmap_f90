@@ -164,26 +164,26 @@ module hashmap_mod
   !* Fortran hashmap wrapper.
   type :: hashmap
     private
-    type(c_ptr) :: data
+    type(c_ptr) :: data = c_null_ptr
   contains
 
   end type hashmap
 
   interface hashmap
-    module procedure :: new_hashmap
+    module procedure :: hashmap_constructor
   end interface hashmap
 
 
 contains
 
 
-  function new_hashmap() result(h)
+  function hashmap_constructor() result(h)
     implicit none
 
     type(hashmap) :: h
 
     h%data = internal_hashmap_new(48_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
-  end function new_hashmap
+  end function hashmap_constructor
 
 
   recursive function hashing_function(item_pointer, seed_0, seed_1) result(hash) bind(c)
@@ -192,6 +192,13 @@ contains
     type(c_ptr), intent(in), value :: item_pointer
     integer(c_int), intent(in), value :: seed_0, seed_1
     integer(c_int64_t) :: hash
+    type(element), pointer :: element_pointer
+
+    if (.not. c_associated(item_pointer)) then
+      error stop "[Hashmap] FATAL ERROR: item_pointer is NULL."
+    end if
+
+    call c_f_pointer(item_pointer, element_pointer)
 
 
 
