@@ -285,16 +285,14 @@ contains
   end function hashing_function
 
 
-  recursive function compare_function(a, b, udata) result(comparitor) bind(c)
+  recursive function compare_function(a, b, udata) result(failed) bind(c)
     use, intrinsic :: iso_c_binding
     implicit none
 
     type(c_ptr), intent(in), value :: a, b, udata
-    logical(c_bool) :: comparitor
+    logical(c_bool) :: failed
 
     type(element), pointer :: element_pointer_a, element_pointer_b
-
-    print*,"comparing"
 
     !* A transfer.
 
@@ -324,10 +322,8 @@ contains
       error stop "[Hashmap] FATAL ERROR: b key is NULL."
     end if
 
-    print*,"comparing"
-
     !* Now check.
-    comparitor = .false.
+    failed = .true.
 
     if (element_pointer_a%key_length /= element_pointer_b%key_length) then
       return
@@ -341,7 +337,7 @@ contains
       print*,udata
     end if
 
-    comparitor = .true.
+    failed = .false.
   end function compare_function
 
 
