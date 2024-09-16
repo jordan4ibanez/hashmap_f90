@@ -277,8 +277,9 @@ contains
       error stop "[Hashmap] FATAL ERROR: element_pointer key is NULL."
     end if
 
-    hash = hashmap_xxhash3(c_loc(element_pointer%key), int(len(element_pointer%key), c_int64_t), seed_0, seed_1)
-    ! print*,"hash:", hash
+    print*,"key: ",element_pointer%key
+    hash = hashmap_xxhash3(c_loc(element_pointer%key), int(element_pointer%key_length, c_int64_t), seed_0, seed_1)
+    print*,"hash:", hash
   end function hashing_function
 
 
