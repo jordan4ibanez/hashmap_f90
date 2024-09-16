@@ -228,17 +228,17 @@ contains
   end subroutine hashmap_set
 
 
-  function hashmap_get(this, key, generic) result(is_some)
+  function hashmap_get(this, key, generic_pointer) result(is_some)
     implicit none
 
     class(hashmap), intent(inout) :: this
     character(len = *, kind = c_char), intent(in) :: key
-    class(*), intent(inout), target :: generic
+    class(*), intent(inout), pointer :: generic_pointer
     logical(c_bool) :: is_some
     type(c_ptr) :: gotten_data
     integer(c_int) :: key_length
     type(element), target :: element_key
-
+    type(element), pointer :: element_pointer
 
     is_some = .false.
 
@@ -250,14 +250,22 @@ contains
     element_key%key = key
     element_key%key_length = key_length
 
+    !? Grabs a C pointer or NULL upon failure.
     gotten_data = internal_hashmap_get(this%map, c_loc(element_key))
 
     !* DEALLOCATE.
     deallocate(element_key%key)
 
-    print*,gotten_data
+    ! It's a null pointer.
+    if (.not. c_associated(gotten_data)) then
+      return
+    end if
 
+    !* We can finally point STRAIGHT AT IT!
+    call c_f_pointer(gotten_data, element_pointer)
+    generic_pointer => element_pointer%data
 
+    is_some = .true.
   end function hashmap_get
 
 
