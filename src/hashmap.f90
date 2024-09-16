@@ -5,6 +5,8 @@ module hashmap_mod
 
   private
 
+  public :: hashmap
+
 
   type :: element
     character(len = :, kind = c_char), allocatable :: key
@@ -13,9 +15,12 @@ module hashmap_mod
 
 
   type :: hashmap
-
+    private
+    type(c_ptr) :: data
+  contains
 
   end type hashmap
+
 
   interface
 
