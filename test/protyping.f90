@@ -39,6 +39,8 @@ program prototyping
   use, intrinsic :: iso_c_binding
   implicit none
 
+  call testing()
+
   ! type(c_ptr) :: map, hash_data_loc
   ! character(len = :, kind = c_char), allocatable, target :: hash_key
   ! integer(c_int64_t) :: hash_result

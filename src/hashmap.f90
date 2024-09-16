@@ -150,8 +150,11 @@ module hashmap_mod
 
 
   public :: hashmap
+  public :: testing
 
 
+  !* Element in the hashmap.
+  !* 48 bytes.
   type :: element
     character(len = :, kind = c_char), allocatable :: key
     class(*), pointer :: data => null()
@@ -167,6 +170,17 @@ module hashmap_mod
 
 
 contains
+
+  subroutine testing()
+
+    type(element) :: hi
+
+    hi%key = "hi there"
+
+
+    print*,sizeof(hi)
+
+  end subroutine testing
 
 
 
