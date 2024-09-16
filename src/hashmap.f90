@@ -164,7 +164,7 @@ module hashmap_mod
   !* Fortran hashmap wrapper.
   type :: hashmap
     private
-    type(c_ptr) :: data = c_null_ptr
+    type(c_ptr) :: map = c_null_ptr
   contains
     procedure :: set => hashmap_set
 
@@ -183,7 +183,7 @@ contains
 
     type(hashmap) :: h
 
-    h%data = internal_hashmap_new(48_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
+    h%map = internal_hashmap_new(48_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
   end function hashmap_constructor
 
 
@@ -212,7 +212,7 @@ contains
 
     new_element%data => generic_pointer
 
-    old_data = internal_hashmap_set(this%data, c_loc(new_element))
+    old_data = internal_hashmap_set(this%map, c_loc(new_element))
 
     ! The old data was a null pointer. We don't have to do anything.
     if (.not. c_associated(old_data)) then
@@ -230,8 +230,11 @@ contains
     character(len = *, kind = c_char), intent(in) :: key
     class(*), intent(inout), target :: generic_pointer
     logical(c_bool) :: is_some
+    type(c_ptr) :: gotten_data
 
     is_some = .false.
+
+    gotten_data = internal_hashmap_get(this%map)
 
   end function hashmap_get
 
