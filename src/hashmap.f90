@@ -249,9 +249,18 @@ contains
       error stop "[Hashmap] FATAL ERROR: b key is NULL."
     end if
 
+    !* Now check.
+    comparitor = .false.
 
+    if (element_pointer_a%key_length /= element_pointer_b%key_length) then
+      return
+    end if
 
+    if (element_pointer_a%key /= element_pointer_b%key) then
+      return
+    end if
 
+    comparitor = .true.
   end function compare_function
 
 
