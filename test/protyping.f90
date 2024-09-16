@@ -41,9 +41,15 @@ program prototyping
 
 
   type(hashmap) :: map
+  type(cool), pointer :: test_data
 
   map = hashmap()
 
+  allocate(test_data)
+
+  test_data%i = 123
+
+  call map%set("hi there", test_data)
 
   ! type(c_ptr) :: map, hash_data_loc
   ! character(len = :, kind = c_char), allocatable, target :: hash_key
