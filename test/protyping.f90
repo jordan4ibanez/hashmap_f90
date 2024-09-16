@@ -34,41 +34,39 @@ contains
 end module yep
 
 program prototyping
-  use :: hashmap
+  use :: hashmap_mod
   use :: yep
   use, intrinsic :: iso_c_binding
   implicit none
 
-  type(c_ptr) :: map, hash_data_loc
-  character(len = :, kind = c_char), allocatable, target :: hash_key
-  integer(c_int64_t) :: hash_result
-  type(c_ptr) :: output
-  type(cool), pointer :: test_data
+  ! type(c_ptr) :: map, hash_data_loc
+  ! character(len = :, kind = c_char), allocatable, target :: hash_key
+  ! integer(c_int64_t) :: hash_result
+  ! type(c_ptr) :: output
+  ! type(cool), pointer :: test_data
 
-  type(c_ptr) :: test_output_c_pointer
-  type(cool), pointer :: test_output_data
+  ! type(c_ptr) :: test_output_c_pointer
+  ! type(cool), pointer :: test_output_data
 
 
-  map = internal_hashmap_new(sizeof(cool()), 0_8, 0_8, 0_8, c_funloc(debug_hash_function), c_funloc(debug_compare_function), c_null_ptr, c_null_ptr)
+  ! map = internal_hashmap_new(sizeof(cool()), 0_8, 0_8, 0_8, c_funloc(debug_hash_function), c_funloc(debug_compare_function), c_null_ptr, c_null_ptr)
 
-  hash_key = "hi there"
+  ! hash_key = "hi there"
 
-  hash_result = hashmap_xxhash3(c_loc(hash_key), int(len(hash_key), c_size_t), 0_8, 0_8)
+  ! hash_result = hashmap_xxhash3(c_loc(hash_key), int(len(hash_key), c_size_t), 0_8, 0_8)
 
-  allocate(test_data)
-  test_data%i = 555
+  ! allocate(test_data)
+  ! test_data%i = 555
 
-  !* Can do c_associated to check needed deallocation.
-  output = internal_hashmap_set(map, c_loc(test_data))
+  ! !* Can do c_associated to check needed deallocation.
+  ! output = internal_hashmap_set(map, c_loc(test_data))
 
-  print*,output
+  ! print*,output
 
   ! test_output_c_pointer = internal_hashmap_get_with_hash(map, )
 
 
-
-
-  call internal_hashmap_free(map)
+  ! call internal_hashmap_free(map)
 
 
 

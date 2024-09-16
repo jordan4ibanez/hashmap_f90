@@ -1,12 +1,20 @@
-module hashmap
+module hashmap_mod
   use, intrinsic :: iso_c_binding
   implicit none
+
+
+  private
 
 
   type :: element
     character(len = :, kind = c_char), allocatable :: key
     class(*), pointer :: data => null()
   end type element
+
+
+  type :: hashmap
+
+  end type hashmap
 
 
 
@@ -176,4 +184,4 @@ contains
 
 
 
-end module hashmap
+end module hashmap_mod
