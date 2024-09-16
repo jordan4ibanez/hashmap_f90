@@ -150,7 +150,6 @@ module hashmap_mod
 
 
   public :: hashmap
-  public :: testing
 
 
   !* Element in the hashmap.
@@ -262,21 +261,6 @@ contains
 
     comparitor = .true.
   end function compare_function
-
-
-
-
-  subroutine testing()
-
-    type(element) :: hi
-
-    hi%key = "hi there"
-
-
-    print*,sizeof(hi)
-
-  end subroutine testing
-
 
 
 end module hashmap_mod
