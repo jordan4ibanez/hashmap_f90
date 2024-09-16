@@ -184,7 +184,7 @@ contains
 
     type(hashmap) :: h
 
-    h%map = internal_hashmap_new(48_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
+    h%map = internal_hashmap_new(56_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
   end function hashmap_constructor
 
 
@@ -224,12 +224,12 @@ contains
   end subroutine hashmap_set
 
 
-  function hashmap_get(this, key, generic_pointer) result(is_some)
+  function hashmap_get(this, key, generic) result(is_some)
     implicit none
 
     class(hashmap), intent(inout) :: this
     character(len = *, kind = c_char), intent(in) :: key
-    class(*), intent(inout), target :: generic_pointer
+    class(*), intent(inout), target :: generic
     logical(c_bool) :: is_some
     type(c_ptr) :: gotten_data
     integer(c_int) :: key_length
@@ -292,6 +292,8 @@ contains
 
     type(element), pointer :: element_pointer_a, element_pointer_b
 
+    print*,"comparing"
+
     !* A transfer.
 
     !? Safety check.
@@ -331,6 +333,10 @@ contains
 
     if (element_pointer_a%key /= element_pointer_b%key) then
       return
+    end if
+
+    if (.false.) then
+      print*,udata
     end if
 
     comparitor = .true.
