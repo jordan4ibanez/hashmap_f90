@@ -223,6 +223,19 @@ contains
   end subroutine hashmap_set
 
 
+  function hashmap_get(this, key, generic_pointer) result(is_some)
+    implicit none
+
+    class(hashmap), intent(inout) :: this
+    character(len = *, kind = c_char), intent(in) :: key
+    class(*), intent(inout), target :: generic_pointer
+    logical(c_bool) :: is_some
+
+    is_some = .false.
+
+  end function hashmap_get
+
+
 !? Very verbose intrinsic hashmap functions. ===========================================================================
 
 
@@ -290,7 +303,7 @@ contains
     end if
 
     print*,"comparing"
-    
+
     !* Now check.
     comparitor = .false.
 
