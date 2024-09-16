@@ -225,6 +225,7 @@ contains
     end if
 
     ! todo: make a function pointer, "thing" to automatically clean up memory, like a really fast GC.
+
   end subroutine hashmap_set
 
 
