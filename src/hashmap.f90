@@ -246,7 +246,9 @@ contains
 
     gotten_data = internal_hashmap_get(this%map, c_loc(element_key_on_stack))
 
-    ! print*,gotten_data
+    deallocate(element_key_on_stack%key)
+
+    print*,gotten_data
 
   end function hashmap_get
 

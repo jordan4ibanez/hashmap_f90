@@ -50,9 +50,9 @@ program prototyping
 
   test_data%i = 123
 
-  call map%set("hi there", test_data)
+  call map%set("hi", test_data)
 
-  if (map%get("hi_there", generic_pointer)) then
+  if (map%get("hi", generic_pointer)) then
     print*,"got you"
   end if
 
