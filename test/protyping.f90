@@ -46,20 +46,23 @@ program prototyping
 
   map = hashmap()
 
-  test_data%i = 1000001
+  do
+    test_data%i = 1000001
 
-  call map%set("hi", test_data)
+    call map%set("hi", test_data)
 
-  if (map%get("hi", generic_pointer)) then
-    print*,"got you"
+    if (map%get("hi", generic_pointer)) then
+      ! print*,"got you"
 
-    select type (generic_pointer)
-     type is (cool)
-      print*,"cool"
-      print*,generic_pointer%i
+      select type (generic_pointer)
+       type is (cool)
+        ! print*,"cool"
+        ! print*,generic_pointer%i
 
-    end select
-  end if
+      end select
+    end if
+
+  end do
 
   ! type(c_ptr) :: map, hash_data_loc
   ! character(len = :, kind = c_char), allocatable, target :: hash_key
