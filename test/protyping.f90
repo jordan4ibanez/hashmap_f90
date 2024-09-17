@@ -36,9 +36,17 @@ program prototyping
   class(*), pointer :: generic_pointer
   integer(c_int) :: i
 
+  ! todo list:
+  ! hashmap_free     # free the hash map
+  ! hashmap_count    # returns the number of items in the hash map
+  ! hashmap_clear    # clear the hash map
+  !
+  ! hashmap_iter     # loop based iteration over all items in hash map
+  ! hashmap_scan     # callback based iteration over all items in hash map
+
   map = hashmap()
 
-  do i = 1,10000000
+  do i = 1,1000000
 
     test_data%i = i
 
