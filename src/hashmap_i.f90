@@ -174,14 +174,9 @@ contains
 
     call c_f_pointer(item_pointer, element_pointer)
 
-
-    !? Safety check.
-    if (.not. associated(element_pointer%key)) then
-      error stop "[Hashmap] FATAL ERROR: element_pointer key is NULL."
-    end if
-
+    !* That's probably as fast as you can go lol.
     ! print*,"key: ",element_pointer%key
-    hash = hashmap_xxhash3(c_loc(element_pointer%key), int(element_pointer%key_length, c_int64_t), seed_0, seed_1)
+    hash = element_pointer%key
     ! print*,"hash:", hash
   end function hashing_function
 
