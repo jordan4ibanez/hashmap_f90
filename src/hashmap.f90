@@ -225,7 +225,7 @@ contains
       return
     end if
 
-    ! todo: make a function pointer, "thing" to automatically clean up memory, like a really fast GC.
+    ! todo: the optional additional GC function call here.
 
   end subroutine hashmap_set
 
@@ -298,6 +298,8 @@ contains
     if (.not. c_associated(gotten_data)) then
       return
     end if
+
+    ! todo: the optional additional GC function call here.
 
     ! todo: could point at the item and return if or make this a separate function possibly?
   end subroutine hashmap_delete
