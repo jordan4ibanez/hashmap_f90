@@ -70,7 +70,7 @@ program prototyping
     test_data%i = i
 
     !* Uses memcpy under the hood.
-    call map%set("hi"//int_to_string(i), test_data)
+    call map%set("hi", test_data)
 
     ! if (map%get("hi"//int_to_string(i), generic_pointer)) then
     !   ! print*,"got you"
