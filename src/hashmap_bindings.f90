@@ -153,7 +153,7 @@ module hashmap_bindings
       use :: hashmap_types
       implicit none
 
-      type(element) :: el
+      type(element_s_key) :: el
     end subroutine gc_function_interface
 
 

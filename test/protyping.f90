@@ -27,7 +27,7 @@ contains
 
     implicit none
 
-    type(element) :: el
+    type(element_s_key) :: el
     class(*), pointer :: generic_pointer
 
     generic_pointer => el%data
@@ -53,10 +53,8 @@ program prototyping
 
   type(hashmap_string) :: map
   type(cool), pointer :: test_data
-  class(*), pointer :: generic_pointer
   integer(c_int) :: i
   integer(c_size_t) :: index
-  character(:), allocatable :: test
 
 
   do
@@ -69,8 +67,6 @@ program prototyping
       allocate(test_data)
 
       allocate(test_data%i)
-
-      print*,sizeof(test_data)
 
       test_data%i = i
 
