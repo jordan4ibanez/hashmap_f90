@@ -9,7 +9,7 @@ module hashmap_s
 
 
   public :: hashmap_string_key
-  public :: new_hashmap
+  public :: new_hashmap_string_key
 
 
   ! todo list:
@@ -36,7 +36,7 @@ module hashmap_s
 contains
 
 
-  function new_hashmap(optional_gc_function) result(h)
+  function new_hashmap_string_key(optional_gc_function) result(h)
     implicit none
 
     type(hashmap_string_key) :: h
@@ -47,7 +47,7 @@ contains
     if (present(optional_gc_function)) then
       h%gc_function = c_funloc(optional_gc_function)
     end if
-  end function new_hashmap
+  end function new_hashmap_string_key
 
 
   subroutine hashmap_set(this, key, generic_pointer)

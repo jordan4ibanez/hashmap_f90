@@ -59,7 +59,7 @@ program prototyping
 
   do
 
-    map = new_hashmap(testing)
+    map = new_hashmap_string_key(testing)
 
     print*,"stage 1"
     do i = 1,1000000
