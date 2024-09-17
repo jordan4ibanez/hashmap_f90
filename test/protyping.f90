@@ -40,15 +40,16 @@ contains
 
   end subroutine testing
 
+
+
 end module yep
 
 
 program prototyping
   use :: hashmap_mod
-  use :: yep
   use, intrinsic :: iso_c_binding
+  use :: yep
   implicit none
-
 
   type(hashmap) :: map
   type(cool), pointer :: test_data
@@ -56,46 +57,56 @@ program prototyping
   integer(c_int) :: i
   integer(c_size_t) :: index
 
-
-
   map = new_hashmap(testing)
 
-  do
-    do i = 1,10000
 
-      allocate(test_data)
+  print*,"stage 1"
+  do i = 1,1000000
 
-      allocate(test_data%i)
+    allocate(test_data)
 
-      test_data%i = i
+    allocate(test_data%i)
 
-      !* Uses memcpy under the hood.
-      call map%set("hi"//int_to_string(i), test_data)
+    test_data%i = i
 
-      ! if (map%get("hi"//int_to_string(i), generic_pointer)) then
-      !   ! print*,"got you"
+    !* Uses memcpy under the hood.
+    call map%set("hi"//int_to_string(i), test_data)
 
-      !   select type (generic_pointer)
-      !    type is (cool)
-      !     ! print*,"cool"
-      !     ! print*,generic_pointer%i
+    ! if (map%get("hi"//int_to_string(i), generic_pointer)) then
+    !   ! print*,"got you"
 
-      !   end select
-      ! end if
-    end do
+    !   select type (generic_pointer)
+    !    type is (cool)
+    !     ! print*,"cool"
+    !     ! print*,generic_pointer%i
 
-    index = 0
-
-    do while(map%iterate(index, generic_pointer))
-      select type(generic_pointer)
-       type is (cool)
-        ! print*,generic_pointer%i
-      end select
-    end do
-
-    do i = 1,10000
-      call map%delete("hi"//int_to_string(i))
-    end do
+    !   end select
+    ! end if
   end do
+
+  index = 0
+
+  print*,"stage 2"
+
+  do while(map%iterate(index, generic_pointer))
+    select type(generic_pointer)
+     type is (cool)
+      ! print*,generic_pointer%i
+    end select
+  end do
+
+  ! do i = 1,1000000
+  !   call map%delete("hi"//int_to_string(i))
+  ! end do
+
+  print*,"stage 3"
+
+  call map%free()
+
+  print*,"nap time"
+
+
+
+  call sleep(10)
 
 end program prototyping
