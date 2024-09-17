@@ -57,7 +57,7 @@ contains
     character(len = *, kind = c_char), intent(in) :: key
     class(*), intent(in), target :: generic_pointer
     integer(c_int) :: key_length
-    type(element_s_key), target :: new_element
+    type(element_i_key), target :: new_element
     type(c_ptr) :: old_data_c_ptr
 
 
@@ -102,8 +102,8 @@ contains
     logical(c_bool) :: is_some
     type(c_ptr) :: gotten_data
     integer(c_int) :: key_length
-    type(element_s_key), target :: element_key
-    type(element_s_key), pointer :: element_pointer
+    type(element_i_key), target :: element_key
+    type(element_i_key), pointer :: element_pointer
 
     is_some = .false.
 
@@ -141,7 +141,7 @@ contains
     character(len = *, kind = c_char), intent(in) :: key
     type(c_ptr) :: gotten_data
     integer(c_int) :: key_length
-    type(element_s_key), target :: element_key
+    type(element_i_key), target :: element_key
 
     key_length = len(key)
 
@@ -198,7 +198,7 @@ contains
     type(c_ptr), intent(in), value :: item_pointer
     integer(c_int64_t), intent(in), value :: seed_0, seed_1
     integer(c_int64_t) :: hash
-    type(element_s_key), pointer :: element_pointer
+    type(element_i_key), pointer :: element_pointer
 
     !? Safety check.
     if (.not. c_associated(item_pointer)) then
@@ -226,7 +226,7 @@ contains
     type(c_ptr), intent(in), value :: a, b, udata
     logical(c_bool) :: failed
 
-    type(element_s_key), pointer :: element_pointer_a, element_pointer_b
+    type(element_i_key), pointer :: element_pointer_a, element_pointer_b
 
     !* A transfer.
 
@@ -304,7 +304,7 @@ contains
     class(*), intent(inout), pointer :: generic_pointer
     logical(c_bool) :: has_item
     type(c_ptr) :: raw_c_pointer
-    type(element_s_key), pointer :: element_pointer
+    type(element_i_key), pointer :: element_pointer
 
     has_item = internal_hashmap_iter(this%map, iterator_index, raw_c_pointer)
 
@@ -325,7 +325,7 @@ contains
 
     type(c_funptr), intent(in), value :: c_function_pointer
     type(c_ptr), intent(in), value :: raw_c_element
-    type(element_s_key), pointer :: element_pointer
+    type(element_i_key), pointer :: element_pointer
     procedure(gc_function_interface), pointer :: func
 
     call c_f_procpointer(c_function_pointer, func)
