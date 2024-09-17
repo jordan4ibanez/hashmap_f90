@@ -54,32 +54,17 @@ contains
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
-    character(len = *, kind = c_char), intent(in) :: key
+    integer(c_int64_t), intent(in), value :: key
     class(*), intent(in), target :: generic_pointer
     integer(c_int) :: key_length
     type(element_i_key), target :: new_element
     type(c_ptr) :: old_data_c_ptr
 
-
-    key_length = len(key)
-
-    !? Safety check.
-    if (key_length == 0) then
-      error stop "[Hashmap] ERROR: key cannot be NULL."
-    end if
-
-    !* ALLOCATE.
-    allocate(character(len = key_length, kind = c_char) :: new_element%key)
-
     new_element%key = key
-    new_element%key_length = key_length
     new_element%data => generic_pointer
 
     !? Internally calls: memcpy.
     old_data_c_ptr = internal_hashmap_set(this%map, c_loc(new_element))
-
-    !* DEALLOCATE.
-    deallocate(new_element%key)
 
     ! The old data was a null pointer. We don't have to do anything.
     if (.not. c_associated(old_data_c_ptr)) then
