@@ -38,7 +38,6 @@ program prototyping
 
   ! todo list:
   !
-  ! hashmap_free     # free the hash map
   ! hashmap_count    # returns the number of items in the hash map
   ! hashmap_clear    # clear the hash map
   !

@@ -169,6 +169,7 @@ module hashmap_mod
     procedure :: set => hashmap_set
     procedure :: get => hashmap_get
     procedure :: delete => hashmap_delete
+    procedure :: free => hashmap_free
 
   end type hashmap
 
@@ -303,6 +304,17 @@ contains
 
     ! todo: could point at the item and return if or make this a separate function possibly?
   end subroutine hashmap_delete
+
+
+  subroutine hashmap_free(this)
+    implicit none
+
+    class(hashmap), intent(in) :: this
+
+    ! todo: the optional additional GC function call here.
+
+    call internal_hashmap_free(this%map)
+  end subroutine hashmap_free
 
 
 !! INTRINSIC HASHMAP FUNCTIONS. ===========================================================================
