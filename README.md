@@ -4,7 +4,9 @@ Fortran bindings to hashmap.c
 If you want to C the original github: https://github.com/tidwall/hashmap.c
 
 This is a sample of what you can do with it.
-You can also see this in ``test/prototype.f90``
+You can also see this in: [test/prototype.f90](https://github.com/jordan4ibanez/hashmap_f90/blob/master/test/example.f90)
+
+You can run the example with: ``make test``
 
 ```fortran
 module my_cool_module
