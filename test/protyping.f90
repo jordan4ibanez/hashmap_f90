@@ -46,6 +46,7 @@ end module yep
 
 
 program prototyping
+  use :: hashmap_types
   use :: hashmap_s
   use, intrinsic :: iso_c_binding
   use :: yep
@@ -57,6 +58,10 @@ program prototyping
   integer(c_size_t) :: index
 
 
+
+  if (.true.) then
+    return
+  end if
   do
 
     map = new_hashmap_string_key(testing)
