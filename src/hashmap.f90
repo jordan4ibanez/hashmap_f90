@@ -164,7 +164,6 @@ module hashmap_mod
 
   ! todo list:
   !
-  ! hashmap_iter     # loop based iteration over all items in hash map
   ! hashmap_scan     # callback based iteration over all items in hash map
   !
   ! Custom GC function
@@ -444,12 +443,26 @@ contains
   end subroutine hashmap_clear
 
 
-  function hashmap_iterate(this) result(has_item)
+  function hashmap_iterate(this, iterator_index, generic_pointer) result(has_item)
     implicit none
 
     class(hashmap), intent(in) :: this
+    integer(c_size_t), intent(inout) :: iterator_index
+    class(*), intent(inout), pointer :: generic_pointer
     logical(c_bool) :: has_item
+    type(c_ptr) :: raw_c_pointer
+    type(element), pointer :: element_pointer
 
+    has_item = internal_hashmap_iter(this%map, iterator_index, raw_c_pointer)
+
+    ! Nothing to do.
+    if (.not. has_item) then
+      return
+    end if
+
+    call c_f_pointer(raw_c_pointer, element_pointer)
+
+    generic_pointer => element_pointer%data
   end function hashmap_iterate
 
 
