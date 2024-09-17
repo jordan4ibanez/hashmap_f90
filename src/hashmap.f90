@@ -1,5 +1,6 @@
 module hashmap_mod
   use, intrinsic :: iso_c_binding
+  use :: hashmap_types
   implicit none
 
 
@@ -153,6 +154,14 @@ module hashmap_mod
     end function compare_function_c_interface
 
 
+    subroutine gc_function_interface(el)
+      use :: hashmap_types
+      implicit none
+
+      type(element) :: el
+    end subroutine gc_function_interface
+
+
   end interface
 
 
@@ -160,6 +169,7 @@ module hashmap_mod
 
 
   public :: hashmap
+  public :: new_hashmap
 
 
   ! todo list:
@@ -169,19 +179,14 @@ module hashmap_mod
   ! Custom GC function
 
 
-  !* Element in the hashmap.
-  !* 48 bytes.
-  type :: element
-    character(len = :, kind = c_char), pointer :: key => null()
-    integer(c_int) :: key_length = 0
-    class(*), pointer :: data => null()
-  end type element
+
 
 
   !* Fortran hashmap wrapper.
   type :: hashmap
     private
     type(c_ptr) :: map = c_null_ptr
+    type(c_funptr) :: gc_function = c_null_funptr
   contains
     procedure :: set => hashmap_set
     procedure :: get => hashmap_get
@@ -192,21 +197,22 @@ module hashmap_mod
     procedure :: iterate => hashmap_iterate
   end type hashmap
 
-  interface hashmap
-    module procedure :: hashmap_constructor
-  end interface hashmap
-
 
 contains
 
 
-  function hashmap_constructor() result(h)
+  function new_hashmap(optional_gc_function) result(h)
     implicit none
 
     type(hashmap) :: h
+    procedure(gc_function_interface), optional :: optional_gc_function
 
     h%map = internal_hashmap_new(56_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
-  end function hashmap_constructor
+
+    if (present(optional_gc_function)) then
+      h%gc_function = c_funloc(optional_gc_function)
+    end if
+  end function new_hashmap
 
 
   subroutine hashmap_set(this, key, generic_pointer)
