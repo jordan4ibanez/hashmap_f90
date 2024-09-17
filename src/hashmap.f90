@@ -174,8 +174,6 @@ contains
     if (c_associated(this%gc_function)) then
       call run_gc(this%gc_function, gotten_data)
     end if
-
-    ! todo: could point at the item and return if or make this a separate function possibly?
   end subroutine hashmap_delete
 
 
