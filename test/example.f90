@@ -13,21 +13,6 @@ module my_cool_module
 contains
 
 
-  function int_to_string(i) result(output)
-    implicit none
-
-    integer(c_int) :: i
-    character(len = :, kind = c_char), allocatable :: output
-
-    ! If the number is any bigger than this, wat.
-    allocate(character(11) :: output)
-    write(output, "(i11)") i
-
-    ! Now we shift the whole thing left and trim it to fit.
-    output = trim(adjustl(output))
-  end function int_to_string
-
-
   subroutine example_gc_function(el)
     implicit none
 
