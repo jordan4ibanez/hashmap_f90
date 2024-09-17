@@ -94,18 +94,23 @@ program example
     end do
 
 
-    !* This is basically free() but you retain your hashmap.
+    !* We can remove the elements we just added because we already knew their keys.
     !*
     !* Will automatically call your GC function.
     ! do i = 1+z,50+z
     !   call map%delete(int(i, c_int64_t))
     ! end do
 
+    !* But if you want to be thorough and wipe the hashmap, you can simply clear it.
+    !*
+    !* Will automatically call your GC function.
+    ! call map%clear()
+
     print*,"stage 3"
 
-    !* Free the hashmap.
+    !* We can finally free the hashmap.
     !*
-    !* This WILL DESTROY the underlying C hashmap!
+    !* This WILL DESTROY the underlying C hashmap data!
     !* DO NOT use the hashmap after this is called, until you have created it again.
     !*
     !* Will automatically call your GC function.
