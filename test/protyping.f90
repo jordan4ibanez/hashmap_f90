@@ -40,25 +40,37 @@ program prototyping
 
   map = hashmap()
 
-  do i = 1,1000000
+  do i = 1,100000
+
+    allocate(test_data)
 
     test_data%i = i
 
     !* Uses memcpy under the hood.
     call map%set("hi"//int_to_string(i), test_data)
 
-    if (map%get("hi"//int_to_string(i), generic_pointer)) then
-      ! print*,"got you"
+    ! if (map%get("hi"//int_to_string(i), generic_pointer)) then
+    !   ! print*,"got you"
 
-      select type (generic_pointer)
-       type is (cool)
-        ! print*,"cool"
-        ! print*,generic_pointer%i
+    !   select type (generic_pointer)
+    !    type is (cool)
+    !     ! print*,"cool"
+    !     ! print*,generic_pointer%i
 
-      end select
+    !   end select
+    ! end if
+    if (i > 3) then
+      exit
     end if
+  end do
 
-    call map%delete("hi"//int_to_string(i))
+  index = 0
+
+  do while(map%iterate(index, generic_pointer))
+    select type(generic_pointer)
+     type is (cool)
+      print*,generic_pointer%i
+    end select
   end do
 
   ! type(c_ptr) :: map, hash_data_loc
