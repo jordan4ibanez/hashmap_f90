@@ -120,6 +120,17 @@ module hashmap_mod
     end subroutine internal_hashmap_clear
 
 
+    function internal_hashmap_iter(map, i, item) result(has_item) bind(c, name = "hashmap_iter")
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: map
+      integer(c_size_t), intent(inout) :: i
+      type(c_ptr), intent(inout) :: item
+      logical(c_bool) :: has_item
+    end function internal_hashmap_iter
+
+
 !? FUNCTION BLUEPRINTS. ===========================================================================
 
 
