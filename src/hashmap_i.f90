@@ -56,7 +56,6 @@ contains
     class(hashmap_integer_key), intent(inout) :: this
     integer(c_int64_t), intent(in), value :: key
     class(*), intent(in), target :: generic_pointer
-    integer(c_int) :: key_length
     type(element_i_key), target :: new_element
     type(c_ptr) :: old_data_c_ptr
 
@@ -86,7 +85,6 @@ contains
     class(*), intent(inout), pointer :: generic_pointer
     logical(c_bool) :: is_some
     type(c_ptr) :: gotten_data
-    integer(c_int) :: key_length
     type(element_i_key), target :: element_key
     type(element_i_key), pointer :: element_pointer
 
@@ -116,7 +114,6 @@ contains
     class(hashmap_integer_key), intent(inout) :: this
     integer(c_int64_t), intent(in), value :: key
     type(c_ptr) :: gotten_data
-    integer(c_int) :: key_length
     type(element_i_key), target :: element_key
 
     element_key%key = key
