@@ -6,7 +6,21 @@ module yep
     integer(c_int) :: i = 0
   end type cool
 
+contains
 
+  function int_to_string(i) result(output)
+    implicit none
+
+    integer(c_int) :: i
+    character(len = :, kind = c_char), allocatable :: output
+
+    ! If the number is any bigger than this, wat.
+    allocate(character(11) :: output)
+    write(output, "(i11)") i
+
+    ! Now we shift the whole thing left and trim it to fit.
+    output = trim(adjustl(output))
+  end function int_to_string
 
 end module yep
 
@@ -29,9 +43,9 @@ program prototyping
     test_data%i = i
 
     !* Uses memcpy under the hood.
-    call map%set("hi", test_data)
+    call map%set("hi"//int_to_string(i), test_data)
 
-    if (map%get("hi", generic_pointer)) then
+    if (map%get("hi"//int_to_string(i), generic_pointer)) then
       ! print*,"got you"
 
       select type (generic_pointer)
@@ -41,6 +55,8 @@ program prototyping
 
       end select
     end if
+
+    call map%delete("hi"//int_to_string(i))
   end do
 
   ! type(c_ptr) :: map, hash_data_loc
