@@ -1,4 +1,4 @@
-module hashmap_s
+module hashmap_str
   use, intrinsic :: iso_c_binding
   use :: hashmap_types
   use :: hashmap_bindings
@@ -341,4 +341,4 @@ contains
   end subroutine run_gc
 
 
-end module hashmap_s
+end module hashmap_str
