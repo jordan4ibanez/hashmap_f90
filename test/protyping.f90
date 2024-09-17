@@ -51,7 +51,7 @@ program prototyping
   use :: yep
   implicit none
 
-  type(hashmap_string) :: map
+  type(hashmap_string_key) :: map
   type(cool), pointer :: test_data
   integer(c_int) :: i
   integer(c_size_t) :: index

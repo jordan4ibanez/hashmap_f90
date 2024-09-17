@@ -8,7 +8,7 @@ module hashmap_s
   private
 
 
-  public :: hashmap_string
+  public :: hashmap_string_key
   public :: new_hashmap
 
 
@@ -18,7 +18,7 @@ module hashmap_s
 
   !* Fortran hashmap wrapper.
   !* String key.
-  type :: hashmap_string
+  type :: hashmap_string_key
     private
     type(c_ptr) :: map = c_null_ptr
     type(c_funptr) :: gc_function = c_null_funptr
@@ -30,7 +30,7 @@ module hashmap_s
     procedure :: count => hashmap_count
     procedure :: clear => hashmap_clear
     procedure :: iterate => hashmap_iterate
-  end type hashmap_string
+  end type hashmap_string_key
 
 
 contains
@@ -39,7 +39,7 @@ contains
   function new_hashmap(optional_gc_function) result(h)
     implicit none
 
-    type(hashmap_string) :: h
+    type(hashmap_string_key) :: h
     procedure(gc_function_interface), optional :: optional_gc_function
 
     h%map = internal_hashmap_new(56_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
@@ -53,7 +53,7 @@ contains
   subroutine hashmap_set(this, key, generic_pointer)
     implicit none
 
-    class(hashmap_string), intent(inout) :: this
+    class(hashmap_string_key), intent(inout) :: this
     character(len = *, kind = c_char), intent(in) :: key
     class(*), intent(in), target :: generic_pointer
     integer(c_int) :: key_length
@@ -96,7 +96,7 @@ contains
   function hashmap_get(this, key, generic_pointer) result(is_some)
     implicit none
 
-    class(hashmap_string), intent(inout) :: this
+    class(hashmap_string_key), intent(inout) :: this
     character(len = *, kind = c_char), intent(in) :: key
     class(*), intent(inout), pointer :: generic_pointer
     logical(c_bool) :: is_some
@@ -137,7 +137,7 @@ contains
   subroutine hashmap_delete(this, key)
     implicit none
 
-    class(hashmap_string), intent(inout) :: this
+    class(hashmap_string_key), intent(inout) :: this
     character(len = *, kind = c_char), intent(in) :: key
     type(c_ptr) :: gotten_data
     integer(c_int) :: key_length
@@ -172,7 +172,7 @@ contains
   subroutine hashmap_free(this)
     implicit none
 
-    class(hashmap_string), intent(inout) :: this
+    class(hashmap_string_key), intent(inout) :: this
     integer(c_int64_t) :: i
     type(c_ptr) :: generic_c_pointer
 
@@ -278,7 +278,7 @@ contains
   function hashmap_count(this) result(count)
     implicit none
 
-    class(hashmap_string), intent(in) :: this
+    class(hashmap_string_key), intent(in) :: this
     integer(c_int64_t) :: count
 
     count = internal_hashmap_count(this%map)
@@ -288,7 +288,7 @@ contains
   subroutine hashmap_clear(this)
     implicit none
 
-    class(hashmap_string), intent(in) :: this
+    class(hashmap_string_key), intent(in) :: this
 
     call internal_hashmap_clear(this%map, logical(.true., kind = c_bool))
 
@@ -299,7 +299,7 @@ contains
   function hashmap_iterate(this, iterator_index, generic_pointer) result(has_item)
     implicit none
 
-    class(hashmap_string), intent(in) :: this
+    class(hashmap_string_key), intent(in) :: this
     integer(c_size_t), intent(inout) :: iterator_index
     class(*), intent(inout), pointer :: generic_pointer
     logical(c_bool) :: has_item
