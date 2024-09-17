@@ -35,6 +35,7 @@ program prototyping
   type(cool) :: test_data
   class(*), pointer :: generic_pointer
   integer(c_int) :: i
+  integer(c_size_t) :: index
 
 
 
