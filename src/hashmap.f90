@@ -270,7 +270,7 @@ contains
   end function hashmap_get
 
 
-!? Very verbose intrinsic hashmap functions. ===========================================================================
+!! INTRINSIC HASHMAP FUNCTIONS. ===========================================================================
 
 
   recursive function hashing_function(item_pointer, seed_0, seed_1) result(hash) bind(c)
