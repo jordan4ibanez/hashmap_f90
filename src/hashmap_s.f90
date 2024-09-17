@@ -40,7 +40,7 @@ contains
     implicit none
 
     type(hashmap_string_key) :: h
-    procedure(gc_function_interface), optional :: optional_gc_function
+    procedure(gc_function_interface_string), optional :: optional_gc_function
 
     h%map = internal_hashmap_new(56_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
 
@@ -326,7 +326,7 @@ contains
     type(c_funptr), intent(in), value :: c_function_pointer
     type(c_ptr), intent(in), value :: raw_c_element
     type(element_s_key), pointer :: element_pointer
-    procedure(gc_function_interface), pointer :: func
+    procedure(gc_function_interface_string), pointer :: func
 
     call c_f_procpointer(c_function_pointer, func)
 
