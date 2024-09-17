@@ -56,57 +56,61 @@ program prototyping
   class(*), pointer :: generic_pointer
   integer(c_int) :: i
   integer(c_size_t) :: index
+  character(:), allocatable :: test
 
-  map = new_hashmap(testing)
 
+  do
 
-  print*,"stage 1"
-  do i = 1,1000000
+    map = new_hashmap(testing)
 
-    allocate(test_data)
+    print*,"stage 1"
+    do i = 1,1000000
 
-    allocate(test_data%i)
+      allocate(test_data)
 
-    test_data%i = i
+      allocate(test_data%i)
 
-    !* Uses memcpy under the hood.
-    call map%set("hi", test_data)
+      print*,sizeof(test_data)
 
-    ! if (map%get("hi"//int_to_string(i), generic_pointer)) then
-    !   ! print*,"got you"
+      test_data%i = i
 
-    !   select type (generic_pointer)
+      !* Uses memcpy under the hood.
+      call map%set("hi", test_data)
+
+      ! if (map%get("hi"//int_to_string(i), generic_pointer)) then
+      !   ! print*,"got you"
+
+      !   select type (generic_pointer)
+      !    type is (cool)
+      !     ! print*,"cool"
+      !     ! print*,generic_pointer%i
+
+      !   end select
+      ! end if
+    end do
+
+    index = 0
+
+    print*,"stage 2"
+
+    ! do while(map%iterate(index, generic_pointer))
+    !   select type(generic_pointer)
     !    type is (cool)
-    !     ! print*,"cool"
     !     ! print*,generic_pointer%i
-
     !   end select
-    ! end if
+    ! end do
+
+    ! do i = 1,1000000
+    !   call map%delete("hi"//int_to_string(i))
+    ! end do
+
+    print*,"stage 3"
+
+    call map%free()
+
+    print*,"nap time"
+
+    call sleep(1)
   end do
-
-  index = 0
-
-  print*,"stage 2"
-
-  do while(map%iterate(index, generic_pointer))
-    select type(generic_pointer)
-     type is (cool)
-      ! print*,generic_pointer%i
-    end select
-  end do
-
-  ! do i = 1,1000000
-  !   call map%delete("hi"//int_to_string(i))
-  ! end do
-
-  print*,"stage 3"
-
-  call map%free()
-
-  print*,"nap time"
-
-
-
-  call sleep(10)
 
 end program prototyping
