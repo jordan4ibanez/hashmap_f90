@@ -317,4 +317,18 @@ contains
   end function hashmap_iterate
 
 
+  !* Re-map the function pointer into the Fortran intrinsic behavior.
+  subroutine run_gc(c_function_pointer, el)
+    implicit none
+
+    type(c_funptr), intent(in), value :: c_function_pointer
+    procedure(gc_function_interface), pointer :: func
+    type(element), intent(in) :: el
+
+    call c_f_procpointer(c_function_pointer, func)
+
+    call func(el)
+  end subroutine run_gc
+
+
 end module hashmap_mod
