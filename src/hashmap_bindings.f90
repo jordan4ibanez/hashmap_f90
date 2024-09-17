@@ -149,12 +149,20 @@ module hashmap_bindings
     end function compare_function_c_interface
 
 
-    subroutine gc_function_interface(el)
+    subroutine gc_function_interface_string(el)
       use :: hashmap_types
       implicit none
 
       type(element_s_key) :: el
-    end subroutine gc_function_interface
+    end subroutine gc_function_interface_string
+
+
+    subroutine gc_function_interface_integer(el)
+      use :: hashmap_types
+      implicit none
+
+      type(element_i_key) :: el
+    end subroutine gc_function_interface_integer
 
 
   end interface
