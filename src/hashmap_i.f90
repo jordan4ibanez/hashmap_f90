@@ -167,6 +167,10 @@ contains
     integer(c_int64_t) :: hash
     type(element_i_key), pointer :: element_pointer
 
+    if (.false.) then
+      print*,seed_0,seed_1
+    end if
+
     !? Safety check.
     if (.not. c_associated(item_pointer)) then
       error stop "[Hashmap] FATAL ERROR: item_pointer is NULL."
