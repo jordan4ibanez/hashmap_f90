@@ -199,11 +199,6 @@ contains
 
     call c_f_pointer(a, element_pointer_a)
 
-    !? Safety check.
-    if (.not. associated(element_pointer_a%key)) then
-      error stop "[Hashmap] FATAL ERROR: a key is NULL."
-    end if
-
     !* B transfer.
 
     !? Safety check.
@@ -213,17 +208,8 @@ contains
 
     call c_f_pointer(a, element_pointer_b)
 
-    !? Safety check.
-    if (.not. associated(element_pointer_b%key)) then
-      error stop "[Hashmap] FATAL ERROR: b key is NULL."
-    end if
-
     !* Now check.
     failed = .true.
-
-    if (element_pointer_a%key_length /= element_pointer_b%key_length) then
-      return
-    end if
 
     if (element_pointer_a%key /= element_pointer_b%key) then
       return
