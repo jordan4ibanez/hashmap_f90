@@ -168,6 +168,7 @@ module hashmap_mod
   contains
     procedure :: set => hashmap_set
     procedure :: get => hashmap_get
+    procedure :: delete => hashmap_delete
 
   end type hashmap
 
@@ -268,6 +269,38 @@ contains
 
     is_some = .true.
   end function hashmap_get
+
+
+  subroutine hashmap_delete(this, key)
+    implicit none
+
+    class(hashmap), intent(inout) :: this
+    character(len = *, kind = c_char), intent(in) :: key
+    type(c_ptr) :: gotten_data
+    integer(c_int) :: key_length
+    type(element), target :: element_key
+
+    key_length = len(key)
+
+    !* ALLOCATE.
+    allocate(character(len = key_length, kind = c_char) :: element_key%key)
+
+    element_key%key = key
+    element_key%key_length = key_length
+
+    !? Grabs a C pointer or NULL upon failure.
+    gotten_data = internal_hashmap_delete(this%map, c_loc(element_key))
+
+    !* DEALLOCATE.
+    deallocate(element_key%key)
+
+    ! It's a null pointer.
+    if (.not. c_associated(gotten_data)) then
+      return
+    end if
+
+    ! todo: could point at the item and return if or make this a separate function possibly?
+  end subroutine hashmap_delete
 
 
 !! INTRINSIC HASHMAP FUNCTIONS. ===========================================================================
