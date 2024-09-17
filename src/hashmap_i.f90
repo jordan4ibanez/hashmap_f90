@@ -82,7 +82,7 @@ contains
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
-    character(len = *, kind = c_char), intent(in) :: key
+    integer(c_int64_t), intent(in), value :: key
     class(*), intent(inout), pointer :: generic_pointer
     logical(c_bool) :: is_some
     type(c_ptr) :: gotten_data
@@ -92,19 +92,10 @@ contains
 
     is_some = .false.
 
-    key_length = len(key)
-
-    !* ALLOCATE.
-    allocate(character(len = key_length, kind = c_char) :: element_key%key)
-
     element_key%key = key
-    element_key%key_length = key_length
 
     !? Grabs a C pointer or NULL upon failure.
     gotten_data = internal_hashmap_get(this%map, c_loc(element_key))
-
-    !* DEALLOCATE.
-    deallocate(element_key%key)
 
     ! It's a null pointer.
     if (.not. c_associated(gotten_data)) then
