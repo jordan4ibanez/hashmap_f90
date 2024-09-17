@@ -170,11 +170,10 @@ contains
       return
     end if
 
+    ! If a GC function was assigned.
     if (c_associated(this%gc_function)) then
       call run_gc(this%gc_function, gotten_data)
     end if
-
-    ! todo: the optional additional GC function call here.
 
     ! todo: could point at the item and return if or make this a separate function possibly?
   end subroutine hashmap_delete
@@ -183,9 +182,18 @@ contains
   subroutine hashmap_free(this)
     implicit none
 
-    class(hashmap), intent(in) :: this
+    class(hashmap), intent(inout) :: this
+    integer(c_int64_t) :: i
+    type(c_ptr) :: generic_c_pointer
 
     ! todo: the optional additional GC function call here.
+
+    if (c_associated(this%gc_function)) then
+      i = 0
+      do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
+        call run_gc(this%gc_function, generic_c_pointer)
+      end do
+    end if
 
     call internal_hashmap_free(this%map)
   end subroutine hashmap_free
