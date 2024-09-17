@@ -27,7 +27,7 @@ contains
 
     implicit none
 
-    type(element_s_key) :: el
+    type(element_integer_key) :: el
     class(*), pointer :: generic_pointer
 
     generic_pointer => el%data
@@ -47,36 +47,31 @@ end module yep
 
 program prototyping
   use :: hashmap_types
-  use :: hashmap_s
+  use :: hashmap_i
   use, intrinsic :: iso_c_binding
   use :: yep
   implicit none
 
-  type(hashmap_string_key) :: map
+  type(hashmap_integer_key) :: map
   type(cool), pointer :: test_data
   integer(c_int) :: i
   integer(c_size_t) :: index
 
 
-
-  if (.true.) then
-    return
-  end if
   do
 
-    map = new_hashmap_string_key(testing)
+    map = new_hashmap_integer_key(testing)
 
     print*,"stage 1"
     do i = 1,1000000
 
       allocate(test_data)
-
       allocate(test_data%i)
 
       test_data%i = i
 
       !* Uses memcpy under the hood.
-      call map%set("hi", test_data)
+      call map%set(int(i, c_int64_t), test_data)
 
       ! if (map%get("hi"//int_to_string(i), generic_pointer)) then
       !   ! print*,"got you"
