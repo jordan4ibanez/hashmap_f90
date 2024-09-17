@@ -36,6 +36,7 @@ module hashmap_i
 contains
 
 
+  !* Hashmap integer key constructor.
   function new_hashmap_integer_key(optional_gc_function) result(h)
     implicit none
 
@@ -50,6 +51,7 @@ contains
   end function new_hashmap_integer_key
 
 
+  !* Set a value in the hashmap with an integer key.
   subroutine hashmap_set(this, key, generic_pointer)
     implicit none
 
@@ -77,6 +79,7 @@ contains
   end subroutine hashmap_set
 
 
+  !* Get a value in the hashmap with an integer key.
   function hashmap_get(this, key, generic_pointer) result(is_some)
     implicit none
 
@@ -133,6 +136,8 @@ contains
   end subroutine hashmap_delete
 
 
+  !* Delete a value in the hashmap with an integer key.
+  !* If it doesn't exist, this is a no-op.
   subroutine hashmap_free(this)
     implicit none
 

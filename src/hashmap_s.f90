@@ -36,6 +36,7 @@ module hashmap_s
 contains
 
 
+  !* Hashmap string key constructor.
   function new_hashmap_string_key(optional_gc_function) result(h)
     implicit none
 
@@ -50,6 +51,7 @@ contains
   end function new_hashmap_string_key
 
 
+  !* Set a value in the hashmap with a string key.
   subroutine hashmap_set(this, key, generic_pointer)
     implicit none
 
@@ -93,6 +95,7 @@ contains
   end subroutine hashmap_set
 
 
+  !* Get a value in the hashmap with a string key.
   function hashmap_get(this, key, generic_pointer) result(is_some)
     implicit none
 
@@ -134,6 +137,8 @@ contains
   end function hashmap_get
 
 
+  !* Delete a value in the hashmap with a string key.
+  !* If it doesn't exist, this is a no-op.
   subroutine hashmap_delete(this, key)
     implicit none
 
