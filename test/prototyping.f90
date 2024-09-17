@@ -9,6 +9,7 @@ module yep
 
 contains
 
+
   function int_to_string(i) result(output)
     implicit none
 
@@ -23,7 +24,8 @@ contains
     output = trim(adjustl(output))
   end function int_to_string
 
-  subroutine testing(el)
+
+  subroutine example_gc_function(el)
 
     implicit none
 
@@ -38,8 +40,7 @@ contains
       deallocate(generic_pointer)
     end select
 
-  end subroutine testing
-
+  end subroutine example_gc_function
 
 
 end module yep
@@ -56,14 +57,15 @@ program prototyping
   type(cool), pointer :: test_data
   integer(c_int) :: i
   integer(c_size_t) :: index
+  class(*), pointer :: generic_pointer
 
 
   do
 
-    map = new_hashmap_integer_key(testing)
+    map = new_hashmap_integer_key(example_gc_function)
 
     print*,"stage 1"
-    do i = 1,1000000
+    do i = 1,50
 
       allocate(test_data)
       allocate(test_data%i)
@@ -73,31 +75,29 @@ program prototyping
       !* Uses memcpy under the hood.
       call map%set(int(i, c_int64_t), test_data)
 
-      ! if (map%get("hi"//int_to_string(i), generic_pointer)) then
-      !   ! print*,"got you"
-
-      !   select type (generic_pointer)
-      !    type is (cool)
-      !     ! print*,"cool"
-      !     ! print*,generic_pointer%i
-
-      !   end select
-      ! end if
+      if (map%get(int(i, c_int64_t), generic_pointer)) then
+        print*,"got you"
+        select type (generic_pointer)
+         type is (cool)
+          print*,"cool"
+          print*,generic_pointer%i
+        end select
+      end if
     end do
 
     index = 0
 
     print*,"stage 2"
 
-    ! do while(map%iterate(index, generic_pointer))
-    !   select type(generic_pointer)
-    !    type is (cool)
-    !     ! print*,generic_pointer%i
-    !   end select
-    ! end do
+    do while(map%iterate(index, generic_pointer))
+      select type(generic_pointer)
+       type is (cool)
+        print*,generic_pointer%i
+      end select
+    end do
 
     ! do i = 1,1000000
-    !   call map%delete("hi"//int_to_string(i))
+    !   call map%delete(int(i, c_int64_t))
     ! end do
 
     print*,"stage 3"
