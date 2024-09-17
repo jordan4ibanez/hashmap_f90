@@ -96,8 +96,10 @@ contains
       return
     end if
 
-    ! todo: the optional additional GC function call here.
-
+    ! If a GC function was assigned.
+    if (c_associated(this%gc_function)) then
+      call run_gc(this%gc_function, old_data_c_ptr)
+    end if
   end subroutine hashmap_set
 
 
