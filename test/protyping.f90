@@ -56,7 +56,7 @@ program prototyping
       end select
     end if
 
-    call map%delete("hi"//int_to_string(i))
+    ! call map%delete("hi"//int_to_string(i))
   end do
 
   ! type(c_ptr) :: map, hash_data_loc
