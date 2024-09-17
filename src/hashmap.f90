@@ -111,14 +111,13 @@ module hashmap_mod
     end function internal_hashmap_delete
 
 
-    function internal_hashmap_clear(map, update_capacity) result(void_pointer) bind(c, name = "hashmap_clear")
+    subroutine internal_hashmap_clear(map, update_capacity) bind(c, name = "hashmap_clear")
       use, intrinsic :: iso_c_binding
       implicit none
 
       type(c_ptr), intent(in), value :: map
       logical(c_bool), intent(in), value :: update_capacity
-      type(c_ptr) :: void_pointer
-    end function internal_hashmap_clear
+    end subroutine internal_hashmap_clear
 
 
 !? FUNCTION BLUEPRINTS. ===========================================================================
@@ -152,6 +151,14 @@ module hashmap_mod
   public :: hashmap
 
 
+  ! todo list:
+  !
+  ! hashmap_iter     # loop based iteration over all items in hash map
+  ! hashmap_scan     # callback based iteration over all items in hash map
+  !
+  ! Custom GC function
+
+
   !* Element in the hashmap.
   !* 48 bytes.
   type :: element
@@ -170,7 +177,9 @@ module hashmap_mod
     procedure :: get => hashmap_get
     procedure :: delete => hashmap_delete
     procedure :: free => hashmap_free
-
+    procedure :: count => hashmap_count
+    procedure :: clear => hashmap_clear
+    procedure :: iterate => hashmap_iterate
   end type hashmap
 
   interface hashmap
@@ -401,6 +410,36 @@ contains
 
     failed = .false.
   end function compare_function
+
+
+  function hashmap_count(this) result(count)
+    implicit none
+
+    class(hashmap), intent(in) :: this
+    integer(c_int64_t) :: count
+
+    count = internal_hashmap_count(this%map)
+  end function hashmap_count
+
+
+  subroutine hashmap_clear(this)
+    implicit none
+
+    class(hashmap), intent(in) :: this
+
+    call internal_hashmap_clear(this%map, logical(.true., kind = c_bool))
+
+    ! todo: this might need a specialty thing.
+  end subroutine hashmap_clear
+
+
+  function hashmap_iterate(this) result(has_item)
+    implicit none
+
+    class(hashmap), intent(in) :: this
+    logical(c_bool) :: has_item
+
+  end function hashmap_iterate
 
 
 end module hashmap_mod
