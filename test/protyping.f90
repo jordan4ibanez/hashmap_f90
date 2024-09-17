@@ -4,7 +4,7 @@ module yep
   implicit none
 
   type :: cool
-    integer(c_int) :: i = 0
+    integer(c_int), pointer :: i => null()
   end type cool
 
 contains
@@ -28,6 +28,14 @@ contains
     implicit none
 
     type(element) :: el
+    class(*), pointer :: generic_pointer
+
+    generic_pointer => el%data
+
+    select type (generic_pointer)
+     type is (cool)
+      print*,"cool"
+    end select
 
   end subroutine testing
 
@@ -50,37 +58,42 @@ program prototyping
 
   map = new_hashmap(testing)
 
-  do i = 1,100000
+  do
+    do i = 1,100000
 
-    allocate(test_data)
+      allocate(test_data)
 
-    test_data%i = i
+      allocate(test_data%i)
 
-    !* Uses memcpy under the hood.
-    call map%set("hi"//int_to_string(i), test_data)
+      test_data%i = i
 
-    ! if (map%get("hi"//int_to_string(i), generic_pointer)) then
-    !   ! print*,"got you"
+      !* Uses memcpy under the hood.
+      call map%set("hi"//int_to_string(i), test_data)
 
-    !   select type (generic_pointer)
-    !    type is (cool)
-    !     ! print*,"cool"
-    !     ! print*,generic_pointer%i
+      ! if (map%get("hi"//int_to_string(i), generic_pointer)) then
+      !   ! print*,"got you"
 
-    !   end select
-    ! end if
-    if (i > 3) then
-      exit
-    end if
+      !   select type (generic_pointer)
+      !    type is (cool)
+      !     ! print*,"cool"
+      !     ! print*,generic_pointer%i
+
+      !   end select
+      ! end if
+    end do
+
+    index = 0
+
+    do while(map%iterate(index, generic_pointer))
+      select type(generic_pointer)
+       type is (cool)
+        ! print*,generic_pointer%i
+      end select
+    end do
   end do
 
-  index = 0
-
-  do while(map%iterate(index, generic_pointer))
-    select type(generic_pointer)
-     type is (cool)
-      print*,generic_pointer%i
-    end select
+  do i = 1,100000
+    call map%delete("hi"//int_to_string(i))
   end do
 
 end program prototyping
