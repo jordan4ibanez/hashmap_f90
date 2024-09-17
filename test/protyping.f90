@@ -37,12 +37,15 @@ program prototyping
   integer(c_int) :: i
 
   ! todo list:
+  !
   ! hashmap_free     # free the hash map
   ! hashmap_count    # returns the number of items in the hash map
   ! hashmap_clear    # clear the hash map
   !
   ! hashmap_iter     # loop based iteration over all items in hash map
   ! hashmap_scan     # callback based iteration over all items in hash map
+  !
+  ! Custom GC function
 
   map = hashmap()
 
