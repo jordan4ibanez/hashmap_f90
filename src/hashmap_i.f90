@@ -42,7 +42,7 @@ contains
     type(hashmap_integer_key) :: h
     procedure(gc_function_interface), optional :: optional_gc_function
 
-    h%map = internal_hashmap_new(56_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
+    h%map = internal_hashmap_new(32_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
 
     if (present(optional_gc_function)) then
       h%gc_function = c_funloc(optional_gc_function)
