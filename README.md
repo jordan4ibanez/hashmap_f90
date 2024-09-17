@@ -95,6 +95,8 @@ program example
     print*,"stage 2"
 
     !* Iterate the hashmap.
+    !*
+    !* NEVER delete elements while iterating!
     do while(map%iterate(index, generic_pointer))
       select type(generic_pointer)
        type is (cool)
