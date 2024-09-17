@@ -6,29 +6,6 @@ module yep
     integer(c_int) :: i = 0
   end type cool
 
-contains
-
-  recursive function debug_hash_function(item_pointer, seed_0, seed_1) result(hash) bind(c)
-    implicit none
-
-    type(c_ptr), intent(in), value :: item_pointer
-    integer(c_int), intent(in), value :: seed_0, seed_1
-    integer(c_int64_t) :: hash
-
-
-
-  end function debug_hash_function
-
-
-  recursive function debug_compare_function(a, b, udata) result(comparitor) bind(c)
-    use, intrinsic :: iso_c_binding
-    implicit none
-
-    type(c_ptr), intent(in), value :: a, b, udata
-    logical(c_bool) :: comparitor
-
-
-  end function debug_compare_function
 
 
 end module yep
@@ -43,12 +20,15 @@ program prototyping
   type(hashmap) :: map
   type(cool) :: test_data
   class(*), pointer :: generic_pointer
+  integer(c_int) :: i
 
   map = hashmap()
 
-  do
-    test_data%i = 1000001
+  do i = 1,10000000
 
+    test_data%i = i
+
+    !* Uses memcpy under the hood.
     call map%set("hi", test_data)
 
     if (map%get("hi", generic_pointer)) then
@@ -61,7 +41,6 @@ program prototyping
 
       end select
     end if
-
   end do
 
   ! type(c_ptr) :: map, hash_data_loc
