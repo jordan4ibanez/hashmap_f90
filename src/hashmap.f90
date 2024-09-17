@@ -68,7 +68,7 @@ contains
     class(*), intent(in), target :: generic_pointer
     integer(c_int) :: key_length
     type(element), target :: new_element
-    type(c_ptr) :: old_data
+    type(c_ptr) :: old_data_c_ptr
 
 
     key_length = len(key)
@@ -86,13 +86,13 @@ contains
     new_element%data => generic_pointer
 
     !? Internally calls: memcpy.
-    old_data = internal_hashmap_set(this%map, c_loc(new_element))
+    old_data_c_ptr = internal_hashmap_set(this%map, c_loc(new_element))
 
     !* DEALLOCATE.
     deallocate(new_element%key)
 
     ! The old data was a null pointer. We don't have to do anything.
-    if (.not. c_associated(old_data)) then
+    if (.not. c_associated(old_data_c_ptr)) then
       return
     end if
 
