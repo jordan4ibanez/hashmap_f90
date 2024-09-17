@@ -145,8 +145,6 @@ contains
     integer(c_int64_t) :: i
     type(c_ptr) :: generic_c_pointer
 
-    ! todo: the optional additional GC function call here.
-
     if (c_associated(this%gc_function)) then
       i = 0
       do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
@@ -243,10 +241,17 @@ contains
     implicit none
 
     class(hashmap_integer_key), intent(in) :: this
+    integer(c_int64_t) :: i
+    type(c_ptr) :: generic_c_pointer
+
+    if (c_associated(this%gc_function)) then
+      i = 0
+      do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
+        call run_gc(this%gc_function, generic_c_pointer)
+      end do
+    end if
 
     call internal_hashmap_clear(this%map, logical(.true., kind = c_bool))
-
-    ! todo: this might need a specialty thing.
   end subroutine hashmap_clear
 
 
