@@ -1,5 +1,6 @@
 module yep
   use, intrinsic :: iso_c_binding
+  use :: hashmap_types
   implicit none
 
   type :: cool
@@ -22,6 +23,14 @@ contains
     output = trim(adjustl(output))
   end function int_to_string
 
+  subroutine testing(el)
+
+    implicit none
+
+    type(element) :: el
+
+  end subroutine testing
+
 end module yep
 
 program prototyping
@@ -39,7 +48,7 @@ program prototyping
 
 
 
-  map = hashmap()
+  map = new_hashmap(testing)
 
   do i = 1,100000
 
