@@ -34,7 +34,8 @@ contains
 
     select type (generic_pointer)
      type is (cool)
-      print*,"cool"
+      deallocate(generic_pointer%i)
+      deallocate(generic_pointer)
     end select
 
   end subroutine testing
@@ -60,7 +61,7 @@ program prototyping
   map = new_hashmap(testing)
 
   do
-    do i = 1,100000
+    do i = 1,10000
 
       allocate(test_data)
 
@@ -91,10 +92,10 @@ program prototyping
         ! print*,generic_pointer%i
       end select
     end do
-  end do
 
-  do i = 1,100000
-    call map%delete("hi"//int_to_string(i))
+    do i = 1,10000
+      call map%delete("hi"//int_to_string(i))
+    end do
   end do
 
 end program prototyping
