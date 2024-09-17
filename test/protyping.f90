@@ -46,12 +46,12 @@ end module yep
 
 
 program prototyping
-  use :: hashmap_mod
+  use :: hashmap_s
   use, intrinsic :: iso_c_binding
   use :: yep
   implicit none
 
-  type(hashmap) :: map
+  type(hashmap_string) :: map
   type(cool), pointer :: test_data
   class(*), pointer :: generic_pointer
   integer(c_int) :: i
