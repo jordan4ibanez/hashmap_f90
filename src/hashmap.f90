@@ -170,6 +170,10 @@ contains
       return
     end if
 
+    if (c_associated(this%gc_function)) then
+      call run_gc(this%gc_function, gotten_data)
+    end if
+
     ! todo: the optional additional GC function call here.
 
     ! todo: could point at the item and return if or make this a separate function possibly?
@@ -318,16 +322,19 @@ contains
 
 
   !* Re-map the function pointer into the Fortran intrinsic behavior.
-  subroutine run_gc(c_function_pointer, el)
+  subroutine run_gc(c_function_pointer, raw_c_element)
     implicit none
 
     type(c_funptr), intent(in), value :: c_function_pointer
+    type(c_ptr), intent(in), value :: raw_c_element
+    type(element), pointer :: element_pointer
     procedure(gc_function_interface), pointer :: func
-    type(element), intent(in) :: el
 
     call c_f_procpointer(c_function_pointer, func)
 
-    call func(el)
+    call c_f_pointer(raw_c_element, element_pointer)
+
+    call func(element_pointer)
   end subroutine run_gc
 
 
