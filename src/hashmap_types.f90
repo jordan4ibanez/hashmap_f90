@@ -13,7 +13,7 @@ module hashmap_types
 
 
   !* Element in the hashmap.
-  !* 48 bytes.
+  !* 32 bytes.
   type :: element_i_key
     integer(c_int64_t) :: key = 0
     class(*), pointer :: data => null()
