@@ -111,6 +111,8 @@ contains
   end function hashmap_get
 
 
+  !* Delete a value in the hashmap with an integer key.
+  !* If it doesn't exist, this is a no-op.
   subroutine hashmap_delete(this, key)
     implicit none
 
@@ -136,8 +138,7 @@ contains
   end subroutine hashmap_delete
 
 
-  !* Delete a value in the hashmap with an integer key.
-  !* If it doesn't exist, this is a no-op.
+
   subroutine hashmap_free(this)
     implicit none
 
