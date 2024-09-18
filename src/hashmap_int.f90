@@ -157,6 +157,7 @@ contains
   end subroutine hashmap_free
 
 
+  !* Get the number of items in the hashmap.
   function hashmap_count(this) result(count)
     implicit none
 
@@ -167,6 +168,7 @@ contains
   end function hashmap_count
 
 
+  !* Clear the hashmap.
   subroutine hashmap_clear(this)
     implicit none
 
