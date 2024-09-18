@@ -14,6 +14,9 @@ module-naming = false
 [install]
 library = false
 
+[dependencies]
+forthread = { git = "https://github.com/jordan4ibanez/forthread" }
+
 [fortran]
 implicit-typing = false
 implicit-external = false
