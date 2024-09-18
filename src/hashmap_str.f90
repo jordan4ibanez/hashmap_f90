@@ -224,6 +224,7 @@ contains
 
   !* Allows you to iterate through each element in the hashmap by direct pointer.
   !* This means: You can mutate the element in the hashmap directly.
+  !*
   !* Your iterator_index must start at 0, or else it's UB.
   !* DO NOT delete elements as you iterate.
   function hashmap_iterate(this, iterator_index, generic_pointer) result(has_item)
@@ -245,12 +246,40 @@ contains
 
     call c_f_pointer(raw_c_pointer, element_pointer)
 
-    if (associated(element_pointer%key)) then
-      print*,element_pointer%key
-    end if
-
     generic_pointer => element_pointer%data
   end function hashmap_iterate
+
+
+  !* Allows you to iterate through each element in the hashmap by key and direct pointer.
+  !* This means: You can mutate the element in the hashmap directly.
+  !*
+  !* If you mutate the key during iteration, good luck.
+  !*
+  !* Your iterator_index must start at 0, or else it's UB.
+  !* DO NOT delete elements as you iterate.
+  function hashmap_iterate_kv(this, iterator_index, key_pointer, generic_pointer) result(has_item)
+    implicit none
+
+    class(hashmap_string_key), intent(in) :: this
+    integer(c_size_t), intent(inout) :: iterator_index
+    character(len = *, kind = c_char), intent(inout), pointer :: key_pointer
+    class(*), intent(inout), pointer :: generic_pointer
+    logical(c_bool) :: has_item
+    type(c_ptr) :: raw_c_pointer
+    type(element_string_key), pointer :: element_pointer
+
+    has_item = internal_hashmap_iter(this%map, iterator_index, raw_c_pointer)
+
+    ! Nothing to do.
+    if (.not. has_item) then
+      return
+    end if
+
+    call c_f_pointer(raw_c_pointer, element_pointer)
+
+    key_pointer => element_pointer%key
+    generic_pointer => element_pointer%data
+  end function hashmap_iterate_kv
 
 
 !! INTRINSIC HASHMAP FUNCTIONS. ===========================================================================
