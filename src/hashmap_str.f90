@@ -191,6 +191,61 @@ contains
   end subroutine hashmap_free
 
 
+  function hashmap_count(this) result(count)
+    implicit none
+
+    class(hashmap_string_key), intent(in) :: this
+    integer(c_int64_t) :: count
+
+    count = internal_hashmap_count(this%map)
+  end function hashmap_count
+
+
+  subroutine hashmap_clear(this)
+    implicit none
+
+    class(hashmap_string_key), intent(in) :: this
+    integer(c_int64_t) :: i
+    type(c_ptr) :: generic_c_pointer
+
+    if (c_associated(this%gc_function)) then
+      i = 0
+      do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
+        call run_gc(this%gc_function, generic_c_pointer)
+      end do
+    end if
+
+    call internal_hashmap_clear(this%map, logical(.true., kind = c_bool))
+  end subroutine hashmap_clear
+
+
+  function hashmap_iterate(this, iterator_index, generic_pointer) result(has_item)
+    implicit none
+
+    class(hashmap_string_key), intent(in) :: this
+    integer(c_size_t), intent(inout) :: iterator_index
+    class(*), intent(inout), pointer :: generic_pointer
+    logical(c_bool) :: has_item
+    type(c_ptr) :: raw_c_pointer
+    type(element_string_key), pointer :: element_pointer
+
+    has_item = internal_hashmap_iter(this%map, iterator_index, raw_c_pointer)
+
+    ! Nothing to do.
+    if (.not. has_item) then
+      return
+    end if
+
+    call c_f_pointer(raw_c_pointer, element_pointer)
+
+    if (associated(element_pointer%key)) then
+      print*,element_pointer%key
+    end if
+
+    generic_pointer => element_pointer%data
+  end function hashmap_iterate
+
+
 !! INTRINSIC HASHMAP FUNCTIONS. ===========================================================================
 
 
@@ -274,57 +329,6 @@ contains
 
     failed = .false.
   end function compare_function
-
-
-  function hashmap_count(this) result(count)
-    implicit none
-
-    class(hashmap_string_key), intent(in) :: this
-    integer(c_int64_t) :: count
-
-    count = internal_hashmap_count(this%map)
-  end function hashmap_count
-
-
-  subroutine hashmap_clear(this)
-    implicit none
-
-    class(hashmap_string_key), intent(in) :: this
-    integer(c_int64_t) :: i
-    type(c_ptr) :: generic_c_pointer
-
-    if (c_associated(this%gc_function)) then
-      i = 0
-      do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
-        call run_gc(this%gc_function, generic_c_pointer)
-      end do
-    end if
-
-    call internal_hashmap_clear(this%map, logical(.true., kind = c_bool))
-  end subroutine hashmap_clear
-
-
-  function hashmap_iterate(this, iterator_index, generic_pointer) result(has_item)
-    implicit none
-
-    class(hashmap_string_key), intent(in) :: this
-    integer(c_size_t), intent(inout) :: iterator_index
-    class(*), intent(inout), pointer :: generic_pointer
-    logical(c_bool) :: has_item
-    type(c_ptr) :: raw_c_pointer
-    type(element_string_key), pointer :: element_pointer
-
-    has_item = internal_hashmap_iter(this%map, iterator_index, raw_c_pointer)
-
-    ! Nothing to do.
-    if (.not. has_item) then
-      return
-    end if
-
-    call c_f_pointer(raw_c_pointer, element_pointer)
-
-    generic_pointer => element_pointer%data
-  end function hashmap_iterate
 
 
   !* Re-map the function pointer into the Fortran intrinsic behavior.
