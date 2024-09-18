@@ -18,12 +18,14 @@ module concurrent_hashmap_str
   ! hashmap_scan     # callback based iteration over all items in hash map
 
   !* Fortran hashmap wrapper.
+  !* Thread safe.
   !* String key.
   type :: concurrent_hashmap_string_key
     private
     type(c_ptr) :: map = c_null_ptr
     type(c_funptr) :: gc_function = c_null_funptr
-    type(mutex_rwlock) :: mutex
+    type(mutex_rwlock), pointer :: mutex
+    type(c_ptr) :: mutex_c_ptr
   contains
     procedure :: set => hashmap_set
     procedure :: get => hashmap_get
@@ -54,7 +56,8 @@ contains
       h%gc_function = c_funloc(optional_gc_function)
     end if
 
-    h%mutex = mutex_rwlock()
+    h%mutex => thread_create_mutex_pointer()
+    h%mutex_c_ptr = c_loc(h%mutex)
   end function new_concurrent_hashmap_string_key
 
 
@@ -209,8 +212,11 @@ contains
       call free_string_key(generic_c_pointer)
     end do
 
-
     call internal_hashmap_free(this%map)
+
+    call thread_destroy_mutex_pointer(this%mutex)
+    this%mutex => null()
+    this%mutex_c_ptr = c_null_ptr
   end subroutine hashmap_free
 
 
@@ -424,6 +430,28 @@ contains
     call c_f_pointer(old_data_c_ptr, old_data)
     deallocate(old_data%key)
   end subroutine free_string_key
+
+
+  !* Lock the hashmap mutex.
+  subroutine hashmap_lock(this)
+    implicit none
+
+    class(concurrent_hashmap_string_key), intent(inout) :: this
+    integer(c_int) :: status
+
+    status = thread_write_lock(this%mutex_c_ptr)
+  end subroutine hashmap_lock
+
+
+  !* Unlock the hashmap mutex.
+  subroutine hashmap_unlock(this)
+    implicit none
+
+    class(concurrent_hashmap_string_key), intent(inout) :: this
+    integer(c_int) :: status
+
+    status = thread_unlock_lock(this%mutex_c_ptr)
+  end subroutine hashmap_unlock
 
 
 end module concurrent_hashmap_str

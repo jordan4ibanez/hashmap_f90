@@ -2,14 +2,15 @@ module concurrent_hashmap_int
   use, intrinsic :: iso_c_binding
   use :: hashmap_types
   use :: hashmap_bindings
+  use :: thread_mutex
   implicit none
 
 
   private
 
 
-  public :: hashmap_integer_key
-  public :: new_hashmap_integer_key
+  public :: concurrent_hashmap_integer_key
+  public :: new_concurrent_hashmap_integer_key
 
 
   ! todo list:
@@ -17,11 +18,14 @@ module concurrent_hashmap_int
   ! hashmap_scan     # callback based iteration over all items in hash map
 
   !* Fortran hashmap wrapper.
+  !* Thread safe.
   !* i64 key.
-  type :: hashmap_integer_key
+  type :: concurrent_hashmap_integer_key
     private
     type(c_ptr) :: map = c_null_ptr
     type(c_funptr) :: gc_function = c_null_funptr
+    type(mutex_rwlock), pointer :: mutex
+    type(c_ptr) :: mutex_c_ptr
   contains
     procedure :: set => hashmap_set
     procedure :: get => hashmap_get
@@ -31,17 +35,19 @@ module concurrent_hashmap_int
     procedure :: clear => hashmap_clear
     procedure :: iterate => hashmap_iterate
     procedure :: iterate_kv => hashmap_iterate_kv
-  end type hashmap_integer_key
+    procedure :: lock => hashmap_lock
+    procedure :: unlock => hashmap_unlock
+  end type concurrent_hashmap_integer_key
 
 
 contains
 
 
   !* Hashmap integer key constructor.
-  function new_hashmap_integer_key(optional_gc_function) result(h)
+  function new_concurrent_hashmap_integer_key(optional_gc_function) result(h)
     implicit none
 
-    type(hashmap_integer_key) :: h
+    type(concurrent_hashmap_integer_key) :: h
     procedure(gc_function_interface_integer), optional :: optional_gc_function
 
     h%map = internal_hashmap_new(32_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
@@ -49,14 +55,17 @@ contains
     if (present(optional_gc_function)) then
       h%gc_function = c_funloc(optional_gc_function)
     end if
-  end function new_hashmap_integer_key
+
+    h%mutex => thread_create_mutex_pointer()
+    h%mutex_c_ptr = c_loc(h%mutex)
+  end function new_concurrent_hashmap_integer_key
 
 
   !* Set a value in the hashmap with an integer key.
   subroutine hashmap_set(this, key, generic_pointer)
     implicit none
 
-    class(hashmap_integer_key), intent(inout) :: this
+    class(concurrent_hashmap_integer_key), intent(inout) :: this
     integer(c_int64_t), intent(in), value :: key
     class(*), intent(in), target :: generic_pointer
     type(element_integer_key), target :: new_element
@@ -84,7 +93,7 @@ contains
   function hashmap_get(this, key, generic_pointer) result(is_some)
     implicit none
 
-    class(hashmap_integer_key), intent(inout) :: this
+    class(concurrent_hashmap_integer_key), intent(inout) :: this
     integer(c_int64_t), intent(in), value :: key
     class(*), intent(inout), pointer :: generic_pointer
     logical(c_bool) :: is_some
@@ -117,7 +126,7 @@ contains
   subroutine hashmap_delete(this, key)
     implicit none
 
-    class(hashmap_integer_key), intent(inout) :: this
+    class(concurrent_hashmap_integer_key), intent(inout) :: this
     integer(c_int64_t), intent(in), value :: key
     type(c_ptr) :: gotten_data
     type(element_integer_key), target :: element_key
@@ -143,7 +152,7 @@ contains
   subroutine hashmap_free(this)
     implicit none
 
-    class(hashmap_integer_key), intent(inout) :: this
+    class(concurrent_hashmap_integer_key), intent(inout) :: this
     integer(c_int64_t) :: i
     type(c_ptr) :: generic_c_pointer
 
@@ -155,6 +164,10 @@ contains
     end if
 
     call internal_hashmap_free(this%map)
+
+    call thread_destroy_mutex_pointer(this%mutex)
+    this%mutex => null()
+    this%mutex_c_ptr = c_null_ptr
   end subroutine hashmap_free
 
 
@@ -162,7 +175,7 @@ contains
   function hashmap_count(this) result(count)
     implicit none
 
-    class(hashmap_integer_key), intent(in) :: this
+    class(concurrent_hashmap_integer_key), intent(in) :: this
     integer(c_int64_t) :: count
 
     count = internal_hashmap_count(this%map)
@@ -173,7 +186,7 @@ contains
   subroutine hashmap_clear(this)
     implicit none
 
-    class(hashmap_integer_key), intent(in) :: this
+    class(concurrent_hashmap_integer_key), intent(in) :: this
     integer(c_int64_t) :: i
     type(c_ptr) :: generic_c_pointer
 
@@ -196,7 +209,7 @@ contains
   function hashmap_iterate(this, iterator_index, generic_pointer) result(has_item)
     implicit none
 
-    class(hashmap_integer_key), intent(in) :: this
+    class(concurrent_hashmap_integer_key), intent(in) :: this
     integer(c_size_t), intent(inout) :: iterator_index
     class(*), intent(inout), pointer :: generic_pointer
     logical(c_bool) :: has_item
@@ -226,7 +239,7 @@ contains
   function hashmap_iterate_kv(this, iterator_index, key_pointer, generic_pointer) result(has_item)
     implicit none
 
-    class(hashmap_integer_key), intent(in) :: this
+    class(concurrent_hashmap_integer_key), intent(in) :: this
     integer(c_size_t), intent(inout) :: iterator_index
     integer(c_int64_t), intent(inout), pointer :: key_pointer
     class(*), intent(inout), pointer :: generic_pointer
@@ -334,6 +347,28 @@ contains
 
     call func(element_pointer)
   end subroutine run_gc
+
+
+  !* Lock the hashmap mutex.
+  subroutine hashmap_lock(this)
+    implicit none
+
+    class(concurrent_hashmap_integer_key), intent(inout) :: this
+    integer(c_int) :: status
+
+    status = thread_write_lock(this%mutex_c_ptr)
+  end subroutine hashmap_lock
+
+
+  !* Unlock the hashmap mutex.
+  subroutine hashmap_unlock(this)
+    implicit none
+
+    class(concurrent_hashmap_integer_key), intent(inout) :: this
+    integer(c_int) :: status
+
+    status = thread_unlock_lock(this%mutex_c_ptr)
+  end subroutine hashmap_unlock
 
 
 end module concurrent_hashmap_int
