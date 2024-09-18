@@ -80,8 +80,7 @@ contains
     !? Internally calls: memcpy.
     old_data_c_ptr = internal_hashmap_set(this%map, c_loc(new_element))
 
-    !* DEALLOCATE.
-    deallocate(new_element%key)
+    !! DO NOT DEALLOCATE THE KEY, WE NEED IT.
 
     ! The old data was a null pointer. We don't have to do anything.
     if (.not. c_associated(old_data_c_ptr)) then
