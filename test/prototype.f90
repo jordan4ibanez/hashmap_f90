@@ -70,7 +70,7 @@ program prototype
     map = new_hashmap_string_key(example_gc_function)
 
     ! print*,"stage 1"
-    do i = 1+z,50+z
+    do i = 1+z,5000+z
 
       !* Create our memory.
       allocate(test_data)
@@ -112,7 +112,7 @@ program prototype
     !* We can remove the elements we just added because we already knew their keys.
     !*
     !* Will automatically call your GC function.
-    ! do i = 1+z,50+z
+    ! do i = 1+z,5000+z
     !   call map%delete(int(i, c_int64_t))
     ! end do
 
@@ -134,9 +134,9 @@ program prototype
     ! print*,"nap time"
 
     !* I just thought it would be neat to let you see it print out chunk by chunk.
-    call sleep(1)
+    ! call sleep(1)
 
-    z = z + 50
+    z = z + 5000
   end do
 
 end program prototype
