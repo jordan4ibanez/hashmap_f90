@@ -30,6 +30,7 @@ module hashmap_str
     procedure :: count => hashmap_count
     procedure :: clear => hashmap_clear
     procedure :: iterate => hashmap_iterate
+    procedure :: iterate_kv => hashmap_iterate_kv
   end type hashmap_string_key
 
 
