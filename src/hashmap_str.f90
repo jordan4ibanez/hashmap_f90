@@ -227,7 +227,6 @@ contains
 
     type(c_ptr), intent(in), value :: a, b, udata
     logical(c_bool) :: failed
-
     type(element_string_key), pointer :: element_pointer_a, element_pointer_b
 
     !* A transfer.
