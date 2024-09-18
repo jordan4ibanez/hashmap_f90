@@ -62,6 +62,7 @@ contains
     integer(c_int) :: key_length
     type(element_string_key), target :: new_element
     type(c_ptr) :: old_data_c_ptr
+    type(element_string_key), pointer :: old_data
 
 
     key_length = len(key)
@@ -92,6 +93,10 @@ contains
     if (c_associated(this%gc_function)) then
       call run_gc(this%gc_function, old_data_c_ptr)
     end if
+
+    ! Clean up the old string key.
+    call c_f_pointer(old_data_c_ptr, old_data)
+    deallocate(old_data%key)
   end subroutine hashmap_set
 
 
@@ -103,7 +108,7 @@ contains
     character(len = *, kind = c_char), intent(in) :: key
     class(*), intent(inout), pointer :: generic_pointer
     logical(c_bool) :: is_some
-    type(c_ptr) :: gotten_data
+    type(c_ptr) :: old_data_c_ptr
     integer(c_int) :: key_length
     type(element_string_key), target :: element_key
     type(element_string_key), pointer :: element_pointer
@@ -119,19 +124,22 @@ contains
     element_key%key_length = key_length
 
     !? Grabs a C pointer or NULL upon failure.
-    gotten_data = internal_hashmap_get(this%map, c_loc(element_key))
+    old_data_c_ptr = internal_hashmap_get(this%map, c_loc(element_key))
 
     !* DEALLOCATE.
     deallocate(element_key%key)
 
     ! It's a null pointer.
-    if (.not. c_associated(gotten_data)) then
+    if (.not. c_associated(old_data_c_ptr)) then
       return
     end if
 
     !* We can finally point STRAIGHT AT IT!
-    call c_f_pointer(gotten_data, element_pointer)
+    call c_f_pointer(old_data_c_ptr, element_pointer)
     generic_pointer => element_pointer%data
+
+    ! Free the old string key pointer.
+    call free_string_key(old_data_c_ptr)
 
     is_some = .true.
   end function hashmap_get
@@ -144,7 +152,7 @@ contains
 
     class(hashmap_string_key), intent(inout) :: this
     character(len = *, kind = c_char), intent(in) :: key
-    type(c_ptr) :: gotten_data
+    type(c_ptr) :: old_data_c_ptr
     integer(c_int) :: key_length
     type(element_string_key), target :: element_key
 
@@ -157,20 +165,23 @@ contains
     element_key%key_length = key_length
 
     !? Grabs a C pointer or NULL upon failure.
-    gotten_data = internal_hashmap_delete(this%map, c_loc(element_key))
+    old_data_c_ptr = internal_hashmap_delete(this%map, c_loc(element_key))
 
     !* DEALLOCATE.
     deallocate(element_key%key)
 
     ! It's a null pointer.
-    if (.not. c_associated(gotten_data)) then
+    if (.not. c_associated(old_data_c_ptr)) then
       return
     end if
 
     ! If a GC function was assigned.
     if (c_associated(this%gc_function)) then
-      call run_gc(this%gc_function, gotten_data)
+      call run_gc(this%gc_function, old_data_c_ptr)
     end if
+
+    ! Free the old string key pointer.
+    call free_string_key(old_data_c_ptr)
   end subroutine hashmap_delete
 
 
@@ -383,6 +394,19 @@ contains
 
     call func(element_pointer)
   end subroutine run_gc
+
+
+  !* Automatically free the string key.
+  subroutine free_string_key(old_data_c_ptr)
+    implicit none
+
+    type(c_ptr) :: old_data_c_ptr
+    type(element_string_key), pointer :: old_data
+
+    ! Clean up the old string key.
+    call c_f_pointer(old_data_c_ptr, old_data)
+    deallocate(old_data%key)
+  end subroutine free_string_key
 
 
 end module hashmap_str
