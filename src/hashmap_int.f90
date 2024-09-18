@@ -138,7 +138,7 @@ contains
   end subroutine hashmap_delete
 
 
-
+  !* Deallocate EVERYTHING including the underlying C memory.
   subroutine hashmap_free(this)
     implicit none
 
