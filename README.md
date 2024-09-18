@@ -3,6 +3,8 @@ Fortran bindings to hashmap.c
 
 If you want to C the original github: https://github.com/tidwall/hashmap.c
 
+If you like what I do, and would like to support me: [My Patreon](https://www.patreon.com/jordan4ibanez)
+
 This is a sample of what you can do with it.
 You can also see this in: [test/prototype.f90](https://github.com/jordan4ibanez/hashmap_f90/blob/master/test/example.f90)
 
