@@ -15,6 +15,8 @@ You can also see this in: [test/prototype.f90](https://github.com/jordan4ibanez/
 - Concurrent string key hashmap.
 - Concurrent c_int64_t key hashmap.
 
+With concurrent hashmaps, basically you need to call lock before you do something then unlock it.
+
 ### Example:
 
 You can run the example with: ``make test``
