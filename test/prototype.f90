@@ -59,7 +59,6 @@ program prototype
   integer(c_int) :: i,z
   integer(c_size_t) :: index
   class(*), pointer :: generic_pointer
-  character(len = :, kind = c_char), allocatable :: keyset
 
   z = 0
 
