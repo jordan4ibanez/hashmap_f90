@@ -219,6 +219,9 @@ contains
   end subroutine hashmap_clear
 
 
+  !* Allows you to iterate through each element in the hashmap.
+  !* Your iterator_index must start at 0, or else it's UB.
+  !* DO NOT delete elements as you iterate.
   function hashmap_iterate(this, iterator_index, generic_pointer) result(has_item)
     implicit none
 
