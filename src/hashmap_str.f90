@@ -190,12 +190,19 @@ contains
     integer(c_int64_t) :: i
     type(c_ptr) :: generic_c_pointer
 
-    if (c_associated(this%gc_function)) then
-      i = 0
-      do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
+    i = 0
+
+    do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
+
+      ! Call the GC function.
+      if (c_associated(this%gc_function)) then
         call run_gc(this%gc_function, generic_c_pointer)
-      end do
-    end if
+      end if
+
+      ! Free the old string key pointer.
+      call free_string_key(generic_c_pointer)
+    end do
+
 
     call internal_hashmap_free(this%map)
   end subroutine hashmap_free
