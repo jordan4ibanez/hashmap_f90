@@ -70,7 +70,7 @@ program prototype
     !* Create the hashmap.
     map = new_hashmap_string_key(example_gc_function)
 
-    print*,"stage 1"
+    ! print*,"stage 1"
     do i = 1+z,50+z
 
       !* Create our memory.
@@ -86,10 +86,10 @@ program prototype
 
       !* Example getting.
       if (map%get("hi"//int_to_string(i), generic_pointer)) then
-        print*,"got you"
+        ! print*,"got you"
         select type (generic_pointer)
          type is (cool)
-          print*,generic_pointer%i
+          ! print*,generic_pointer%i
         end select
       end if
     end do
@@ -97,7 +97,7 @@ program prototype
     !* MAKE SURE, that your iterator starts at 0.
     index = 0
 
-    print*,"stage 2"
+    ! print*,"stage 2"
 
     !* Iterate the hashmap.
     !*
@@ -105,7 +105,7 @@ program prototype
     do while(map%iterate(index, generic_pointer))
       select type(generic_pointer)
        type is (cool)
-        print*,generic_pointer%i
+        ! print*,generic_pointer%i
       end select
     end do
 
@@ -122,7 +122,7 @@ program prototype
     !* Will automatically call your GC function.
     ! call map%clear()
 
-    print*,"stage 3"
+    ! print*,"stage 3"
 
     !* We can finally free the hashmap.
     !*
@@ -132,7 +132,7 @@ program prototype
     !* Will automatically call your GC function.
     call map%free()
 
-    print*,"nap time"
+    ! print*,"nap time"
 
     !* I just thought it would be neat to let you see it print out chunk by chunk.
     call sleep(1)
