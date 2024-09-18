@@ -138,9 +138,6 @@ contains
     call c_f_pointer(old_data_c_ptr, element_pointer)
     generic_pointer => element_pointer%data
 
-    ! Free the old string key pointer.
-    call free_string_key(old_data_c_ptr)
-
     is_some = .true.
   end function hashmap_get
 
