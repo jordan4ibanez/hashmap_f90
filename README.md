@@ -6,6 +6,12 @@ If you want to C the original github: https://github.com/tidwall/hashmap.c
 This is a sample of what you can do with it.
 You can also see this in: [test/prototype.f90](https://github.com/jordan4ibanez/hashmap_f90/blob/master/test/example.f90)
 
+#### Comes with a few different kinds:
+- String key hashmap.
+- c_int64_t key hashmap.
+- Concurrent string key hashmap.
+- Concurrent c_int64_t key hashmap.
+
 You can run the example with: ``make test``
 
 ```fortran
