@@ -19,6 +19,15 @@ You can also see this in: [test/prototype.f90](https://github.com/jordan4ibanez/
 
 With concurrent hashmaps, basically you need to call lock before you do something then unlock it.
 
+### Add to your project:
+
+In your fpm.toml add:
+
+```toml
+[dependencies]
+forthread = { git = "https://github.com/jordan4ibanez/hashmap_f90" }
+```
+
 ### Example:
 
 You can run the example with: ``make test``
