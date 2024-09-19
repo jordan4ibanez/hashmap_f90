@@ -25,7 +25,7 @@ In your fpm.toml add:
 
 ```toml
 [dependencies]
-forthread = { git = "https://github.com/jordan4ibanez/hashmap_f90" }
+hashmap_f90 = { git = "https://github.com/jordan4ibanez/hashmap_f90" }
 ```
 
 ### Example:
