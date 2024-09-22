@@ -25,6 +25,7 @@ module hashmap_int
   contains
     procedure :: set => hashmap_set
     procedure :: get => hashmap_get
+    procedure :: has_key => hashmap_has_key
     procedure :: delete => hashmap_delete
     procedure :: free => hashmap_free
     procedure :: count => hashmap_count
@@ -110,6 +111,30 @@ contains
 
     is_some = .true.
   end function hashmap_get
+
+
+  !* Check if a hashmap has a key.
+  function hashmap_has_key(this, key) result(has)
+    implicit none
+
+    class(hashmap_integer_key), intent(inout) :: this
+    integer(c_int64_t), intent(in), value :: key
+    logical(c_bool) :: has
+    type(c_ptr) :: data_c_ptr
+    type(element_integer_key), target :: element_key
+
+    has = .false.
+
+    element_key%key = key
+
+    !? Grabs a C pointer or NULL upon failure.
+    data_c_ptr = internal_hashmap_get(this%map, c_loc(element_key))
+
+    ! We can simply check if it's NULL.
+    if (c_associated(data_c_ptr)) then
+      has = .true.
+    end if
+  end function hashmap_has_key
 
 
   !* Delete a value in the hashmap with an integer key.
