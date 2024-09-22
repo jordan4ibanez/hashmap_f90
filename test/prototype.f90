@@ -31,16 +31,13 @@ contains
   subroutine example_gc_function(el)
     implicit none
 
-    type(element_string_key) :: el
-    class(*), pointer :: generic_pointer
+    class(*), pointer :: el
 
-    generic_pointer => el%data
-
-    select type (generic_pointer)
+    select type (el)
      type is (cool)
       !* We free the Fortran memory here. :)
-      deallocate(generic_pointer%i)
-      deallocate(generic_pointer)
+      deallocate(el%i)
+      deallocate(el)
     end select
   end subroutine example_gc_function
 
