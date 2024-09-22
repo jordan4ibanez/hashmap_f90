@@ -45,7 +45,7 @@ contains
     type(hashmap_string_key) :: h
     procedure(gc_function_interface_string), optional :: optional_gc_function
 
-    h%map = internal_hashmap_new(56_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
+    h%map = internal_hashmap_new(56_8, 0_8, 0_8, 0_8, c_funloc(str_hashing_function), c_funloc(str_compare_function), c_null_funptr, c_null_ptr)
 
     if (present(optional_gc_function)) then
       h%gc_function = c_funloc(optional_gc_function)
@@ -92,7 +92,7 @@ contains
 
     ! If a GC function was assigned.
     if (c_associated(this%gc_function)) then
-      call run_gc(this%gc_function, old_data_c_ptr)
+      call str_run_gc(this%gc_function, old_data_c_ptr)
     end if
 
     ! Clean up the old string key.
@@ -209,11 +209,11 @@ contains
 
     ! If a GC function was assigned.
     if (c_associated(this%gc_function)) then
-      call run_gc(this%gc_function, old_data_c_ptr)
+      call str_run_gc(this%gc_function, old_data_c_ptr)
     end if
 
     ! Free the old string key pointer.
-    call free_string_key(old_data_c_ptr)
+    call str_free_string_key(old_data_c_ptr)
   end subroutine hashmap_delete
 
 
@@ -231,11 +231,11 @@ contains
 
       ! Call the GC function.
       if (c_associated(this%gc_function)) then
-        call run_gc(this%gc_function, generic_c_pointer)
+        call str_run_gc(this%gc_function, generic_c_pointer)
       end if
 
       ! Free the old string key pointer.
-      call free_string_key(generic_c_pointer)
+      call str_free_string_key(generic_c_pointer)
     end do
 
 
@@ -269,11 +269,11 @@ contains
 
       ! Call the GC function.
       if (c_associated(this%gc_function)) then
-        call run_gc(this%gc_function, generic_c_pointer)
+        call str_run_gc(this%gc_function, generic_c_pointer)
       end if
 
       ! Free the old string key pointer.
-      call free_string_key(generic_c_pointer)
+      call str_free_string_key(generic_c_pointer)
     end do
 
     call internal_hashmap_clear(this%map, logical(.true., kind = c_bool))
@@ -343,7 +343,7 @@ contains
 !! INTRINSIC HASHMAP FUNCTIONS. ===========================================================================
 
 
-  recursive function hashing_function(item_pointer, seed_0, seed_1) result(hash) bind(c)
+  recursive function str_hashing_function(item_pointer, seed_0, seed_1) result(hash) bind(c)
     implicit none
 
     type(c_ptr), intent(in), value :: item_pointer
@@ -367,10 +367,10 @@ contains
     ! print*,"key: ",element_pointer%key
     hash = hashmap_xxhash3(c_loc(element_pointer%key), int(element_pointer%key_length, c_int64_t), seed_0, seed_1)
     ! print*,"hash:", hash
-  end function hashing_function
+  end function str_hashing_function
 
 
-  recursive function compare_function(a, b, udata) result(failed) bind(c)
+  recursive function str_compare_function(a, b, udata) result(failed) bind(c)
     use, intrinsic :: iso_c_binding
     implicit none
 
@@ -422,11 +422,11 @@ contains
     end if
 
     failed = .false.
-  end function compare_function
+  end function str_compare_function
 
 
   !* Re-map the function pointer into the Fortran intrinsic behavior.
-  subroutine run_gc(c_function_pointer, raw_c_element)
+  subroutine str_run_gc(c_function_pointer, raw_c_element)
     implicit none
 
     type(c_funptr), intent(in), value :: c_function_pointer
@@ -439,11 +439,11 @@ contains
     call c_f_pointer(raw_c_element, element_pointer)
 
     call func(element_pointer)
-  end subroutine run_gc
+  end subroutine str_run_gc
 
 
   !* Automatically free the string key.
-  subroutine free_string_key(old_data_c_ptr)
+  subroutine str_free_string_key(old_data_c_ptr)
     implicit none
 
     type(c_ptr) :: old_data_c_ptr
@@ -452,7 +452,7 @@ contains
     ! Clean up the old string key.
     call c_f_pointer(old_data_c_ptr, old_data)
     deallocate(old_data%key)
-  end subroutine free_string_key
+  end subroutine str_free_string_key
 
 
 end module hashmap_str
