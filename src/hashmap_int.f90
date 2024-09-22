@@ -45,7 +45,7 @@ contains
     type(hashmap_integer_key) :: h
     procedure(gc_function_interface_integer), optional :: optional_gc_function
 
-    h%map = internal_hashmap_new(32_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
+    h%map = internal_hashmap_new(32_8, 0_8, 0_8, 0_8, c_funloc(int_hashing_function), c_funloc(int_compare_function), c_null_funptr, c_null_ptr)
 
     if (present(optional_gc_function)) then
       h%gc_function = c_funloc(optional_gc_function)
@@ -76,7 +76,7 @@ contains
 
     ! If a GC function was assigned.
     if (c_associated(this%gc_function)) then
-      call run_gc(this%gc_function, old_data_c_ptr)
+      call int_run_gc(this%gc_function, old_data_c_ptr)
     end if
   end subroutine hashmap_set
 
@@ -159,7 +159,7 @@ contains
 
     ! If a GC function was assigned.
     if (c_associated(this%gc_function)) then
-      call run_gc(this%gc_function, gotten_data)
+      call int_run_gc(this%gc_function, gotten_data)
     end if
   end subroutine hashmap_delete
 
@@ -175,7 +175,7 @@ contains
     if (c_associated(this%gc_function)) then
       i = 0
       do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
-        call run_gc(this%gc_function, generic_c_pointer)
+        call int_run_gc(this%gc_function, generic_c_pointer)
       end do
     end if
 
@@ -205,7 +205,7 @@ contains
     if (c_associated(this%gc_function)) then
       i = 0
       do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
-        call run_gc(this%gc_function, generic_c_pointer)
+        call int_run_gc(this%gc_function, generic_c_pointer)
       end do
     end if
 
@@ -276,7 +276,7 @@ contains
 !! INTRINSIC HASHMAP FUNCTIONS. ===========================================================================
 
 
-  recursive function hashing_function(item_pointer, seed_0, seed_1) result(hash) bind(c)
+  recursive function int_hashing_function(item_pointer, seed_0, seed_1) result(hash) bind(c)
     implicit none
 
     type(c_ptr), intent(in), value :: item_pointer
@@ -299,10 +299,10 @@ contains
     ! print*,"key: ",element_pointer%key
     hash = element_pointer%key
     ! print*,"hash:", hash
-  end function hashing_function
+  end function int_hashing_function
 
 
-  recursive function compare_function(a, b, udata) result(failed) bind(c)
+  recursive function int_compare_function(a, b, udata) result(failed) bind(c)
     use, intrinsic :: iso_c_binding
     implicit none
 
@@ -341,11 +341,11 @@ contains
     end if
 
     failed = .false.
-  end function compare_function
+  end function int_compare_function
 
 
   !* Re-map the function pointer into the Fortran intrinsic behavior.
-  subroutine run_gc(c_function_pointer, raw_c_element)
+  subroutine int_run_gc(c_function_pointer, raw_c_element)
     implicit none
 
     type(c_funptr), intent(in), value :: c_function_pointer
@@ -358,7 +358,7 @@ contains
     call c_f_pointer(raw_c_element, element_pointer)
 
     call func(element_pointer)
-  end subroutine run_gc
+  end subroutine int_run_gc
 
 
 end module hashmap_int
