@@ -123,7 +123,7 @@ contains
   end function concurrent_int_hashmap_get
 
 
-    !* Check if a hashmap has a key.
+  !* Check if a hashmap has a key.
   function concurrent_int_hashmap_has_key(this, key) result(has)
     implicit none
 
