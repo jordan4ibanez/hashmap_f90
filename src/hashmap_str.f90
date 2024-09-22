@@ -143,9 +143,38 @@ contains
   end function hashmap_get
 
 
+  !* Check if a hashmap has a key.
+  function hashmap_has_key(this, key) result(has)
+    implicit none
 
+    class(hashmap_string_key), intent(inout) :: this
+    character(len = *, kind = c_char), intent(in) :: key
+    logical(c_bool) :: has
+    integer(c_int) :: key_length
+    type(c_ptr) :: data_c_ptr
+    type(element_string_key), target :: element_key
 
+    has = .false.
 
+    key_length = len(key)
+
+    !* ALLOCATE.
+    allocate(character(len = key_length, kind = c_char) :: element_key%key)
+
+    element_key%key = key
+    element_key%key_length = key_length
+
+    !? Grabs a C pointer or NULL upon failure.
+    data_c_ptr = internal_hashmap_get(this%map, c_loc(element_key))
+
+    !* DEALLOCATE.
+    deallocate(element_key%key)
+
+    ! We can simply check if it's NULL.
+    if (c_associated(data_c_ptr)) then
+      has = .true.
+    end if
+  end function hashmap_has_key
 
 
   !* Delete a value in the hashmap with a string key.
