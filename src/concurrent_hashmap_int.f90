@@ -33,6 +33,7 @@ module concurrent_hashmap_int
     procedure :: delete => concurrent_int_hashmap_delete
     procedure :: free => concurrent_int_hashmap_free
     procedure :: count => concurrent_int_hashmap_count
+    procedure :: is_empty => concurrent_int_hashmap_is_empty
     procedure :: clear => concurrent_int_hashmap_clear
     procedure :: iterate => concurrent_int_hashmap_iterate
     procedure :: iterate_kv => concurrent_int_hashmap_iterate_kv
@@ -205,6 +206,17 @@ contains
 
     count = internal_hashmap_count(this%map)
   end function concurrent_int_hashmap_count
+
+
+  !* Check if a hashmap is empty.
+  function concurrent_int_hashmap_is_empty(this) result(is_empty)
+    implicit none
+
+    class(concurrent_hashmap_integer_key), intent(in) :: this
+    logical(c_bool) :: is_empty
+
+    is_empty = (this%count() == 0)
+  end function concurrent_int_hashmap_is_empty
 
 
   !* Clear the hashmap.

@@ -29,6 +29,7 @@ module hashmap_int
     procedure :: delete => int_hashmap_delete
     procedure :: free => int_hashmap_free
     procedure :: count => int_hashmap_count
+    procedure :: is_empty => int_hashmap_is_empty
     procedure :: clear => int_hashmap_clear
     procedure :: iterate => int_hashmap_iterate
     procedure :: iterate_kv => int_hashmap_iterate_kv
@@ -192,6 +193,17 @@ contains
 
     count = internal_hashmap_count(this%map)
   end function int_hashmap_count
+
+
+  !* Check if a hashmap is empty.
+  function int_hashmap_is_empty(this) result(is_empty)
+    implicit none
+
+    class(hashmap_integer_key), intent(in) :: this
+    logical(c_bool) :: is_empty
+
+    is_empty = (this%count() == 0)
+  end function int_hashmap_is_empty
 
 
   !* Clear the hashmap.
