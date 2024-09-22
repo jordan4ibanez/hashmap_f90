@@ -285,7 +285,7 @@ contains
 
     class(hashmap_string_key), intent(in) :: this
     integer(c_size_t), intent(inout) :: iterator_index
-    character(len = *, kind = c_char), intent(inout), pointer :: key_pointer
+    character(len = :, kind = c_char), intent(inout), pointer :: key_pointer
     class(*), intent(inout), pointer :: generic_pointer
     logical(c_bool) :: has_item
     type(c_ptr) :: raw_c_pointer
