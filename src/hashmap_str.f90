@@ -109,7 +109,7 @@ contains
     character(len = *, kind = c_char), intent(in) :: key
     class(*), intent(inout), pointer :: generic_pointer
     logical(c_bool) :: is_some
-    type(c_ptr) :: old_data_c_ptr
+    type(c_ptr) :: data_c_ptr
     integer(c_int) :: key_length
     type(element_string_key), target :: element_key
     type(element_string_key), pointer :: element_pointer
@@ -125,25 +125,25 @@ contains
     element_key%key_length = key_length
 
     !? Grabs a C pointer or NULL upon failure.
-    old_data_c_ptr = internal_hashmap_get(this%map, c_loc(element_key))
+    data_c_ptr = internal_hashmap_get(this%map, c_loc(element_key))
 
     !* DEALLOCATE.
     deallocate(element_key%key)
 
     ! It's a null pointer.
-    if (.not. c_associated(old_data_c_ptr)) then
+    if (.not. c_associated(data_c_ptr)) then
       return
     end if
 
     !* We can finally point STRAIGHT AT IT!
-    call c_f_pointer(old_data_c_ptr, element_pointer)
+    call c_f_pointer(data_c_ptr, element_pointer)
     generic_pointer => element_pointer%data
 
     is_some = .true.
   end function hashmap_get
 
 
-  
+
 
 
 
