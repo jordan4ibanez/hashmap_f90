@@ -23,15 +23,15 @@ module hashmap_int
     type(c_ptr) :: map = c_null_ptr
     type(c_funptr) :: gc_function = c_null_funptr
   contains
-    procedure :: set => hashmap_set
-    procedure :: get => hashmap_get
-    procedure :: has_key => hashmap_has_key
-    procedure :: delete => hashmap_delete
-    procedure :: free => hashmap_free
-    procedure :: count => hashmap_count
-    procedure :: clear => hashmap_clear
-    procedure :: iterate => hashmap_iterate
-    procedure :: iterate_kv => hashmap_iterate_kv
+    procedure :: set => int_hashmap_set
+    procedure :: get => int_hashmap_get
+    procedure :: has_key => int_hashmap_has_key
+    procedure :: delete => int_hashmap_delete
+    procedure :: free => int_hashmap_free
+    procedure :: count => int_hashmap_count
+    procedure :: clear => int_hashmap_clear
+    procedure :: iterate => int_hashmap_iterate
+    procedure :: iterate_kv => int_hashmap_iterate_kv
   end type hashmap_integer_key
 
 
@@ -54,7 +54,7 @@ contains
 
 
   !* Set a value in the hashmap with an integer key.
-  subroutine hashmap_set(this, key, generic_pointer)
+  subroutine int_hashmap_set(this, key, generic_pointer)
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
@@ -78,11 +78,11 @@ contains
     if (c_associated(this%gc_function)) then
       call int_run_gc(this%gc_function, old_data_c_ptr)
     end if
-  end subroutine hashmap_set
+  end subroutine int_hashmap_set
 
 
   !* Get a value in the hashmap with an integer key.
-  function hashmap_get(this, key, generic_pointer) result(is_some)
+  function int_hashmap_get(this, key, generic_pointer) result(is_some)
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
@@ -110,11 +110,11 @@ contains
     generic_pointer => element_pointer%data
 
     is_some = .true.
-  end function hashmap_get
+  end function int_hashmap_get
 
 
   !* Check if a hashmap has a key.
-  function hashmap_has_key(this, key) result(has)
+  function int_hashmap_has_key(this, key) result(has)
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
@@ -134,12 +134,12 @@ contains
     if (c_associated(data_c_ptr)) then
       has = .true.
     end if
-  end function hashmap_has_key
+  end function int_hashmap_has_key
 
 
   !* Delete a value in the hashmap with an integer key.
   !* If it doesn't exist, this is a no-op.
-  subroutine hashmap_delete(this, key)
+  subroutine int_hashmap_delete(this, key)
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
@@ -161,11 +161,11 @@ contains
     if (c_associated(this%gc_function)) then
       call int_run_gc(this%gc_function, gotten_data)
     end if
-  end subroutine hashmap_delete
+  end subroutine int_hashmap_delete
 
 
   !* Deallocate EVERYTHING including the underlying C memory.
-  subroutine hashmap_free(this)
+  subroutine int_hashmap_free(this)
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
@@ -180,22 +180,22 @@ contains
     end if
 
     call internal_hashmap_free(this%map)
-  end subroutine hashmap_free
+  end subroutine int_hashmap_free
 
 
   !* Get the number of items in the hashmap.
-  function hashmap_count(this) result(count)
+  function int_hashmap_count(this) result(count)
     implicit none
 
     class(hashmap_integer_key), intent(in) :: this
     integer(c_int64_t) :: count
 
     count = internal_hashmap_count(this%map)
-  end function hashmap_count
+  end function int_hashmap_count
 
 
   !* Clear the hashmap.
-  subroutine hashmap_clear(this)
+  subroutine int_hashmap_clear(this)
     implicit none
 
     class(hashmap_integer_key), intent(in) :: this
@@ -210,7 +210,7 @@ contains
     end if
 
     call internal_hashmap_clear(this%map, logical(.true., kind = c_bool))
-  end subroutine hashmap_clear
+  end subroutine int_hashmap_clear
 
 
   !* Allows you to iterate through each element in the hashmap by direct pointer.
@@ -218,7 +218,7 @@ contains
   !*
   !* Your iterator_index must start at 0, or else it's UB.
   !* DO NOT delete elements as you iterate.
-  function hashmap_iterate(this, iterator_index, generic_pointer) result(has_item)
+  function int_hashmap_iterate(this, iterator_index, generic_pointer) result(has_item)
     implicit none
 
     class(hashmap_integer_key), intent(in) :: this
@@ -238,7 +238,7 @@ contains
     call c_f_pointer(raw_c_pointer, element_pointer)
 
     generic_pointer => element_pointer%data
-  end function hashmap_iterate
+  end function int_hashmap_iterate
 
 
   !* Allows you to iterate through each element in the hashmap by key and direct pointer.
@@ -248,7 +248,7 @@ contains
   !*
   !* Your iterator_index must start at 0, or else it's UB.
   !* DO NOT delete elements as you iterate.
-  function hashmap_iterate_kv(this, iterator_index, key_pointer, generic_pointer) result(has_item)
+  function int_hashmap_iterate_kv(this, iterator_index, key_pointer, generic_pointer) result(has_item)
     implicit none
 
     class(hashmap_integer_key), intent(in) :: this
@@ -270,7 +270,7 @@ contains
 
     key_pointer => element_pointer%key
     generic_pointer => element_pointer%data
-  end function hashmap_iterate_kv
+  end function int_hashmap_iterate_kv
 
 
 !! INTRINSIC HASHMAP FUNCTIONS. ===========================================================================
