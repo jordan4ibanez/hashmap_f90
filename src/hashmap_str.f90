@@ -438,7 +438,7 @@ contains
 
     call c_f_pointer(raw_c_element, element_pointer)
 
-    call func(element_pointer)
+    call func(element_pointer%data)
   end subroutine str_run_gc
 
 
