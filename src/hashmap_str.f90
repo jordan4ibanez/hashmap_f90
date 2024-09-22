@@ -25,6 +25,7 @@ module hashmap_str
   contains
     procedure :: set => hashmap_set
     procedure :: get => hashmap_get
+    procedure :: has_key => hashmap_has_key
     procedure :: delete => hashmap_delete
     procedure :: free => hashmap_free
     procedure :: count => hashmap_count
@@ -140,6 +141,11 @@ contains
 
     is_some = .true.
   end function hashmap_get
+
+
+  
+
+
 
 
   !* Delete a value in the hashmap with a string key.
