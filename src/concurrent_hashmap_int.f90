@@ -27,17 +27,17 @@ module concurrent_hashmap_int
     type(mutex_rwlock), pointer :: mutex
     type(c_ptr) :: mutex_c_ptr
   contains
-    procedure :: set => hashmap_set
-    procedure :: get => hashmap_get
-    procedure :: has_key => hashmap_has_key
-    procedure :: delete => hashmap_delete
-    procedure :: free => hashmap_free
-    procedure :: count => hashmap_count
-    procedure :: clear => hashmap_clear
-    procedure :: iterate => hashmap_iterate
-    procedure :: iterate_kv => hashmap_iterate_kv
-    procedure :: lock => hashmap_lock
-    procedure :: unlock => hashmap_unlock
+    procedure :: set => concurrent_int_hashmap_set
+    procedure :: get => concurrent_int_hashmap_get
+    procedure :: has_key => concurrent_int_hashmap_has_key
+    procedure :: delete => concurrent_int_hashmap_delete
+    procedure :: free => concurrent_int_hashmap_free
+    procedure :: count => concurrent_int_hashmap_count
+    procedure :: clear => concurrent_int_hashmap_clear
+    procedure :: iterate => concurrent_int_hashmap_iterate
+    procedure :: iterate_kv => concurrent_int_hashmap_iterate_kv
+    procedure :: lock => concurrent_int_hashmap_lock
+    procedure :: unlock => concurrent_int_hashmap_unlock
   end type concurrent_hashmap_integer_key
 
 
@@ -51,7 +51,7 @@ contains
     type(concurrent_hashmap_integer_key) :: h
     procedure(gc_function_interface_integer), optional :: optional_gc_function
 
-    h%map = internal_hashmap_new(32_8, 0_8, 0_8, 0_8, c_funloc(hashing_function), c_funloc(compare_function), c_null_funptr, c_null_ptr)
+    h%map = internal_hashmap_new(32_8, 0_8, 0_8, 0_8, c_funloc(concurrent_int_hashing_function), c_funloc(concurrent_int_compare_function), c_null_funptr, c_null_ptr)
 
     if (present(optional_gc_function)) then
       h%gc_function = c_funloc(optional_gc_function)
@@ -63,7 +63,7 @@ contains
 
 
   !* Set a value in the hashmap with an integer key.
-  subroutine hashmap_set(this, key, generic_pointer)
+  subroutine concurrent_int_hashmap_set(this, key, generic_pointer)
     implicit none
 
     class(concurrent_hashmap_integer_key), intent(inout) :: this
@@ -85,13 +85,13 @@ contains
 
     ! If a GC function was assigned.
     if (c_associated(this%gc_function)) then
-      call run_gc(this%gc_function, old_data_c_ptr)
+      call concurrent_int_run_gc(this%gc_function, old_data_c_ptr)
     end if
-  end subroutine hashmap_set
+  end subroutine concurrent_int_hashmap_set
 
 
   !* Get a value in the hashmap with an integer key.
-  function hashmap_get(this, key, generic_pointer) result(is_some)
+  function concurrent_int_hashmap_get(this, key, generic_pointer) result(is_some)
     implicit none
 
     class(concurrent_hashmap_integer_key), intent(inout) :: this
@@ -119,11 +119,11 @@ contains
     generic_pointer => element_pointer%data
 
     is_some = .true.
-  end function hashmap_get
+  end function concurrent_int_hashmap_get
 
 
     !* Check if a hashmap has a key.
-  function hashmap_has_key(this, key) result(has)
+  function concurrent_int_hashmap_has_key(this, key) result(has)
     implicit none
 
     class(concurrent_hashmap_integer_key), intent(inout) :: this
@@ -143,12 +143,12 @@ contains
     if (c_associated(data_c_ptr)) then
       has = .true.
     end if
-  end function hashmap_has_key
+  end function concurrent_int_hashmap_has_key
 
 
   !* Delete a value in the hashmap with an integer key.
   !* If it doesn't exist, this is a no-op.
-  subroutine hashmap_delete(this, key)
+  subroutine concurrent_int_hashmap_delete(this, key)
     implicit none
 
     class(concurrent_hashmap_integer_key), intent(inout) :: this
@@ -168,13 +168,13 @@ contains
 
     ! If a GC function was assigned.
     if (c_associated(this%gc_function)) then
-      call run_gc(this%gc_function, gotten_data)
+      call concurrent_int_run_gc(this%gc_function, gotten_data)
     end if
-  end subroutine hashmap_delete
+  end subroutine concurrent_int_hashmap_delete
 
 
   !* Deallocate EVERYTHING including the underlying C memory.
-  subroutine hashmap_free(this)
+  subroutine concurrent_int_hashmap_free(this)
     implicit none
 
     class(concurrent_hashmap_integer_key), intent(inout) :: this
@@ -184,7 +184,7 @@ contains
     if (c_associated(this%gc_function)) then
       i = 0
       do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
-        call run_gc(this%gc_function, generic_c_pointer)
+        call concurrent_int_run_gc(this%gc_function, generic_c_pointer)
       end do
     end if
 
@@ -193,22 +193,22 @@ contains
     call thread_destroy_mutex_pointer(this%mutex)
     this%mutex => null()
     this%mutex_c_ptr = c_null_ptr
-  end subroutine hashmap_free
+  end subroutine concurrent_int_hashmap_free
 
 
   !* Get the number of items in the hashmap.
-  function hashmap_count(this) result(count)
+  function concurrent_int_hashmap_count(this) result(count)
     implicit none
 
     class(concurrent_hashmap_integer_key), intent(in) :: this
     integer(c_int64_t) :: count
 
     count = internal_hashmap_count(this%map)
-  end function hashmap_count
+  end function concurrent_int_hashmap_count
 
 
   !* Clear the hashmap.
-  subroutine hashmap_clear(this)
+  subroutine concurrent_int_hashmap_clear(this)
     implicit none
 
     class(concurrent_hashmap_integer_key), intent(in) :: this
@@ -218,12 +218,12 @@ contains
     if (c_associated(this%gc_function)) then
       i = 0
       do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
-        call run_gc(this%gc_function, generic_c_pointer)
+        call concurrent_int_run_gc(this%gc_function, generic_c_pointer)
       end do
     end if
 
     call internal_hashmap_clear(this%map, logical(.true., kind = c_bool))
-  end subroutine hashmap_clear
+  end subroutine concurrent_int_hashmap_clear
 
 
   !* Allows you to iterate through each element in the hashmap by direct pointer.
@@ -231,7 +231,7 @@ contains
   !*
   !* Your iterator_index must start at 0, or else it's UB.
   !* DO NOT delete elements as you iterate.
-  function hashmap_iterate(this, iterator_index, generic_pointer) result(has_item)
+  function concurrent_int_hashmap_iterate(this, iterator_index, generic_pointer) result(has_item)
     implicit none
 
     class(concurrent_hashmap_integer_key), intent(in) :: this
@@ -251,7 +251,7 @@ contains
     call c_f_pointer(raw_c_pointer, element_pointer)
 
     generic_pointer => element_pointer%data
-  end function hashmap_iterate
+  end function concurrent_int_hashmap_iterate
 
 
   !* Allows you to iterate through each element in the hashmap by key and direct pointer.
@@ -261,7 +261,7 @@ contains
   !*
   !* Your iterator_index must start at 0, or else it's UB.
   !* DO NOT delete elements as you iterate.
-  function hashmap_iterate_kv(this, iterator_index, key_pointer, generic_pointer) result(has_item)
+  function concurrent_int_hashmap_iterate_kv(this, iterator_index, key_pointer, generic_pointer) result(has_item)
     implicit none
 
     class(concurrent_hashmap_integer_key), intent(in) :: this
@@ -283,13 +283,13 @@ contains
 
     key_pointer => element_pointer%key
     generic_pointer => element_pointer%data
-  end function hashmap_iterate_kv
+  end function concurrent_int_hashmap_iterate_kv
 
 
 !! INTRINSIC HASHMAP FUNCTIONS. ===========================================================================
 
 
-  recursive function hashing_function(item_pointer, seed_0, seed_1) result(hash) bind(c)
+  recursive function concurrent_int_hashing_function(item_pointer, seed_0, seed_1) result(hash) bind(c)
     implicit none
 
     type(c_ptr), intent(in), value :: item_pointer
@@ -312,10 +312,10 @@ contains
     ! print*,"key: ",element_pointer%key
     hash = element_pointer%key
     ! print*,"hash:", hash
-  end function hashing_function
+  end function concurrent_int_hashing_function
 
 
-  recursive function compare_function(a, b, udata) result(failed) bind(c)
+  recursive function concurrent_int_compare_function(a, b, udata) result(failed) bind(c)
     use, intrinsic :: iso_c_binding
     implicit none
 
@@ -354,11 +354,11 @@ contains
     end if
 
     failed = .false.
-  end function compare_function
+  end function concurrent_int_compare_function
 
 
   !* Re-map the function pointer into the Fortran intrinsic behavior.
-  subroutine run_gc(c_function_pointer, raw_c_element)
+  subroutine concurrent_int_run_gc(c_function_pointer, raw_c_element)
     implicit none
 
     type(c_funptr), intent(in), value :: c_function_pointer
@@ -371,29 +371,29 @@ contains
     call c_f_pointer(raw_c_element, element_pointer)
 
     call func(element_pointer)
-  end subroutine run_gc
+  end subroutine concurrent_int_run_gc
 
 
   !* Lock the hashmap mutex.
-  subroutine hashmap_lock(this)
+  subroutine concurrent_int_hashmap_lock(this)
     implicit none
 
     class(concurrent_hashmap_integer_key), intent(inout) :: this
     integer(c_int) :: status
 
     status = thread_write_lock(this%mutex_c_ptr)
-  end subroutine hashmap_lock
+  end subroutine concurrent_int_hashmap_lock
 
 
   !* Unlock the hashmap mutex.
-  subroutine hashmap_unlock(this)
+  subroutine concurrent_int_hashmap_unlock(this)
     implicit none
 
     class(concurrent_hashmap_integer_key), intent(inout) :: this
     integer(c_int) :: status
 
     status = thread_unlock_lock(this%mutex_c_ptr)
-  end subroutine hashmap_unlock
+  end subroutine concurrent_int_hashmap_unlock
 
 
 end module concurrent_hashmap_int
