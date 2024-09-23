@@ -28,7 +28,7 @@ module hashmap_str
     procedure :: delete => str_hashmap_delete
     ! procedure :: free => str_hashmap_free
     procedure :: count => str_hashmap_count
-    ! procedure :: is_empty => str_hashmap_is_empty
+    procedure :: is_empty => str_hashmap_is_empty
     ! procedure :: clear => str_hashmap_clear
     ! procedure :: iterate => str_hashmap_iterate
     ! procedure :: iterate_kv => str_hashmap_iterate_kv
@@ -203,41 +203,41 @@ contains
   end function str_hashmap_count
 
 
-!   !* Check if a hashmap is empty.
-!   function str_hashmap_is_empty(this) result(is_empty)
-!     implicit none
+  !* Check if a hashmap is empty.
+  function str_hashmap_is_empty(this) result(is_empty)
+    implicit none
 
-!     class(hashmap_string_key), intent(in) :: this
-!     logical(c_bool) :: is_empty
+    class(hashmap_string_key), intent(in) :: this
+    logical(c_bool) :: is_empty
 
-!     is_empty = (this%count() == 0)
-!   end function str_hashmap_is_empty
-
-
-!   !* Clear the hashmap.
-!   subroutine str_hashmap_clear(this)
-!     implicit none
-
-!     class(hashmap_string_key), intent(in) :: this
-!     integer(c_int64_t) :: i
-!     type(c_ptr) :: generic_c_pointer
+    is_empty = (this%count() == 0)
+  end function str_hashmap_is_empty
 
 
-!     i = 0
+  ! !* Clear the hashmap.
+  ! subroutine str_hashmap_clear(this)
+  !   implicit none
 
-!     do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
+  !   class(hashmap_string_key), intent(in) :: this
+  !   integer(c_int64_t) :: i
+  !   type(c_ptr) :: generic_c_pointer
 
-!       ! Call the GC function.
-!       if (c_associated(this%gc_function)) then
-!         call str_run_gc(this%gc_function, generic_c_pointer)
-!       end if
 
-!       ! Free the old string key pointer.
-!       call str_free_string_key(generic_c_pointer)
-!     end do
+  !   i = 0
 
-!     call internal_hashmap_clear(this%map, logical(.true., kind = c_bool))
-!   end subroutine str_hashmap_clear
+  !   do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
+
+  !     ! Call the GC function.
+  !     if (c_associated(this%gc_function)) then
+  !       call str_run_gc(this%gc_function, generic_c_pointer)
+  !     end if
+
+  !     ! Free the old string key pointer.
+  !     call str_free_string_key(generic_c_pointer)
+  !   end do
+
+  !   call internal_hashmap_clear(this%map, logical(.true., kind = c_bool))
+  ! end subroutine str_hashmap_clear
 
 
 !   !* Allows you to iterate through each element in the hashmap by direct pointer.
