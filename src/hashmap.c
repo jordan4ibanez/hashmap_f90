@@ -374,7 +374,7 @@ static void build_int_header(header *header_element, const int64_t key_i)
  */
 static bool resize(struct hashmap *map, size_t new_cap)
 {
-    struct hashmap *map2 = hashmap_new(map->elsize, new_cap, map->hash, map->compare, map->elfree);
+    struct hashmap *map2 = hashmap_new(map->elsize, new_cap, map->hash, map->elfree);
 
     if (!map2)
     {
@@ -503,8 +503,7 @@ const void *hashmap_set_internal(struct hashmap *map, const header *header_eleme
             return NULL;
         }
         bitem = bucket_item(bucket);
-        if (entry->hash == bucket->hash && (!map->compare ||
-                                            map->compare(eitem, bitem) == 0))
+        if (entry->hash == bucket->hash && (compare_function(eitem, bitem) == 0))
         {
             memcpy(map->spare, bitem, map->elsize);
             memcpy(bitem, eitem, map->elsize);
