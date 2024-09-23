@@ -54,6 +54,17 @@ const void *hashmap_set_with_hash(struct hashmap *map, const void *item, uint64_
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power);
 void hashmap_set_load_factor(struct hashmap *map, double load_factor);
 
+// Element is a piece of raw data that buckets contain.
+// Memory layout:
+// [key byte width][key][fortran data]
+struct element
+{
+    // Allows hyper generic keys for each element.
+    // 4 bytes.
+    uint32_t data_width;
+};
+
+// Bucker is a container for elements.
 struct bucket
 {
     uint64_t hash : 48;
