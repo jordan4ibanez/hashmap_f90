@@ -1,6 +1,8 @@
 // Copyright 2020 Joshua J Baker. All rights reserved.
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
+//
+// Reworked into this monstrosity by jordan4ibanez.
 
 #include <stdio.h>
 #include <string.h>
@@ -19,14 +21,6 @@
 static void *(*__malloc)(size_t) = NULL;
 static void *(*__realloc)(void *, size_t) = NULL;
 static void (*__free)(void *) = NULL;
-
-// hashmap_set_allocator allows for configuring a custom allocator for
-// all hashmap library operations. This function, if needed, should be called
-// only once at startup and a prior to calling hashmap_new().
-void hashmap_set_allocator(void *(*malloc)(size_t), void (*free)(void*)) {
-    __malloc = malloc;
-    __free = free;
-}
 
 struct bucket {
     uint64_t hash:48;
