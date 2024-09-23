@@ -62,12 +62,13 @@ program prototype
 
   ! z = 0
 
-
-
   !* Create the hashmap.
   map = new_hashmap_string_key(sizeof(10))
 
   call map%set("hi", 10)
+
+  
+
 
   ! ! print*,"stage 1"
   ! do i = 1+z,5000+z
