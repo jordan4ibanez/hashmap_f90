@@ -197,6 +197,7 @@ struct hashmap *hashmap_new(
     {
         bucketsz++;
     }
+    
     // hashmap + spare + edata
     size_t size = sizeof(struct hashmap) + bucketsz * 2;
     struct hashmap *map = malloc(size);
@@ -272,6 +273,7 @@ void hashmap_clear(struct hashmap *map, bool update_cap)
     map->shrinkat = map->nbuckets * SHRINK_AT;
 }
 
+// Returns success.
 static bool resize(struct hashmap *map, size_t new_cap)
 {
     struct hashmap *map2 = hashmap_new_with_allocator(map->elsize, new_cap, map->hash,
