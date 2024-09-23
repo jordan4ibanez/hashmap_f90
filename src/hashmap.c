@@ -172,20 +172,22 @@ static uint64_t get_hash(struct hashmap *map, const void *key)
     return clip_hash(map->hash(key));
 }
 
-// hashmap_new returns a new hash map.
-// Param `elsize` is the size of each element in the tree. Every element that
-// is inserted, deleted, or retrieved will be this size.
-// Param `cap` is the default lower capacity of the hashmap. Setting this to
-// zero will default to 16.
-// Param `hash` is a function that generates a hash value for an item. It's
-// important that you provide a good hash function, otherwise it will perform
-// poorly or be vulnerable to Denial-of-service attacks. This implementation
-// comes with two helper functions `hashmap_sip()` and `hashmap_murmur()`.
-// Param `compare` is a function that compares items in the tree. See the
-// qsort stdlib function for an example of how this function works.
-// The hashmap must be freed with hashmap_free().
-// Param `elfree` is a function that frees a specific item. This should be NULL
-// unless you're storing some kind of reference data in the hash.
+/**
+ * hashmap_new returns a new hash map.
+ * Param `elsize` is the size of each element in the tree. Every element that
+ * is inserted, deleted, or retrieved will be this size.
+ * Param `cap` is the default lower capacity of the hashmap. Setting this to
+ * zero will default to 16.
+ * Param `hash` is a function that generates a hash value for an item. It's
+ * important that you provide a good hash function, otherwise it will perform
+ * poorly or be vulnerable to Denial-of-service attacks. This implementation
+ * comes with two helper functions `hashmap_sip()` and `hashmap_murmur()`.
+ * Param `compare` is a function that compares items in the tree. See the
+ * qsort stdlib function for an example of how this function works.
+ * The hashmap must be freed with hashmap_free().
+ * Param `elfree` is a function that frees a specific item. This should be NULL
+ * unless you're storing some kind of reference data in the hash.
+ */
 struct hashmap *hashmap_new(
     size_t el_only_size, size_t cap,
     uint64_t (*hash)(const void *item),
@@ -264,12 +266,14 @@ static void free_elements(struct hashmap *map)
     }
 }
 
-// hashmap_clear quickly clears the map.
-// Every item is called with the element-freeing function given in hashmap_new,
-// if present, to free any data referenced in the elements of the hashmap.
-// When the update_cap is provided, the map's capacity will be updated to match
-// the currently number of allocated buckets. This is an optimization to ensure
-// that this operation does not perform any allocations.
+/**
+ * hashmap_clear quickly clears the map.
+ * Every item is called with the element-freeing function given in hashmap_new,
+ * if present, to free any data referenced in the elements of the hashmap.
+ * When the update_cap is provided, the map's capacity will be updated to match
+ * the currently number of allocated buckets. This is an optimization to ensure
+ * that this operation does not perform any allocations.
+ */
 void hashmap_clear(struct hashmap *map, bool update_cap)
 {
     map->count = 0;
@@ -294,7 +298,9 @@ void hashmap_clear(struct hashmap *map, bool update_cap)
     map->shrinkat = map->nbuckets * SHRINK_AT;
 }
 
-// Returns success.
+/**
+ * Returns success.
+ */
 static bool resize(struct hashmap *map, size_t new_cap)
 {
     struct hashmap *map2 = hashmap_new(map->elsize, new_cap, map->hash, map->compare, map->elfree);
