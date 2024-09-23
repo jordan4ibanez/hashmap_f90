@@ -87,10 +87,6 @@ contains
     if (c_associated(this%gc_function)) then
       call str_run_gc(this%gc_function, old_data_c_ptr)
     end if
-
-    ! Clean up the old string key.
-    call c_f_pointer(old_data_c_ptr, old_data)
-    deallocate(old_data%key)
   end subroutine str_hashmap_set
 
 
