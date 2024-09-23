@@ -132,7 +132,7 @@ int compare_function(const void *a, const void *b)
         }
 
         // Then we can just compare the bytes directly.
-        return strncmp(&head_a->key_s, &head_b->key_s, head_a->string_length);
+        return strncmp((const char *)&head_a->key_s, (const char *)&head_b->key_s, head_a->string_length);
     }
     else
     {
