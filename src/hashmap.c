@@ -692,7 +692,10 @@ size_t hashmap_count(struct hashmap *map)
 void hashmap_free(struct hashmap *map)
 {
     if (!map)
+    {
         return;
+    }
+
     free_elements(map);
     free(map->buckets);
     free(map);
