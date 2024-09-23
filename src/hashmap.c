@@ -48,7 +48,8 @@ const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t k
 const void *hashmap_get_int_key(struct hashmap *map, const int64_t key_i);
 const void *hashmap_get_internal(struct hashmap *map, const header *header_element);
 
-const void *hashmap_delete(struct hashmap *map, const void *item);
+const void *hashmap_delete_internal(struct hashmap *map, const void *item);
+
 const void *hashmap_probe(struct hashmap *map, uint64_t position);
 bool hashmap_scan(struct hashmap *map, bool (*iter)(const void *item));
 bool hashmap_iter(struct hashmap *map, size_t *i, void **item);
@@ -572,7 +573,7 @@ const void *hashmap_probe(struct hashmap *map, uint64_t position)
 // will not be called.
 // hashmap_delete removes an item from the hash map and returns it. If the
 // item is not found then NULL is returned.
-const void *hashmap_delete(struct hashmap *map, const void *key)
+const void *hashmap_delete_internal(struct hashmap *map, const void *key)
 {
     uint64_t hash = get_hash(map, key);
     hash = clip_hash(hash);
