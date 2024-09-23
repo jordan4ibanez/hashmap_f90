@@ -307,7 +307,6 @@ struct hashmap *hashmap_new(size_t el_only_size, size_t cap)
 void hashmap_clear(struct hashmap *map, bool update_cap)
 {
     map->count = 0;
-    free_elements(map);
     if (update_cap)
     {
         map->cap = map->nbuckets;
@@ -675,8 +674,6 @@ void hashmap_free(struct hashmap *map)
     {
         return;
     }
-
-    free_elements(map);
     free(map->buckets);
     free(map);
 }
