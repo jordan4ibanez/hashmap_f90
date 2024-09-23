@@ -57,18 +57,21 @@ program prototype
   type(hashmap_string_key) :: map
   integer(c_int), pointer :: gotten_data
   type(c_ptr) :: raw_ptr
+  integer(c_int) :: i
 
   ! z = 0
 
   !* Create the hashmap.
   map = new_hashmap_string_key(sizeof(10))
 
-  call map%set("hi", 10)
+  do i = 1,100
+    call map%set("hi", i)
 
-  if (map%get("hi", raw_ptr)) then
-    call c_f_pointer(raw_ptr, gotten_data)
-    print*,gotten_data
-  end if
+    if (map%get("hi", raw_ptr)) then
+      call c_f_pointer(raw_ptr, gotten_data)
+      print*,gotten_data
+    end if
+  end do
 
 
 
