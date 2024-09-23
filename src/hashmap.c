@@ -44,7 +44,7 @@ const void *hashmap_set_str_key(struct hashmap *, const char *key_s, size_t stri
 const void *hashmap_set_int_key(struct hashmap *, int64_t key_i_fort, const void *raw_item);
 const void *hashmap_set_internal(struct hashmap *map, const header *header_element, const void *raw_item);
 
-const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t key_len);
+const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t string_length);
 const void *hashmap_get_int_key(struct hashmap *map, const int64_t key_i);
 const void *hashmap_get_internal(struct hashmap *map, const header *header_element);
 
@@ -566,6 +566,28 @@ const void *hashmap_probe(struct hashmap *map, uint64_t position)
         return NULL;
     }
     return bucket_item(bucket);
+}
+
+/**
+ * Delete an element in a string key hashmap.
+ */
+const void *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_t string_length)
+{
+    header header_element;
+    build_string_header(&header_element, key_s, string_length);
+
+    return hashmap_delete_internal(map, &header_element);
+}
+
+/**
+ * Delete an element in a string key hashmap.
+ */
+const void *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i)
+{
+    header header_element;
+    build_int_header(&header_element, (uint64_t)key_i);
+
+    return hashmap_delete_internal(map, &header_element);
 }
 
 /**
