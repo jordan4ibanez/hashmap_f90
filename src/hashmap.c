@@ -32,7 +32,6 @@ typedef struct bucket bucket;
 struct hashmap *hashmap_new(
     size_t elsize,
     size_t cap,
-    uint64_t (*hash)(const void *item),
     void (*elfree)(void *item));
 
 void hashmap_free(struct hashmap *map);
