@@ -371,7 +371,8 @@ const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t s
 
     // Jump over the entire string and create a null terminator.
     //! this might crash. Gonna need a good ol' testing.
-    memcpy(item + 2 + string_length, '\0', 1);
+    char null_term = '\0';
+    memcpy(item + 2 + string_length, &null_term, 1);
 
     // Now jump over the entire header and copy the stack element
     memcpy(item + HEADER_SIZE, raw_item, map->raw_el_size);
