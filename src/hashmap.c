@@ -39,7 +39,7 @@ const void *hashmap_delete(struct hashmap *map, const void *item);
 const void *hashmap_probe(struct hashmap *map, uint64_t position);
 bool hashmap_scan(struct hashmap *map, bool (*iter)(const void *item));
 bool hashmap_iter(struct hashmap *map, size_t *i, void **item);
-const void *hashmap_get_with_hash(struct hashmap *map, const void *key, uint64_t hash);
+
 const void *hashmap_delete_with_hash(struct hashmap *map, const void *key, uint64_t hash);
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power);
 void hashmap_set_load_factor(struct hashmap *map, double load_factor);
@@ -381,11 +381,14 @@ const void *hashmap_set(struct hashmap *map, const void *item)
 
 // hashmap_get_with_hash works like hashmap_get but you provide your
 // own hash. The 'hash' callback provided to the hashmap_new function
-// will not be called
-const void *hashmap_get_with_hash(struct hashmap *map, const void *key,
-                                  uint64_t hash)
+// will not be called.
+// hashmap_get returns the item based on the provided key. If the item is not
+// found then NULL is returned.
+const void *hashmap_get(struct hashmap *map, const void *key)
 {
+    uint64_t hash = get_hash(map, key);
     hash = clip_hash(hash);
+
     size_t i = hash & map->mask;
     while (1)
     {
@@ -402,13 +405,6 @@ const void *hashmap_get_with_hash(struct hashmap *map, const void *key,
         }
         i = (i + 1) & map->mask;
     }
-}
-
-// hashmap_get returns the item based on the provided key. If the item is not
-// found then NULL is returned.
-const void *hashmap_get(struct hashmap *map, const void *key)
-{
-    return hashmap_get_with_hash(map, key, get_hash(map, key));
 }
 
 // hashmap_probe returns the item in the bucket at position or NULL if an item
