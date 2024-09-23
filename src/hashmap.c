@@ -143,7 +143,7 @@ int compare_function(const void *a, const void *b)
 }
 
 /**
- * Hashes the header.
+ * Hashes the header key.
  */
 uint64_t hash_function(const void *a)
 {
