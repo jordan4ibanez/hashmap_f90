@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
-#include "hashmap.h"
+#include <stdbool.h>
 
 // 60%
 #define GROW_AT 0.60
