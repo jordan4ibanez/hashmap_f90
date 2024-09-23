@@ -23,15 +23,15 @@ module hashmap_str
     type(c_funptr) :: gc_function = c_null_funptr
   contains
     procedure :: set => str_hashmap_set
-    procedure :: get => str_hashmap_get
-    procedure :: has_key => str_hashmap_has_key
-    procedure :: delete => str_hashmap_delete
-    procedure :: free => str_hashmap_free
-    procedure :: count => str_hashmap_count
-    procedure :: is_empty => str_hashmap_is_empty
-    procedure :: clear => str_hashmap_clear
-    procedure :: iterate => str_hashmap_iterate
-    procedure :: iterate_kv => str_hashmap_iterate_kv
+    ! procedure :: get => str_hashmap_get
+    ! procedure :: has_key => str_hashmap_has_key
+    ! procedure :: delete => str_hashmap_delete
+    ! procedure :: free => str_hashmap_free
+    ! procedure :: count => str_hashmap_count
+    ! procedure :: is_empty => str_hashmap_is_empty
+    ! procedure :: clear => str_hashmap_clear
+    ! procedure :: iterate => str_hashmap_iterate
+    ! procedure :: iterate_kv => str_hashmap_iterate_kv
   end type hashmap_string_key
 
 
