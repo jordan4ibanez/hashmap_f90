@@ -85,6 +85,7 @@ struct bucket
 // hashmap is an open addressed hash map using robinhood hashing.
 struct hashmap
 {
+    size_t raw_el_size;
     size_t elsize;
     size_t cap;
     uint64_t (*hash)(const void *item);
@@ -225,6 +226,7 @@ struct hashmap *hashmap_new(
 
     memset(map, 0, sizeof(struct hashmap));
 
+    map->raw_el_size = raw_el_size;
     map->elsize = elsize;
     map->bucketsz = bucketsz;
     map->hash = hash;
