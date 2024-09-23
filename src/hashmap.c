@@ -226,7 +226,7 @@ struct hashmap *hashmap_new(
 
     memset(map, 0, sizeof(struct hashmap));
 
-    map->raw_el_size = raw_el_size;
+    map->raw_el_size = el_only_size;
     map->elsize = elsize;
     map->bucketsz = bucketsz;
     map->hash = hash;
