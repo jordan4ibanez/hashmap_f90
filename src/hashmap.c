@@ -423,11 +423,14 @@ const void *hashmap_probe(struct hashmap *map, uint64_t position)
 
 // hashmap_delete_with_hash works like hashmap_delete but you provide your
 // own hash. The 'hash' callback provided to the hashmap_new function
-// will not be called
-const void *hashmap_delete_with_hash(struct hashmap *map, const void *key,
-                                     uint64_t hash)
+// will not be called.
+// hashmap_delete removes an item from the hash map and returns it. If the
+// item is not found then NULL is returned.
+const void *hashmap_delete(struct hashmap *map, const void *key)
 {
+    uint64_t hash = get_hash(map, key);
     hash = clip_hash(hash);
+
     map->oom = false;
     size_t i = hash & map->mask;
     while (1)
@@ -468,13 +471,6 @@ const void *hashmap_delete_with_hash(struct hashmap *map, const void *key,
         }
         i = (i + 1) & map->mask;
     }
-}
-
-// hashmap_delete removes an item from the hash map and returns it. If the
-// item is not found then NULL is returned.
-const void *hashmap_delete(struct hashmap *map, const void *key)
-{
-    return hashmap_delete_with_hash(map, key, get_hash(map, key));
 }
 
 // hashmap_count returns the number of items in the hash map.
