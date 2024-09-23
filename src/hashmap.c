@@ -512,9 +512,9 @@ const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t k
  * hashmap_get returns the item based on the provided key. If the item is not
  * found then NULL is returned.
  */
-const void *hashmap_get_internal(struct hashmap *map, const void *key)
+const void *hashmap_get_internal(struct hashmap *map, const header *header_element)
 {
-    uint64_t hash = get_hash(map, key);
+    uint64_t hash = get_hash(map, header_element);
     hash = clip_hash(hash);
 
     size_t i = hash & map->mask;
