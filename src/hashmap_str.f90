@@ -23,7 +23,7 @@ module hashmap_str
     type(c_funptr) :: gc_function = c_null_funptr
   contains
     procedure :: set => str_hashmap_set
-    ! procedure :: get => str_hashmap_get
+    procedure :: get => str_hashmap_get
     ! procedure :: has_key => str_hashmap_has_key
     ! procedure :: delete => str_hashmap_delete
     ! procedure :: free => str_hashmap_free
@@ -55,18 +55,18 @@ contains
 
 
   !* Set a value in the hashmap with a string key.
-  subroutine str_hashmap_set(this, key, raw_item)
+  subroutine str_hashmap_set(this, key_s, raw_item)
     implicit none
 
     class(hashmap_string_key), intent(inout) :: this
-    character(len = *, kind = c_char), intent(in) :: key
+    character(len = *, kind = c_char), intent(in) :: key_s
     class(*), intent(in), target :: raw_item
     integer(c_size_t) :: key_length
     type(c_ptr) :: black_magic
     type(c_ptr) :: old_data_c_ptr
 
 
-    key_length = len(key)
+    key_length = len(key_s)
 
     !? Safety check.
     if (key_length == 0) then
@@ -76,7 +76,7 @@ contains
     black_magic = transfer(loc(raw_item), black_magic)
 
     !? Internally calls: memcpy.
-    old_data_c_ptr = internal_hashmap_set_str_key(this%map, key, key_length, black_magic)
+    old_data_c_ptr = internal_hashmap_set_str_key(this%map, key_s, key_length, black_magic)
 
     ! The old data was a null pointer. We don't have to do anything.
     if (.not. c_associated(old_data_c_ptr)) then
@@ -90,46 +90,30 @@ contains
   end subroutine str_hashmap_set
 
 
-!   !* Get a value in the hashmap with a string key.
-!   function str_hashmap_get(this, key, generic_pointer) result(is_some)
-!     implicit none
+  !* Get a value in the hashmap with a string key.
+  function str_hashmap_get(this, key_s, gotten_c_ptr) result(is_some)
+    implicit none
 
-!     class(hashmap_string_key), intent(inout) :: this
-!     character(len = *, kind = c_char), intent(in) :: key
-!     class(*), intent(inout), pointer :: generic_pointer
-!     logical(c_bool) :: is_some
-!     type(c_ptr) :: data_c_ptr
-!     integer(c_int) :: key_length
-!     type(element_string_key), target :: element_key
-!     type(element_string_key), pointer :: element_pointer
+    class(hashmap_string_key), intent(inout) :: this
+    character(len = *, kind = c_char), intent(in) :: key_s
+    type(c_ptr), intent(inout) :: gotten_c_ptr
+    logical(c_bool) :: is_some
+    integer(c_size_t) :: key_length
 
-!     is_some = .false.
+    is_some = .false.
 
-!     key_length = len(key)
+    key_length = len(key_s)
 
-!     !* ALLOCATE.
-!     allocate(character(len = key_length, kind = c_char) :: element_key%key)
+    !? Safety check.
+    if (key_length == 0) then
+      error stop "[Hashmap] Error: Key cannot be NULL."
+    end if
 
-!     element_key%key = key
-!     element_key%key_length = key_length
+    !? Grabs a C pointer or NULL upon failure.
+    gotten_c_ptr = internal_hashmap_get_str_key(this%map, key_s, key_length )
 
-!     !? Grabs a C pointer or NULL upon failure.
-!     data_c_ptr = internal_hashmap_get(this%map, c_loc(element_key))
-
-!     !* DEALLOCATE.
-!     deallocate(element_key%key)
-
-!     ! It's a null pointer.
-!     if (.not. c_associated(data_c_ptr)) then
-!       return
-!     end if
-
-!     !* We can finally point STRAIGHT AT IT!
-!     call c_f_pointer(data_c_ptr, element_pointer)
-!     generic_pointer => element_pointer%data
-
-!     is_some = .true.
-!   end function str_hashmap_get
+    is_some = c_associated(gotten_c_ptr)
+  end function str_hashmap_get
 
 
 !   !* Check if a hashmap has a key.
