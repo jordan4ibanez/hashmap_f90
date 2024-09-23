@@ -380,60 +380,6 @@ contains
 !   end function str_hashing_function
 
 
-!   recursive function str_compare_function(a, b, udata) result(failed) bind(c)
-!     use, intrinsic :: iso_c_binding
-!     implicit none
-
-!     type(c_ptr), intent(in), value :: a, b, udata
-!     logical(c_bool) :: failed
-!     type(element_string_key), pointer :: element_pointer_a, element_pointer_b
-
-!     !* A transfer.
-
-!     !? Safety check.
-!     if (.not. c_associated(a)) then
-!       error stop "[Hashmap] FATAL ERROR: a is NULL."
-!     end if
-
-!     call c_f_pointer(a, element_pointer_a)
-
-!     !? Safety check.
-!     if (.not. associated(element_pointer_a%key)) then
-!       error stop "[Hashmap] FATAL ERROR: a key is NULL."
-!     end if
-
-!     !* B transfer.
-
-!     !? Safety check.
-!     if (.not. c_associated(b)) then
-!       error stop "[Hashmap] FATAL ERROR: b is NULL."
-!     end if
-
-!     call c_f_pointer(a, element_pointer_b)
-
-!     !? Safety check.
-!     if (.not. associated(element_pointer_b%key)) then
-!       error stop "[Hashmap] FATAL ERROR: b key is NULL."
-!     end if
-
-!     !* Now check.
-!     failed = .true.
-
-!     if (element_pointer_a%key_length /= element_pointer_b%key_length) then
-!       return
-!     end if
-
-!     if (element_pointer_a%key /= element_pointer_b%key) then
-!       return
-!     end if
-
-!     if (.false.) then
-!       print*,udata
-!     end if
-
-!     failed = .false.
-!   end function str_compare_function
-
 
   !* Re-map the function pointer into the Fortran intrinsic behavior.
   subroutine str_run_gc(c_function_pointer, raw_c_element)
