@@ -1,12 +1,11 @@
 module my_prototype_module
   use, intrinsic :: iso_c_binding
-  use :: hashmap_types
   implicit none
 
 
   !* Our cool type. 8)
   type :: cool
-    integer(c_int), pointer :: i => null()
+    integer(c_int) :: i = 0
   end type cool
 
 
@@ -28,18 +27,22 @@ contains
   end function int_to_string
 
 
-  subroutine example_gc_function(el)
-    implicit none
+  ! subroutine example_gc_function(raw_c_element)
+  !   implicit none
 
-    class(*), pointer :: el
+  !   type(c_ptr), intent(in), value :: raw_c_element
 
-    select type (el)
-     type is (cool)
-      !* We free the Fortran memory here. :)
-      deallocate(el%i)
-      deallocate(el)
-    end select
-  end subroutine example_gc_function
+  !   if (.not. c_associated(raw_c_element)) then
+      
+  !   end if
+
+  !   select type (el)
+  !    type is (cool)
+  !     !* We free the Fortran memory here. :)
+  !     deallocate(el%i)
+  !     deallocate(el)
+  !   end select
+  ! end subroutine example_gc_function
 
 
 end module my_prototype_module
