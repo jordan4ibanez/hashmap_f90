@@ -43,7 +43,7 @@ contains
     implicit none
 
     integer(c_size_t), intent(in), value :: element_size
-    procedure(gc_function_interface_string), optional :: optional_gc_function
+    procedure(gc_function_interface), optional :: optional_gc_function
     type(hashmap_string_key) :: h
 
     h%map = internal_hashmap_new(element_size, 0_8)
