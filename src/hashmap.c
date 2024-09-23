@@ -1,3 +1,6 @@
+// String length limit example:
+// "This is an example of how long your string key can be. If you don't think this is long enough then I think you might want to rethink your implementation. I still need to type something here :)"
+//
 // Copyright 2020 Joshua J Baker. All rights reserved.
 // Use of this source code is governed by an MIT-style
 // license that can be found in the LICENSE file.
@@ -45,6 +48,7 @@ void hashmap_set_load_factor(struct hashmap *map, double load_factor);
 // Element is a piece of raw data that buckets contain.
 // Memory layout:
 // [key byte width][key][fortran data]
+// Total: 208 bytes.
 typedef struct
 {
     // Allows hyper generic keys for each element.
@@ -52,12 +56,15 @@ typedef struct
     // 1 byte.
     bool is_string;
     // 1 byte.
-    // String limit: 253.
+    // String limit: 192.
     uint8_t data_width;
-    // 252 bytes.
-    char key_s[252];
+    // 192 bytes.
+    // Balanced for capacity and flexibility.
+    // If you don't think this is long enough, I left a comment at the top of this.
+    char key_s[192];
     // Then the integer key.
-
+    // 8 bytes.
+    uint64_t key_i;
 } element;
 
 int compare_function(const void *a, const void *b)
