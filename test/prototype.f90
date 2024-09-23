@@ -72,7 +72,15 @@ program prototype
       print*,gotten_data
     end if
 
+    if (.not. map%has_key("hi"//int_to_string(i))) then
+      print*,"FAILED"
+    end if
+
     call map%delete("hi"//int_to_string(i))
+
+    if (map%has_key("hi"//int_to_string(i))) then
+      print*,"FAILED"
+    end if
 
   end do
 
