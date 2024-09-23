@@ -37,7 +37,7 @@ void hashmap_clear(struct hashmap *map, bool update_cap);
 size_t hashmap_count(struct hashmap *map);
 bool hashmap_oom(struct hashmap *map);
 const void *hashmap_get(struct hashmap *map, const void *item);
-const void *hashmap_set(struct hashmap *map, const void *item);
+const void *hashmap_set_internal(struct hashmap *map, const void *item);
 const void *hashmap_delete(struct hashmap *map, const void *item);
 const void *hashmap_probe(struct hashmap *map, uint64_t position);
 bool hashmap_scan(struct hashmap *map, bool (*iter)(const void *item));
@@ -346,8 +346,10 @@ static bool resize(struct hashmap *map, size_t new_cap)
 // replaced then it is returned otherwise NULL is returned. This operation
 // may allocate memory. If the system is unable to allocate additional
 // memory then NULL is returned and hashmap_oom() returns true.
-const void *hashmap_set(struct hashmap *map, const void *item)
+//* Implementation note: I would keep raw_item on the stack in Fortran.
+const void *hashmap_set_internal(struct hashmap *map, const void *item)
 {
+
     uint64_t hash = get_hash(map, item);
     hash = clip_hash(hash);
 
