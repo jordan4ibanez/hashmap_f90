@@ -142,6 +142,13 @@ int compare_function(const void *a, const void *b)
     }
 }
 
+/**
+ * Hashes the header.
+ */
+uint64_t hash_function(const void *a)
+{
+}
+
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power)
 {
     // Limit the power to range: 1-16.
