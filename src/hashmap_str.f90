@@ -353,33 +353,6 @@ contains
 ! !! INTRINSIC HASHMAP FUNCTIONS. ===========================================================================
 
 
-!   recursive function str_hashing_function(item_pointer, seed_0, seed_1) result(hash) bind(c)
-!     implicit none
-
-!     type(c_ptr), intent(in), value :: item_pointer
-!     integer(c_int64_t), intent(in), value :: seed_0, seed_1
-!     integer(c_int64_t) :: hash
-!     type(element_string_key), pointer :: element_pointer
-
-!     !? Safety check.
-!     if (.not. c_associated(item_pointer)) then
-!       error stop "[Hashmap] FATAL ERROR: item_pointer is NULL."
-!     end if
-
-!     call c_f_pointer(item_pointer, element_pointer)
-
-
-!     !? Safety check.
-!     if (.not. associated(element_pointer%key)) then
-!       error stop "[Hashmap] FATAL ERROR: element_pointer key is NULL."
-!     end if
-
-!     ! print*,"key: ",element_pointer%key
-!     hash = hashmap_xxhash3(c_loc(element_pointer%key), int(element_pointer%key_length, c_int64_t), seed_0, seed_1)
-!     ! print*,"hash:", hash
-!   end function str_hashing_function
-
-
 
   !* Re-map the function pointer into the Fortran intrinsic behavior.
   subroutine str_run_gc(c_function_pointer, raw_c_element)
