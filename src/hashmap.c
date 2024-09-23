@@ -39,8 +39,6 @@ const void *hashmap_delete(struct hashmap *map, const void *item);
 const void *hashmap_probe(struct hashmap *map, uint64_t position);
 bool hashmap_scan(struct hashmap *map, bool (*iter)(const void *item));
 bool hashmap_iter(struct hashmap *map, size_t *i, void **item);
-
-const void *hashmap_delete_with_hash(struct hashmap *map, const void *key, uint64_t hash);
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power);
 void hashmap_set_load_factor(struct hashmap *map, double load_factor);
 
