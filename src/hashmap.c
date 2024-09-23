@@ -11,8 +11,10 @@
 #include <stddef.h>
 #include "hashmap.h"
 
-#define GROW_AT 0.60   /* 60% */
-#define SHRINK_AT 0.10 /* 10% */
+//* 60%
+#define GROW_AT 0.60
+//* 10%
+#define SHRINK_AT 0.10
 
 #ifndef HASHMAP_LOAD_FACTOR
 #define HASHMAP_LOAD_FACTOR GROW_AT
