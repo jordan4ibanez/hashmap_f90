@@ -247,7 +247,7 @@ void hashmap_clear(struct hashmap *map, bool update_cap)
     map->shrinkat = map->nbuckets * SHRINK_AT;
 }
 
-static bool resize0(struct hashmap *map, size_t new_cap)
+static bool resize(struct hashmap *map, size_t new_cap)
 {
     struct hashmap *map2 = hashmap_new_with_allocator(map->elsize, new_cap, map->hash,
                                                       map->compare, map->elfree);
@@ -288,11 +288,6 @@ static bool resize0(struct hashmap *map, size_t new_cap)
     map->shrinkat = map2->shrinkat;
     free(map2);
     return true;
-}
-
-static bool resize(struct hashmap *map, size_t new_cap)
-{
-    return resize0(map, new_cap);
 }
 
 // hashmap_set_with_hash works like hashmap_set but you provide your
