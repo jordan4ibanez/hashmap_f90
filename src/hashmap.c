@@ -343,6 +343,8 @@ static bool resize(struct hashmap *map, size_t new_cap)
 
 /**
  * Set the item with a string key.
+ *
+ * I highly recommend you only use stack elements for the raw_pointer.
  */
 const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t string_length, const void *raw_item)
 {
