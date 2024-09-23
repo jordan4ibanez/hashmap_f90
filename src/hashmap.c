@@ -59,6 +59,10 @@ struct element
     uint8_t data_width;
 };
 
+int compare_function(const void *a, const void *b)
+{
+}
+
 // Bucker is a container for elements.
 struct bucket
 {
