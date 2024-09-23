@@ -358,26 +358,23 @@ static bool resize(struct hashmap *map, size_t new_cap)
  */
 const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t string_length, const void *raw_item)
 {
-    void *item = malloc(sizeof(map->elsize));
+    header header_element;
 
     //! The string length will be checked in fortran.
 
     // Set header parameters.
-    ((header *)item)->is_string = true;
-    ((header *)item)->string_length = string_length;
+    header_element.is_string = true;
+    header_element.string_length = string_length;
 
     // Jump over the first two bytes and memcpy the data into the key.
-    memcpy(item + 2, key_s, string_length);
+    memcpy(&header_element + 2, key_s, string_length);
 
     // Jump over the entire string and create a null terminator.
     //! this might crash. Gonna need a good ol' testing.
     char null_term = '\0';
-    memcpy(item + 2 + string_length, &null_term, 1);
+    memcpy(&header_element + 2 + string_length, &null_term, 1);
 
-    // Now jump over the entire header and copy the stack element
-    memcpy(item + HEADER_SIZE, raw_item, map->raw_el_size);
-
-    return hashmap_set_internal(map, item);
+    return hashmap_set_internal(map, &header_element, raw_item);
 }
 
 /**
