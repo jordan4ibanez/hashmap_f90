@@ -25,6 +25,8 @@
 #endif
 
 // Forward declaration.
+typedef struct header header;
+
 struct hashmap *hashmap_new(
     size_t elsize,
     size_t cap,
