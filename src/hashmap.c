@@ -345,8 +345,8 @@ static void build_string_header(header *header_element, const char *key_s, size_
 
     // Jump over the entire string and create a null terminator.
     //! this might crash. Gonna need a good ol' testing.
-    char null_term = '\0';
-    memcpy(&header_element + 2 + string_length, &null_term, 1);
+    // char null_term = '\0';
+    // memcpy(&header_element + 2 + string_length, &null_term, 1);
 }
 
 /**
