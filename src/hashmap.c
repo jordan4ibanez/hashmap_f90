@@ -400,7 +400,7 @@ const void *hashmap_set_int_key(struct hashmap *map, int64_t key_i_fort, const v
 
 /**
  *! THIS IS INTERNAL ONLY.
- * 
+ *
  * hashmap_set_with_hash works like hashmap_set but you provide your
  * own hash. The 'hash' callback provided to the hashmap_new function
  * will not be called.
@@ -468,11 +468,13 @@ const void *hashmap_set_internal(struct hashmap *map, const void *item)
     }
 }
 
-// hashmap_get_with_hash works like hashmap_get but you provide your
-// own hash. The 'hash' callback provided to the hashmap_new function
-// will not be called.
-// hashmap_get returns the item based on the provided key. If the item is not
-// found then NULL is returned.
+/**
+ * hashmap_get_with_hash works like hashmap_get but you provide your
+ * own hash. The 'hash' callback provided to the hashmap_new function
+ * will not be called.
+ * hashmap_get returns the item based on the provided key. If the item is not
+ * found then NULL is returned.
+ */
 const void *hashmap_get_internal(struct hashmap *map, const void *key)
 {
     uint64_t hash = get_hash(map, key);
