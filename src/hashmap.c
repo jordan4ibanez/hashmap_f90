@@ -67,6 +67,9 @@ typedef struct
     uint64_t key_i;
 } header;
 
+// Header size in bytes.
+const static size_t HEADER_SIZE = sizeof(header);
+
 int compare_function(const void *a, const void *b)
 {
     // This will take in 2 [ element | void data ] pointers.
