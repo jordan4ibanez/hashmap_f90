@@ -276,8 +276,8 @@ void hashmap_clear(struct hashmap *map, bool update_cap)
 // Returns success.
 static bool resize(struct hashmap *map, size_t new_cap)
 {
-    struct hashmap *map2 = hashmap_new_with_allocator(map->elsize, new_cap, map->hash,
-                                                      map->compare, map->elfree);
+    struct hashmap *map2 = hashmap_new(map->elsize, new_cap, map->hash, map->compare, map->elfree);
+
     if (!map2)
         return false;
     for (size_t i = 0; i < map->nbuckets; i++)
