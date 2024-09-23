@@ -48,13 +48,15 @@ module hashmap_bindings
     end function internal_hashmap_get_str_key
 
 
-!     function internal_hashmap_delete(map, key) result(void_pointer) bind(c, name = "hashmap_delete")
-!       use, intrinsic :: iso_c_binding
-!       implicit none
+    function internal_hashmap_delete_str_key(map, key_s, string_length) result(void_pointer) bind(c, name = "hashmap_delete_str_key")
+      use, intrinsic :: iso_c_binding
+      implicit none
 
-!       type(c_ptr), intent(in), value :: map, key
-!       type(c_ptr) :: void_pointer
-!     end function internal_hashmap_delete
+      type(c_ptr), intent(in), value :: map
+      character(len = 1, kind = c_char), intent(in) :: key_s
+      integer(c_size_t), intent(in), value :: string_length
+      type(c_ptr) :: void_pointer
+    end function internal_hashmap_delete_str_key
 
 
     subroutine internal_hashmap_clear(map, update_capacity) bind(c, name = "hashmap_clear")
