@@ -360,6 +360,8 @@ const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t s
 
     // Now jump over the entire header and copy the stack element
     memcpy(item + HEADER_SIZE, raw_item, map->raw_el_size);
+
+    return hashmap_set_internal(map, item);
 }
 
 // hashmap_set_with_hash works like hashmap_set but you provide your
