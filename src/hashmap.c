@@ -354,7 +354,7 @@ static bool resize(struct hashmap *map, size_t new_cap)
 /**
  * Set the item with a string key.
  *
- * I highly recommend you only use stack elements for the raw_item.
+ * I highly recommend you only use stack elements for the raw_item. (the item can contain Fortran/C pointers)
  */
 const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t string_length, const void *raw_item)
 {
@@ -380,7 +380,7 @@ const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t s
  *
  * Fortran does not have unsigned types (yet) so we're going to use a straight up cast.
  *
- * I highly recommend you only use stack elements for the raw_item.
+ * I highly recommend you only use stack elements for the raw_item. (the item can contain Fortran/C pointers)
  */
 const void *hashmap_set_int_key(struct hashmap *map, int64_t key_i_fort, const void *raw_item)
 {
