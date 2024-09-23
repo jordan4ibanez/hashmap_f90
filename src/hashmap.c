@@ -39,11 +39,14 @@ void hashmap_free(struct hashmap *map);
 void hashmap_clear(struct hashmap *map, bool update_cap);
 size_t hashmap_count(struct hashmap *map);
 bool hashmap_oom(struct hashmap *map);
-const void *hashmap_get_internal(struct hashmap *map, const header *header_element);
+
 const void *hashmap_set_str_key(struct hashmap *, const char *key_s, size_t string_length, const void *raw_item);
 const void *hashmap_set_int_key(struct hashmap *, int64_t key_i_fort, const void *raw_item);
-
 const void *hashmap_set_internal(struct hashmap *map, const header *header_element, const void *raw_item);
+
+const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t key_len);
+const void *hashmap_get_int_key(struct hashmap *map, const int64_t key_i);
+const void *hashmap_get_internal(struct hashmap *map, const header *header_element);
 
 const void *hashmap_delete(struct hashmap *map, const void *item);
 const void *hashmap_probe(struct hashmap *map, uint64_t position);
