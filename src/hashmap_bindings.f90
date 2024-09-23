@@ -17,14 +17,6 @@ module hashmap_bindings
     end function internal_hashmap_new
 
 
-    subroutine internal_hashmap_free(map) bind(c, name = "hashmap_free")
-      use, intrinsic :: iso_c_binding
-      implicit none
-
-      type(c_ptr), intent(in), value :: map
-    end subroutine internal_hashmap_free
-
-
     function internal_hashmap_count(map) result(count) bind(c, name = "hashmap_count")
       use, intrinsic :: iso_c_binding
       implicit none
@@ -63,13 +55,13 @@ module hashmap_bindings
 !     end function internal_hashmap_delete
 
 
-!     subroutine internal_hashmap_clear(map, update_capacity) bind(c, name = "hashmap_clear")
-!       use, intrinsic :: iso_c_binding
-!       implicit none
+    subroutine internal_hashmap_clear(map, update_capacity) bind(c, name = "hashmap_clear")
+      use, intrinsic :: iso_c_binding
+      implicit none
 
-!       type(c_ptr), intent(in), value :: map
-!       logical(c_bool), intent(in), value :: update_capacity
-!     end subroutine internal_hashmap_clear
+      type(c_ptr), intent(in), value :: map
+      logical(c_bool), intent(in), value :: update_capacity
+    end subroutine internal_hashmap_clear
 
 
 !     function internal_hashmap_iter(map, i, item) result(has_item) bind(c, name = "hashmap_iter")
