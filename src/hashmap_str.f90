@@ -27,7 +27,7 @@ module hashmap_str
     procedure :: has_key => str_hashmap_has_key
     procedure :: delete => str_hashmap_delete
     ! procedure :: free => str_hashmap_free
-    ! procedure :: count => str_hashmap_count
+    procedure :: count => str_hashmap_count
     ! procedure :: is_empty => str_hashmap_is_empty
     ! procedure :: clear => str_hashmap_clear
     ! procedure :: iterate => str_hashmap_iterate
@@ -192,15 +192,15 @@ contains
 !   end subroutine str_hashmap_free
 
 
-!   !* Get the number of items in the hashmap.
-!   function str_hashmap_count(this) result(count)
-!     implicit none
+  !* Get the number of items in the hashmap.
+  function str_hashmap_count(this) result(count)
+    implicit none
 
-!     class(hashmap_string_key), intent(in) :: this
-!     integer(c_int64_t) :: count
+    class(hashmap_string_key), intent(in) :: this
+    integer(c_int64_t) :: count
 
-!     count = internal_hashmap_count(this%map)
-!   end function str_hashmap_count
+    count = internal_hashmap_count(this%map)
+  end function str_hashmap_count
 
 
 !   !* Check if a hashmap is empty.
