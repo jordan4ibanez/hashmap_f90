@@ -48,7 +48,7 @@ const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t k
 const void *hashmap_get_int_key(struct hashmap *map, const int64_t key_i);
 const void *hashmap_get_internal(struct hashmap *map, const header *header_element);
 
-const void *hashmap_delete_internal(struct hashmap *map, const void *item);
+const void *hashmap_delete_internal(struct hashmap *map, const header *header_element);
 
 const void *hashmap_probe(struct hashmap *map, uint64_t position);
 bool hashmap_scan(struct hashmap *map, bool (*iter)(const void *item));
@@ -577,9 +577,9 @@ const void *hashmap_probe(struct hashmap *map, uint64_t position)
  * hashmap_delete removes an item from the hash map and returns it. If the
  * item is not found then NULL is returned.
  */
-const void *hashmap_delete_internal(struct hashmap *map, const void *key)
+const void *hashmap_delete_internal(struct hashmap *map, const header *header_element)
 {
-    uint64_t hash = get_hash(map, key);
+    uint64_t hash = get_hash(map, header_element);
     hash = clip_hash(hash);
 
     map->oom = false;
@@ -593,7 +593,7 @@ const void *hashmap_delete_internal(struct hashmap *map, const void *key)
         }
         void *bitem = bucket_item(bucket);
         if (bucket->hash == hash && (!map->compare ||
-                                     map->compare(key, bitem) == 0))
+                                     map->compare(header_element, bitem) == 0))
         {
             memcpy(map->spare, bitem, map->elsize);
             bucket->dib = 0;
