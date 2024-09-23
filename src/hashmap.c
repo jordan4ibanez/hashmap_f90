@@ -52,9 +52,12 @@ bool hashmap_iter(struct hashmap *map, size_t *i, void **item);
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power);
 void hashmap_set_load_factor(struct hashmap *map, double load_factor);
 
+/**
+ * Compares two headers.
+ */
 int compare_function(const void *a, const void *b)
 {
-    // This will take in 2 [ element | void data ] pointers.
+    // This will take in 2 [ header ] pointers.
 }
 
 // Header is a piece of raw data that identifies the element in the bucket.
