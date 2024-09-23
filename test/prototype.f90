@@ -55,10 +55,8 @@ program prototype
   implicit none
 
   type(hashmap_string_key) :: map
-  ! type(cool), pointer :: test_data
-  ! integer(c_int) :: i,z
-  ! integer(c_size_t) :: index
-  ! class(*), pointer :: generic_pointer
+  integer(c_int), pointer :: gotten_data
+  type(c_ptr) :: raw_ptr
 
   ! z = 0
 
@@ -67,7 +65,12 @@ program prototype
 
   call map%set("hi", 10)
 
-  
+  if (map%get("hi", raw_ptr)) then
+    call c_f_pointer(raw_ptr, gotten_data)
+    print*,gotten_data
+  end if
+
+
 
 
   ! ! print*,"stage 1"
