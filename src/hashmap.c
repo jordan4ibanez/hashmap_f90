@@ -59,14 +59,6 @@ bool hashmap_iter(struct hashmap *map, size_t *i, void **item);
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power);
 void hashmap_set_load_factor(struct hashmap *map, double load_factor);
 
-/**
- * Compares two headers.
- */
-int compare_function(const void *a, const void *b)
-{
-    // This will take in 2 [ header ] pointers.
-}
-
 // Header is a piece of raw data that identifies the element in the bucket.
 // Memory layout including bucket:
 // [bucket][header][fortran data]
@@ -121,6 +113,19 @@ struct hashmap
     void *spare;
     void *edata;
 };
+
+/**
+ * Compares two headers.
+ */
+int compare_function(const void *a, const void *b)
+{
+    // This will take in 2 [ header ] pointers.
+    header *head_a = (header *)a;
+    header *head_b = (header *)b;
+
+    // If this goes wrong, uh oh.
+    assert(head_a->is_string && head_b->is_string);
+}
 
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power)
 {
