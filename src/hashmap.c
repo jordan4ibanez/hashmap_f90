@@ -436,10 +436,12 @@ const void *hashmap_set_internal(struct hashmap *map, const header *header_eleme
     entry->dib = 1;
 
     void *eitem = bucket_item(entry);
-    memcpy(eitem, item, map->elsize);
 
-    // We can now free the old data.
-    free(item);
+    // First copy the header over.
+    memcpy(eitem, header_element, HEADER_SIZE);
+
+    // Then, jump over the entire header and copy the stack element
+    memcpy(eitem + HEADER_SIZE, raw_item, map->raw_el_size);
 
     void *bitem;
     size_t i = entry->hash & map->mask;
