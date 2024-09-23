@@ -65,12 +65,13 @@ program prototype
   map = new_hashmap_string_key(sizeof(10))
 
   do i = 1,100
-    call map%set("hi", i)
+    call map%set("hi"//int_to_string(i), i)
 
-    if (map%get("hi", raw_ptr)) then
+    if (map%get("hi"//int_to_string(i), raw_ptr)) then
       call c_f_pointer(raw_ptr, gotten_data)
       print*,gotten_data
     end if
+
   end do
 
 
