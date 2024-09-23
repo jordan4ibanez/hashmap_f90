@@ -276,51 +276,51 @@ void hashmap_clear(struct hashmap *map, bool update_cap)
 }
 
 // Returns success.
-// static bool resize(struct hashmap *map, size_t new_cap)
-// {
-//     struct hashmap *map2 = hashmap_new(map->elsize, new_cap, map->hash, map->compare, map->elfree);
+static bool resize(struct hashmap *map, size_t new_cap)
+{
+    struct hashmap *map2 = hashmap_new(map->elsize, new_cap, map->hash, map->compare, map->elfree);
 
-//     if (!map2)
-//     {
-//         return false;
-//     }
+    if (!map2)
+    {
+        return false;
+    }
 
-//     for (size_t i = 0; i < map->nbuckets; i++)
-//     {
-//         struct bucket *entry = bucket_at(map, i);
-//         if (!entry->dib)
-//         {
-//             continue;
-//         }
-//         entry->dib = 1;
-//         size_t j = entry->hash & map2->mask;
-//         while (1)
-//         {
-//             struct bucket *bucket = bucket_at(map2, j);
-//             if (bucket->dib == 0)
-//             {
-//                 memcpy(bucket, entry, map->bucketsz);
-//                 break;
-//             }
-//             if (bucket->dib < entry->dib)
-//             {
-//                 memcpy(map2->spare, bucket, map->bucketsz);
-//                 memcpy(bucket, entry, map->bucketsz);
-//                 memcpy(entry, map2->spare, map->bucketsz);
-//             }
-//             j = (j + 1) & map2->mask;
-//             entry->dib += 1;
-//         }
-//     }
-//     free(map->buckets);
-//     map->buckets = map2->buckets;
-//     map->nbuckets = map2->nbuckets;
-//     map->mask = map2->mask;
-//     map->growat = map2->growat;
-//     map->shrinkat = map2->shrinkat;
-//     free(map2);
-//     return true;
-// }
+    for (size_t i = 0; i < map->nbuckets; i++)
+    {
+        struct bucket *entry = bucket_at(map, i);
+        if (!entry->dib)
+        {
+            continue;
+        }
+        entry->dib = 1;
+        size_t j = entry->hash & map2->mask;
+        while (1)
+        {
+            struct bucket *bucket = bucket_at(map2, j);
+            if (bucket->dib == 0)
+            {
+                memcpy(bucket, entry, map->bucketsz);
+                break;
+            }
+            if (bucket->dib < entry->dib)
+            {
+                memcpy(map2->spare, bucket, map->bucketsz);
+                memcpy(bucket, entry, map->bucketsz);
+                memcpy(entry, map2->spare, map->bucketsz);
+            }
+            j = (j + 1) & map2->mask;
+            entry->dib += 1;
+        }
+    }
+    free(map->buckets);
+    map->buckets = map2->buckets;
+    map->nbuckets = map2->nbuckets;
+    map->mask = map2->mask;
+    map->growat = map2->growat;
+    map->shrinkat = map2->shrinkat;
+    free(map2);
+    return true;
+}
 
 // hashmap_set_with_hash works like hashmap_set but you provide your
 // own hash. The 'hash' callback provided to the hashmap_new function
