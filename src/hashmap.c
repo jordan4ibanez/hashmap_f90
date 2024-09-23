@@ -95,25 +95,35 @@ void hashmap_set_grow_by_power(struct hashmap *map, size_t power)
     {
         map->growpower = 1;
     }
+    else if (power > 16)
+    {
+        map->growpower = 16;
+    }
     else
     {
-        if (power > 16)
-        {
-            map->growpower = 16;
-        }
-        else
-        {
-            map->growpower = power;
-        }
+        map->growpower = power;
     }
 }
 
 static double clamp_load_factor(double factor, double default_factor)
 {
-    // Check for NaN and clamp between 50% and 90%
-    return factor != factor ? default_factor : factor < 0.50 ? 0.50
-                                           : factor > 0.95   ? 0.95
-                                                             : factor;
+    // Check for NaN and clamp between 50% and 90%.
+    if (factor != factor)
+    {
+        return default_factor;
+    }
+    else if (factor < 0.50)
+    {
+        return 0.50;
+    }
+    else if (factor > 0.95)
+    {
+        return 0.95;
+    }
+    else
+    {
+        return factor;
+    }
 }
 
 void hashmap_set_load_factor(struct hashmap *map, double factor)
