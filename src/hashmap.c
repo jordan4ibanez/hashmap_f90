@@ -416,7 +416,9 @@ const void *hashmap_set_int_key(struct hashmap *map, int64_t key_i_fort, const v
 const void *hashmap_set_internal(struct hashmap *map, const header *header_element, void *raw_item)
 {
 
-    uint64_t hash = get_hash(map, item);
+    // The hackjob of 2024.
+    uint64_t hash = get_hash(map, header_element);
+
     hash = clip_hash(hash);
 
     map->oom = false;
