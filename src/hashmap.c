@@ -548,9 +548,11 @@ const void *hashmap_get_internal(struct hashmap *map, const header *header_eleme
     }
 }
 
-// hashmap_probe returns the item in the bucket at position or NULL if an item
-// is not set for that bucket. The position is 'moduloed' by the number of
-// buckets in the hashmap.
+/**
+ * hashmap_probe returns the item in the bucket at position or NULL if an item
+ * is not set for that bucket. The position is 'moduloed' by the number of
+ * buckets in the hashmap.
+ */
 const void *hashmap_probe(struct hashmap *map, uint64_t position)
 {
     size_t i = position & map->mask;
