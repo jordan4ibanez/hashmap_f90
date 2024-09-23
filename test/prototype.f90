@@ -72,6 +72,8 @@ program prototype
       print*,gotten_data
     end if
 
+    call map%delete("hi"//int_to_string(i))
+
   end do
 
 

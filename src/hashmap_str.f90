@@ -25,7 +25,7 @@ module hashmap_str
     procedure :: set => str_hashmap_set
     procedure :: get => str_hashmap_get
     ! procedure :: has_key => str_hashmap_has_key
-    ! procedure :: delete => str_hashmap_delete
+    procedure :: delete => str_hashmap_delete
     ! procedure :: free => str_hashmap_free
     ! procedure :: count => str_hashmap_count
     ! procedure :: is_empty => str_hashmap_is_empty
@@ -150,44 +150,33 @@ contains
 !   end function str_hashmap_has_key
 
 
-!   !* Delete a value in the hashmap with a string key.
-!   !* If it doesn't exist, this is a no-op.
-!   subroutine str_hashmap_delete(this, key)
-!     implicit none
+  !* Delete a value in the hashmap with a string key.
+  !* If it doesn't exist, this is a no-op.
+  subroutine str_hashmap_delete(this, key_s)
+    implicit none
 
-!     class(hashmap_string_key), intent(inout) :: this
-!     character(len = *, kind = c_char), intent(in) :: key
-!     type(c_ptr) :: old_data_c_ptr
-!     integer(c_int) :: key_length
-!     type(element_string_key), target :: element_key
+    class(hashmap_string_key), intent(inout) :: this
+    character(len = *, kind = c_char), intent(in) :: key_s
+    type(c_ptr) :: old_data_c_ptr
+    integer(c_size_t) :: string_length
 
-!     key_length = len(key)
+    string_length = len(key_s)
 
-!     !* ALLOCATE.
-!     allocate(character(len = key_length, kind = c_char) :: element_key%key)
+    !? Grabs a C pointer or NULL upon failure.
+    old_data_c_ptr = internal_hashmap_delete_str_key(this%map, key_s, string_length)
 
-!     element_key%key = key
-!     element_key%key_length = key_length
+    ! It's a null pointer.
+    if (.not. c_associated(old_data_c_ptr)) then
+      return
+    end if
 
-!     !? Grabs a C pointer or NULL upon failure.
-!     old_data_c_ptr = internal_hashmap_delete(this%map, c_loc(element_key))
+    ! print*,"freed"
 
-!     !* DEALLOCATE.
-!     deallocate(element_key%key)
-
-!     ! It's a null pointer.
-!     if (.not. c_associated(old_data_c_ptr)) then
-!       return
-!     end if
-
-!     ! If a GC function was assigned.
-!     if (c_associated(this%gc_function)) then
-!       call str_run_gc(this%gc_function, old_data_c_ptr)
-!     end if
-
-!     ! Free the old string key pointer.
-!     call str_free_string_key(old_data_c_ptr)
-!   end subroutine str_hashmap_delete
+    ! If a GC function was assigned.
+    if (c_associated(this%gc_function)) then
+      call str_run_gc(this%gc_function, old_data_c_ptr)
+    end if
+  end subroutine str_hashmap_delete
 
 
 !   !* Deallocate EVERYTHING including the underlying C memory.
