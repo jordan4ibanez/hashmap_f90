@@ -41,7 +41,6 @@ bool hashmap_scan(struct hashmap *map, bool (*iter)(const void *item));
 bool hashmap_iter(struct hashmap *map, size_t *i, void **item);
 const void *hashmap_get_with_hash(struct hashmap *map, const void *key, uint64_t hash);
 const void *hashmap_delete_with_hash(struct hashmap *map, const void *key, uint64_t hash);
-const void *hashmap_set_with_hash(struct hashmap *map, const void *item, uint64_t hash);
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power);
 void hashmap_set_load_factor(struct hashmap *map, double load_factor);
 
@@ -322,11 +321,17 @@ void hashmap_clear(struct hashmap *map, bool update_cap)
 
 // hashmap_set_with_hash works like hashmap_set but you provide your
 // own hash. The 'hash' callback provided to the hashmap_new function
-// will not be called
-const void *hashmap_set_with_hash(struct hashmap *map, const void *item,
-                                  uint64_t hash)
+// will not be called.
+// hashmap_set inserts or replaces an item in the hash map. If an item is
+// replaced then it is returned otherwise NULL is returned. This operation
+// may allocate memory. If the system is unable to allocate additional
+// memory then NULL is returned and hashmap_oom() returns true.
+const void *hashmap_set(struct hashmap *map, const void *item)
 {
+
+    uint64_t hash = get_hash(map, item);
     hash = clip_hash(hash);
+
     map->oom = false;
     if (map->count >= map->growat)
     {
@@ -372,15 +377,6 @@ const void *hashmap_set_with_hash(struct hashmap *map, const void *item,
         i = (i + 1) & map->mask;
         entry->dib += 1;
     }
-}
-
-// hashmap_set inserts or replaces an item in the hash map. If an item is
-// replaced then it is returned otherwise NULL is returned. This operation
-// may allocate memory. If the system is unable to allocate additional
-// memory then NULL is returned and hashmap_oom() returns true.
-const void *hashmap_set(struct hashmap *map, const void *item)
-{
-    return hashmap_set_with_hash(map, item, get_hash(map, item));
 }
 
 // hashmap_get_with_hash works like hashmap_get but you provide your
