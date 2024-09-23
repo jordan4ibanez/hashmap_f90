@@ -32,8 +32,8 @@ struct hashmap *hashmap_new(
 
 struct hashmap *hashmap_new_with_allocator(
     size_t elsize,
-    size_t cap, uint64_t seed0, uint64_t seed1,
-    uint64_t (*hash)(const void *item, uint64_t seed0, uint64_t seed1),
+    size_t cap,
+    uint64_t (*hash)(const void *item),
     int (*compare)(const void *a, const void *b, void *udata),
     void (*elfree)(void *item),
     void *udata);
@@ -70,9 +70,7 @@ struct hashmap
 {
     size_t elsize;
     size_t cap;
-    uint64_t seed0;
-    uint64_t seed1;
-    uint64_t (*hash)(const void *item, uint64_t seed0, uint64_t seed1);
+    uint64_t (*hash)(const void *item);
     int (*compare)(const void *a, const void *b, void *udata);
     void (*elfree)(void *item);
     void *udata;
@@ -133,14 +131,14 @@ static uint64_t clip_hash(uint64_t hash)
 
 static uint64_t get_hash(struct hashmap *map, const void *key)
 {
-    return clip_hash(map->hash(key, map->seed0, map->seed1));
+    return clip_hash(map->hash(key));
 }
 
 // hashmap_new_with_allocator returns a new hash map using a custom allocator.
 // See hashmap_new for more information information
 struct hashmap *hashmap_new_with_allocator(
-    size_t elsize, size_t cap, uint64_t seed0, uint64_t seed1,
-    uint64_t (*hash)(const void *item, uint64_t seed0, uint64_t seed1),
+    size_t elsize, size_t cap,
+    uint64_t (*hash)(const void *item),
     int (*compare)(const void *a, const void *b, void *udata),
     void (*elfree)(void *item),
     void *udata)
@@ -173,8 +171,6 @@ struct hashmap *hashmap_new_with_allocator(
     memset(map, 0, sizeof(struct hashmap));
     map->elsize = elsize;
     map->bucketsz = bucketsz;
-    map->seed0 = seed0;
-    map->seed1 = seed1;
     map->hash = hash;
     map->compare = compare;
     map->elfree = elfree;
@@ -224,8 +220,7 @@ struct hashmap *hashmap_new(
     void *udata)
 {
     return hashmap_new_with_allocator(
-        elsize, cap, seed0,
-        seed1, hash, compare, elfree, udata);
+        elsize, cap, hash, compare, elfree, udata);
 }
 
 static void free_elements(struct hashmap *map)
@@ -273,7 +268,7 @@ void hashmap_clear(struct hashmap *map, bool update_cap)
 
 static bool resize0(struct hashmap *map, size_t new_cap)
 {
-    struct hashmap *map2 = hashmap_new_with_allocator(map->elsize, new_cap, map->seed0, map->seed1, map->hash,
+    struct hashmap *map2 = hashmap_new_with_allocator(map->elsize, new_cap, map->hash,
                                                       map->compare, map->elfree, map->udata);
     if (!map2)
         return false;
