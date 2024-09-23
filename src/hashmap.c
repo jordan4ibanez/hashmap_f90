@@ -568,11 +568,15 @@ const void *hashmap_probe(struct hashmap *map, uint64_t position)
     return bucket_item(bucket);
 }
 
-// hashmap_delete_with_hash works like hashmap_delete but you provide your
-// own hash. The 'hash' callback provided to the hashmap_new function
-// will not be called.
-// hashmap_delete removes an item from the hash map and returns it. If the
-// item is not found then NULL is returned.
+/**
+ *! THIS IS INTERNAL ONLY!
+ *
+ * hashmap_delete_with_hash works like hashmap_delete but you provide your
+ * own hash. The 'hash' callback provided to the hashmap_new function
+ * will not be called.
+ * hashmap_delete removes an item from the hash map and returns it. If the
+ * item is not found then NULL is returned.
+ */
 const void *hashmap_delete_internal(struct hashmap *map, const void *key)
 {
     uint64_t hash = get_hash(map, key);
