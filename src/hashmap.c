@@ -57,7 +57,7 @@ typedef struct
     bool is_string;
     // 1 byte.
     // String limit: 192.
-    uint8_t data_width;
+    uint8_t string_length;
     // 192 bytes.
     // Balanced for capacity and flexibility.
     // If you don't think this is long enough, I left a comment at the top of this.
