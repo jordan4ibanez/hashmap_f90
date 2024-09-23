@@ -146,6 +146,15 @@ int compare_function(const void *a, const void *b)
 uint64_t hash_function(const void *a)
 {
     // This will be getting a header pointer.
+    header *header_pointer = (header *)a;
+
+    if (header_pointer->is_string)
+    {
+    }
+    else
+    {
+        return header_pointer->key_i;
+    }
 }
 
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power)
