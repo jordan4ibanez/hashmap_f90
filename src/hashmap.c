@@ -23,9 +23,8 @@
 
 // Forward declaration.
 struct hashmap *hashmap_new(
-    size_t elsize, size_t cap, uint64_t seed0,
-    uint64_t seed1,
-    uint64_t (*hash)(const void *item, uint64_t seed0, uint64_t seed1),
+    size_t elsize, size_t cap,
+    uint64_t (*hash)(const void *item),
     int (*compare)(const void *a, const void *b),
     void (*elfree)(void *item));
 
@@ -200,9 +199,6 @@ struct hashmap *hashmap_new_with_allocator(
 // is inserted, deleted, or retrieved will be this size.
 // Param `cap` is the default lower capacity of the hashmap. Setting this to
 // zero will default to 16.
-// Params `seed0` and `seed1` are optional seed values that are passed to the
-// following `hash` function. These can be any value you wish but it's often
-// best to use randomly generated values.
 // Param `hash` is a function that generates a hash value for an item. It's
 // important that you provide a good hash function, otherwise it will perform
 // poorly or be vulnerable to Denial-of-service attacks. This implementation
@@ -213,8 +209,7 @@ struct hashmap *hashmap_new_with_allocator(
 // Param `elfree` is a function that frees a specific item. This should be NULL
 // unless you're storing some kind of reference data in the hash.
 struct hashmap *hashmap_new(
-    size_t elsize, size_t cap, uint64_t seed0,
-    uint64_t seed1,
+    size_t elsize, size_t cap,
     uint64_t (*hash)(const void *item),
     int (*compare)(const void *a, const void *b),
     void (*elfree)(void *item))
