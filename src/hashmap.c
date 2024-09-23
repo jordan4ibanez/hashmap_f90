@@ -526,7 +526,7 @@ const void *hashmap_get_internal(struct hashmap *map, const header *header_eleme
         if (bucket->hash == hash)
         {
             void *bitem = bucket_item(bucket);
-            if (!map->compare || map->compare(key, bitem) == 0)
+            if (!map->compare || map->compare(header_element, bitem) == 0)
             {
                 return bitem;
             }
