@@ -14,6 +14,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 #include <assert.h>
+#include "rapid_hash/rapidhash.h"
 
 // 60%
 #define GROW_AT 0.60
