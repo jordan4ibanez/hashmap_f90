@@ -40,7 +40,7 @@ const void *hashmap_get_internal(struct hashmap *map, const void *item);
 const void *hashmap_set_str_key(struct hashmap *, const char *key_s, size_t string_length, const void *raw_item);
 const void *hashmap_set_int_key(struct hashmap *, int64_t key_i_fort, const void *raw_item);
 
-const void *hashmap_set_internal(struct hashmap *map, const void *item);
+const void *hashmap_set_internal(struct hashmap *map, void *item);
 
 const void *hashmap_delete(struct hashmap *map, const void *item);
 const void *hashmap_probe(struct hashmap *map, uint64_t position);
@@ -415,7 +415,7 @@ const void *hashmap_set_int_key(struct hashmap *map, int64_t key_i_fort, const v
  *
  * Implementation note: I would keep item on the stack in Fortran. (the item can contain Fortran/C pointers)
  */
-const void *hashmap_set_internal(struct hashmap *map, const void *item)
+const void *hashmap_set_internal(struct hashmap *map, void *item)
 {
 
     uint64_t hash = get_hash(map, item);
