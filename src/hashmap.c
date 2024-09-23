@@ -30,10 +30,7 @@
 typedef struct header header;
 typedef struct bucket bucket;
 
-struct hashmap *hashmap_new(
-    size_t elsize,
-    size_t cap,
-    void (*elfree)(void *item));
+struct hashmap *hashmap_new(size_t elsize, size_t cap);
 
 void hashmap_free(struct hashmap *map);
 void hashmap_clear(struct hashmap *map, bool update_cap);
@@ -96,7 +93,6 @@ struct hashmap
     size_t raw_el_size;
     size_t elsize;
     size_t cap;
-    void (*elfree)(void *item);
     size_t bucketsz;
     size_t nbuckets;
     size_t count;
@@ -242,9 +238,7 @@ static uint64_t get_hash(struct hashmap *map, const void *key)
  * Param `elfree` is a function that frees a specific item. This should be NULL
  * unless you're storing some kind of reference data in the hash.
  */
-struct hashmap *hashmap_new(
-    size_t el_only_size, size_t cap,
-    void (*elfree)(void *item))
+struct hashmap *hashmap_new(size_t el_only_size, size_t cap)
 {
 
     const size_t elsize = HEADER_SIZE + el_only_size;
@@ -283,7 +277,6 @@ struct hashmap *hashmap_new(
     map->raw_el_size = el_only_size;
     map->elsize = elsize;
     map->bucketsz = bucketsz;
-    map->elfree = elfree;
     map->spare = ((char *)map) + sizeof(struct hashmap);
     map->edata = (char *)map->spare + bucketsz;
     map->cap = cap;
@@ -301,19 +294,6 @@ struct hashmap *hashmap_new(
     map->growat = map->nbuckets * (map->loadfactor / 100.0);
     map->shrinkat = map->nbuckets * SHRINK_AT;
     return map;
-}
-
-static void free_elements(struct hashmap *map)
-{
-    if (map->elfree)
-    {
-        for (size_t i = 0; i < map->nbuckets; i++)
-        {
-            struct bucket *bucket = bucket_at(map, i);
-            if (bucket->dib)
-                map->elfree(bucket_item(bucket));
-        }
-    }
 }
 
 /**
@@ -389,7 +369,7 @@ static void build_int_header(header *header_element, const int64_t key_i)
  */
 static bool resize(struct hashmap *map, size_t new_cap)
 {
-    struct hashmap *map2 = hashmap_new(map->elsize, new_cap, map->elfree);
+    struct hashmap *map2 = hashmap_new(map->elsize, new_cap);
 
     if (!map2)
     {
