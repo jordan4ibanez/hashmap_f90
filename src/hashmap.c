@@ -634,8 +634,7 @@ const void *hashmap_delete_internal(struct hashmap *map, const header *header_el
             return NULL;
         }
         void *bitem = bucket_item(bucket);
-        if (bucket->hash == hash && (!map->compare ||
-                                     map->compare(header_element, bitem) == 0))
+        if (bucket->hash == hash && (compare_function(header_element, bitem) == 0))
         {
             memcpy(map->spare, bitem, map->elsize);
             bucket->dib = 0;
