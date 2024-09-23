@@ -90,8 +90,22 @@ struct hashmap
 
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power)
 {
-    map->growpower = power < 1 ? 1 : power > 16 ? 16
-                                                : power;
+    // Limit the power to range: 1-16.
+    if (power < 1)
+    {
+        map->growpower = 1;
+    }
+    else
+    {
+        if (power > 16)
+        {
+            map->growpower = 16;
+        }
+        else
+        {
+            map->growpower = power;
+        }
+    }
 }
 
 static double clamp_load_factor(double factor, double default_factor)
