@@ -62,6 +62,7 @@ typedef struct
 
 int compare_function(const void *a, const void *b)
 {
+    // This will take in 2 [ element | void data ] pointers.
 }
 
 // Bucker is a container for elements.
