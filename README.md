@@ -1,6 +1,8 @@
 # hashmap_f90
 Fortran bindings to hashmap.c 
 
+Modified to the extreme for Fortran only.
+
 If you want to C the original github: https://github.com/tidwall/hashmap.c
 
 If you like what I do, and would like to support me: [My Patreon](https://www.patreon.com/jordan4ibanez)
