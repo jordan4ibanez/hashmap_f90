@@ -378,7 +378,7 @@ const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t s
  *
  * I highly recommend you only use stack elements for the raw_item.
  */
-const void *hashmap_set_int_key(struct hashmap *map, int64_t key_i_fort, size_t string_length, const void *raw_item)
+const void *hashmap_set_int_key(struct hashmap *map, int64_t key_i_fort, const void *raw_item)
 {
     const uint64_t key_i = (int64_t)key_i_fort;
 
