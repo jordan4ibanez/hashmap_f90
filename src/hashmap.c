@@ -411,9 +411,9 @@ const void *hashmap_set_int_key(struct hashmap *map, int64_t key_i_fort, const v
  * may allocate memory. If the system is unable to allocate additional
  * memory then NULL is returned and hashmap_oom() returns true.
  *
- * Implementation note: I would keep item on the stack in Fortran. (the item can contain Fortran/C pointers)
+ * Implementation note: I would keep raw_item on the stack in Fortran. (the item can contain Fortran/C pointers)
  */
-const void *hashmap_set_internal(struct hashmap *map, header *header, void *item)
+const void *hashmap_set_internal(struct hashmap *map, const header *header_element, void *raw_item)
 {
 
     uint64_t hash = get_hash(map, item);
