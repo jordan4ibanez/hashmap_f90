@@ -397,9 +397,6 @@ const void *hashmap_set_int_key(struct hashmap *map, int64_t key_i_fort, const v
     header_element.is_string = false;
     header_element.key_i = key_i;
 
-    // Now jump over the entire header and copy the stack element
-    // memcpy(item + HEADER_SIZE, raw_item, map->raw_el_size);
-
     return hashmap_set_internal(map, &header_element, raw_item);
 }
 
