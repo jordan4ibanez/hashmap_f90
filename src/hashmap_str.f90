@@ -1,6 +1,5 @@
 module hashmap_str
   use, intrinsic :: iso_c_binding
-  use :: hashmap_types
   use :: hashmap_bindings
   implicit none
 
@@ -40,13 +39,14 @@ contains
 
 
   !* Hashmap string key constructor.
-  function new_hashmap_string_key(optional_gc_function) result(h)
+  function new_hashmap_string_key(element_size, optional_gc_function) result(h)
     implicit none
 
-    type(hashmap_string_key) :: h
+    integer(c_size_t), intent(in), value :: element_size
     procedure(gc_function_interface_string), optional :: optional_gc_function
+    type(hashmap_string_key) :: h
 
-    h%map = internal_hashmap_new(56_8, 0_8, 0_8, 0_8, c_funloc(str_hashing_function), c_funloc(str_compare_function), c_null_funptr, c_null_ptr)
+    h%map = internal_hashmap_new(element_size, 0_8)
 
     if (present(optional_gc_function)) then
       h%gc_function = c_funloc(optional_gc_function)
@@ -55,16 +55,14 @@ contains
 
 
   !* Set a value in the hashmap with a string key.
-  subroutine str_hashmap_set(this, key, generic_pointer)
+  subroutine str_hashmap_set(this, key, raw_item)
     implicit none
 
     class(hashmap_string_key), intent(inout) :: this
     character(len = *, kind = c_char), intent(in) :: key
-    class(*), intent(in), target :: generic_pointer
+    class(*), intent(in), target :: raw_item
     integer(c_int) :: key_length
-    type(element_string_key), target :: new_element
     type(c_ptr) :: old_data_c_ptr
-    type(element_string_key), pointer :: old_data
 
 
     key_length = len(key)
@@ -79,7 +77,7 @@ contains
 
     new_element%key = key
     new_element%key_length = key_length
-    new_element%data => generic_pointer
+    new_element%data => raw_item
 
     !? Internally calls: memcpy.
     old_data_c_ptr = internal_hashmap_set(this%map, c_loc(new_element))
@@ -443,28 +441,12 @@ contains
 
     type(c_funptr), intent(in), value :: c_function_pointer
     type(c_ptr), intent(in), value :: raw_c_element
-    type(element_string_key), pointer :: element_pointer
-    procedure(gc_function_interface_string), pointer :: func
+    procedure(gc_function_interface), pointer :: func
 
     call c_f_procpointer(c_function_pointer, func)
 
-    call c_f_pointer(raw_c_element, element_pointer)
-
-    call func(element_pointer%data)
+    call func(raw_c_element)
   end subroutine str_run_gc
-
-
-  !* Automatically free the string key.
-  subroutine str_free_string_key(old_data_c_ptr)
-    implicit none
-
-    type(c_ptr) :: old_data_c_ptr
-    type(element_string_key), pointer :: old_data
-
-    ! Clean up the old string key.
-    call c_f_pointer(old_data_c_ptr, old_data)
-    deallocate(old_data%key)
-  end subroutine str_free_string_key
 
 
 end module hashmap_str
