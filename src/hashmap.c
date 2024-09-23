@@ -365,6 +365,29 @@ const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t s
     return hashmap_set_internal(map, item);
 }
 
+/**
+ * Set the item with an int64 key.
+ *
+ * Fortran does not have unsigned types (yet) so we're going to use a straight up cast.
+ *
+ * I highly recommend you only use stack elements for the raw_item.
+ */
+const void *hashmap_set_int_key(struct hashmap *map, int64_t key_i_fort, size_t string_length, const void *raw_item)
+{
+    const uint64_t key_i = (int64_t)key_i_fort;
+
+    void *item = malloc(sizeof(map->elsize));
+
+    // Set header parameters.
+    ((header *)item)->is_string = false;
+    ((header *)item)->key_i = key_i;
+
+    // Now jump over the entire header and copy the stack element
+    memcpy(item + HEADER_SIZE, raw_item, map->raw_el_size);
+
+    return hashmap_set_internal(map, item);
+}
+
 // hashmap_set_with_hash works like hashmap_set but you provide your
 // own hash. The 'hash' callback provided to the hashmap_new function
 // will not be called.
