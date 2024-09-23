@@ -125,6 +125,23 @@ int compare_function(const void *a, const void *b)
 
     // If this goes wrong, uh oh.
     assert(head_a->is_string && head_b->is_string);
+
+    if (head_a->is_string)
+    {
+        // Simple length check.
+        if (head_a->string_length != head_b->string_length)
+        {
+            return 1;
+        }
+
+        // Then we can just compare the bytes directly.
+        return strncmp(&head_a->key_s, &head_b->key_s, head_a->string_length);
+    }
+    else
+    {
+        // 0 is true and -1,1 is false in strncmp due to the way it was designed.
+        return head_a->key_i != head_b->key_i;
+    }
 }
 
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power)
