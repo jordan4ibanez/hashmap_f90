@@ -212,7 +212,7 @@ static uint64_t clip_hash(uint64_t hash)
 
 static uint64_t get_hash(struct hashmap *map, const void *key)
 {
-    return clip_hash(map->hash(key));
+    return clip_hash(hash_function(key));
 }
 
 /**
