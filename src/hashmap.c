@@ -57,8 +57,12 @@ void hashmap_set_load_factor(struct hashmap *map, double load_factor);
 struct element
 {
     // Allows hyper generic keys for each element.
-    // 4 bytes.
-    uint32_t data_width;
+    // If it's not a string, it's a uint64_t.
+    // 1 byte.
+    bool is_string;
+    // 1 byte.
+    // String limit: 255.
+    uint8_t data_width;
 };
 
 // Bucker is a container for elements.
