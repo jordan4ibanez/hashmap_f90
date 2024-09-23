@@ -45,16 +45,20 @@ void hashmap_set_load_factor(struct hashmap *map, double load_factor);
 // Element is a piece of raw data that buckets contain.
 // Memory layout:
 // [key byte width][key][fortran data]
-struct element
+typedef struct
 {
     // Allows hyper generic keys for each element.
     // If it's not a string, it's a uint64_t.
     // 1 byte.
     bool is_string;
     // 1 byte.
-    // String limit: 255.
+    // String limit: 253.
     uint8_t data_width;
-};
+    // 252 bytes.
+    char key_s[252];
+    // Then the integer key.
+
+} element;
 
 int compare_function(const void *a, const void *b)
 {
