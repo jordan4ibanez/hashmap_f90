@@ -339,6 +339,16 @@ static bool resize(struct hashmap *map, size_t new_cap)
     return true;
 }
 
+/**
+ * Set the item with a string key.
+ */
+const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, const void *raw_Item)
+{
+    void *item = malloc(sizeof(map->elsize));
+
+    const size_t key_length = strlen(key_s);
+}
+
 // hashmap_set_with_hash works like hashmap_set but you provide your
 // own hash. The 'hash' callback provided to the hashmap_new function
 // will not be called.
