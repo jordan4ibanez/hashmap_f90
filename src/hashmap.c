@@ -29,9 +29,6 @@ struct bucket
 // hashmap is an open addressed hash map using robinhood hashing.
 struct hashmap
 {
-    void *(*malloc)(size_t);
-    void *(*realloc)(void *, size_t);
-    void (*free)(void *);
     size_t elsize;
     size_t cap;
     uint64_t seed0;
