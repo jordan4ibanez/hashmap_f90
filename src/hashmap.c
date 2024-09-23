@@ -109,14 +109,11 @@ void hashmap_set_load_factor(struct hashmap *map, double factor)
     map->growat = map->nbuckets * (map->loadfactor / 100.0);
 }
 
-static struct bucket *bucket_at0(void *buckets, size_t bucketsz, size_t i)
-{
-    return (struct bucket *)(((char *)buckets) + (bucketsz * i));
-}
-
 static struct bucket *bucket_at(struct hashmap *map, size_t index)
 {
-    return bucket_at0(map->buckets, map->bucketsz, index);
+    const size_t buckets = map->buckets;
+    const size_t bucketsz = map->bucketsz;
+    return (struct bucket *)(((char *)buckets) + (bucketsz * index));
 }
 
 static void *bucket_item(struct bucket *entry)
