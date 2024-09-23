@@ -469,6 +469,8 @@ const void *hashmap_set_internal(struct hashmap *map, const void *item)
 }
 
 /**
+ *! THIS IS INTERNAL ONLY!
+ *
  * hashmap_get_with_hash works like hashmap_get but you provide your
  * own hash. The 'hash' callback provided to the hashmap_new function
  * will not be called.
