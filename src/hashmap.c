@@ -36,7 +36,7 @@ void hashmap_free(struct hashmap *map);
 void hashmap_clear(struct hashmap *map, bool update_cap);
 size_t hashmap_count(struct hashmap *map);
 bool hashmap_oom(struct hashmap *map);
-const void *hashmap_get(struct hashmap *map, const void *item);
+const void *hashmap_get_internal(struct hashmap *map, const void *item);
 const void *hashmap_set_str_key(struct hashmap *, const char *key_s, size_t string_length, const void *raw_item);
 const void *hashmap_set_int_key(struct hashmap *, int64_t key_i_fort, const void *raw_item);
 
@@ -473,7 +473,7 @@ const void *hashmap_set_internal(struct hashmap *map, const void *item)
 // will not be called.
 // hashmap_get returns the item based on the provided key. If the item is not
 // found then NULL is returned.
-const void *hashmap_get(struct hashmap *map, const void *key)
+const void *hashmap_get_internal(struct hashmap *map, const void *key)
 {
     uint64_t hash = get_hash(map, key);
     hash = clip_hash(hash);
