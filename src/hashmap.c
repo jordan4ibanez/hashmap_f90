@@ -20,10 +20,6 @@
 #define HASHMAP_LOAD_FACTOR GROW_AT
 #endif
 
-static void *(*__malloc)(size_t) = NULL;
-static void *(*__realloc)(void *, size_t) = NULL;
-static void (*__free)(void *) = NULL;
-
 struct bucket
 {
     uint64_t hash : 48;
