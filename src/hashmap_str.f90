@@ -24,7 +24,7 @@ module hashmap_str
   contains
     procedure :: set => str_hashmap_set
     procedure :: get => str_hashmap_get
-    ! procedure :: has_key => str_hashmap_has_key
+    procedure :: has_key => str_hashmap_has_key
     procedure :: delete => str_hashmap_delete
     ! procedure :: free => str_hashmap_free
     ! procedure :: count => str_hashmap_count
@@ -112,42 +112,31 @@ contains
     !? Grabs a C pointer or NULL upon failure.
     gotten_c_ptr = internal_hashmap_get_str_key(this%map, key_s, key_length )
 
+    ! We can simply check if it's NULL.
     is_some = c_associated(gotten_c_ptr)
   end function str_hashmap_get
 
 
-!   !* Check if a hashmap has a key.
-!   function str_hashmap_has_key(this, key) result(has)
-!     implicit none
+  !* Check if a hashmap has a key.
+  function str_hashmap_has_key(this, key_s) result(has)
+    implicit none
 
-!     class(hashmap_string_key), intent(inout) :: this
-!     character(len = *, kind = c_char), intent(in) :: key
-!     logical(c_bool) :: has
-!     integer(c_int) :: key_length
-!     type(c_ptr) :: data_c_ptr
-!     type(element_string_key), target :: element_key
+    class(hashmap_string_key), intent(inout) :: this
+    character(len = *, kind = c_char), intent(in) :: key_s
+    logical(c_bool) :: has
+    integer(c_size_t) :: string_length
+    type(c_ptr) :: data_c_ptr
 
-!     has = .false.
+    has = .false.
 
-!     key_length = len(key)
+    string_length = len(key_s)
 
-!     !* ALLOCATE.
-!     allocate(character(len = key_length, kind = c_char) :: element_key%key)
+    !? Grabs a C pointer or NULL upon failure.
+    data_c_ptr = internal_hashmap_get_str_key(this%map, key_s, string_length)
 
-!     element_key%key = key
-!     element_key%key_length = key_length
-
-!     !? Grabs a C pointer or NULL upon failure.
-!     data_c_ptr = internal_hashmap_get(this%map, c_loc(element_key))
-
-!     !* DEALLOCATE.
-!     deallocate(element_key%key)
-
-!     ! We can simply check if it's NULL.
-!     if (c_associated(data_c_ptr)) then
-!       has = .true.
-!     end if
-!   end function str_hashmap_has_key
+    ! We can simply check if it's NULL.
+    has = c_associated(data_c_ptr)
+  end function str_hashmap_has_key
 
 
   !* Delete a value in the hashmap with a string key.
