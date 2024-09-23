@@ -342,11 +342,20 @@ static bool resize(struct hashmap *map, size_t new_cap)
 /**
  * Set the item with a string key.
  */
-const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, const void *raw_Item)
+const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t string_length, const void *raw_item)
 {
     void *item = malloc(sizeof(map->elsize));
 
-    const size_t key_length = strlen(key_s);
+    //! The string length will be checked in fortran.
+
+    ((header *)item)->is_string = true;
+    ((header *)item)->string_length = string_length;
+
+    // Jump over the first two bytes and memcpy the data into the key.
+    memcpy(item + 2, key_s, string_length);
+
+
+
 }
 
 // hashmap_set_with_hash works like hashmap_set but you provide your
