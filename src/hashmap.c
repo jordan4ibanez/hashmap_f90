@@ -497,9 +497,13 @@ const void *hashmap_set_internal(struct hashmap *map, const header *header_eleme
     }
 }
 
-const void *hashmap_get_str_key(struct hashmap *map, const char *key, size_t key_len)
+/**
+ * Get an item from the hashmap. Or null.
+ */
+const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t key_len)
 {
     header header_element;
+    build_string_header(&header_element, key_s, key_len);
 }
 
 /**
