@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <assert.h>
 
 // 60%
 #define GROW_AT 0.60
@@ -48,6 +49,8 @@ const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t s
 const void *hashmap_get_int_key(struct hashmap *map, const int64_t key_i);
 const void *hashmap_get_internal(struct hashmap *map, const header *header_element);
 
+const void *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_t string_length);
+const void *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i);
 const void *hashmap_delete_internal(struct hashmap *map, const header *header_element);
 
 const void *hashmap_probe(struct hashmap *map, uint64_t position);
