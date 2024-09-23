@@ -428,8 +428,12 @@ const void *hashmap_set_internal(struct hashmap *map, const void *item)
     struct bucket *entry = map->edata;
     entry->hash = hash;
     entry->dib = 1;
+
     void *eitem = bucket_item(entry);
     memcpy(eitem, item, map->elsize);
+
+    // We can now free the old data.
+    free(item);
 
     void *bitem;
     size_t i = entry->hash & map->mask;
