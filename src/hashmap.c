@@ -398,14 +398,17 @@ const void *hashmap_set_int_key(struct hashmap *map, int64_t key_i_fort, const v
     return hashmap_set_internal(map, item);
 }
 
-// hashmap_set_with_hash works like hashmap_set but you provide your
-// own hash. The 'hash' callback provided to the hashmap_new function
-// will not be called.
-// hashmap_set inserts or replaces an item in the hash map. If an item is
-// replaced then it is returned otherwise NULL is returned. This operation
-// may allocate memory. If the system is unable to allocate additional
-// memory then NULL is returned and hashmap_oom() returns true.
-//* Implementation note: I would keep raw_item on the stack in Fortran.
+/**
+ * hashmap_set_with_hash works like hashmap_set but you provide your
+ * own hash. The 'hash' callback provided to the hashmap_new function
+ * will not be called.
+ * hashmap_set inserts or replaces an item in the hash map. If an item is
+ * replaced then it is returned otherwise NULL is returned. This operation
+ * may allocate memory. If the system is unable to allocate additional
+ * memory then NULL is returned and hashmap_oom() returns true.
+ *
+ * Implementation note: I would keep raw_item on the stack in Fortran.
+ */
 const void *hashmap_set_internal(struct hashmap *map, const void *item)
 {
 
