@@ -309,7 +309,7 @@ void hashmap_clear(struct hashmap *map, bool update_cap)
 }
 
 /**
- * Returns a header element built for string key hashmaps.
+ * Builds a header element built for string key hashmaps.
  *
  * The header is meant to be on the stack.
  */
@@ -326,6 +326,18 @@ static void build_string_header(header *header_element, const char *key_s, size_
     //! this might crash. Gonna need a good ol' testing.
     char null_term = '\0';
     memcpy(&header_element + 2 + string_length, &null_term, 1);
+}
+
+/**
+ * Builds a header element built for int key hashmaps.
+ *
+ * The header is meant to be on the stack.
+ */
+static void build_int_header(header *header_element, const int64_t key_i)
+{
+    // Set header parameters.
+    header_element->is_string = false;
+    header_element->key_i = key_i;
 }
 
 /**
@@ -399,15 +411,12 @@ const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t s
  *
  * I highly recommend you only use stack elements for the raw_item. (the item can contain Fortran/C pointers)
  */
-const void *hashmap_set_int_key(struct hashmap *map, int64_t key_i_fort, const void *raw_item)
+const void *hashmap_set_int_key(struct hashmap *map, const int64_t key_i_fort, const void *raw_item)
 {
     const uint64_t key_i = (int64_t)key_i_fort;
 
     header header_element;
-
-    // Set header parameters.
-    header_element.is_string = false;
-    header_element.key_i = key_i;
+    build_int_header(&header_element);
 
     return hashmap_set_internal(map, &header_element, raw_item);
 }
