@@ -309,6 +309,8 @@ void hashmap_clear(struct hashmap *map, bool update_cap)
 }
 
 /**
+ *! THIS IS INTERNAL ONLY.
+ *
  * Builds a header element built for string key hashmaps.
  *
  * The header is meant to be on the stack.
@@ -329,6 +331,8 @@ static void build_string_header(header *header_element, const char *key_s, size_
 }
 
 /**
+ *! THIS IS INTERNAL ONLY.
+ *
  * Builds a header element built for int key hashmaps.
  *
  * The header is meant to be on the stack.
