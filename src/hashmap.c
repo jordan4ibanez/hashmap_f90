@@ -504,6 +504,8 @@ const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t k
 {
     header header_element;
     build_string_header(&header_element, key_s, key_len);
+
+    return hashmap_get_internal(map, &header_element);
 }
 
 /**
