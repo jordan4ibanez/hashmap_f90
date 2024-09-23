@@ -399,6 +399,8 @@ const void *hashmap_set_int_key(struct hashmap *map, int64_t key_i_fort, const v
 }
 
 /**
+ *! THIS IS INTERNAL ONLY.
+ * 
  * hashmap_set_with_hash works like hashmap_set but you provide your
  * own hash. The 'hash' callback provided to the hashmap_new function
  * will not be called.
