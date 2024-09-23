@@ -341,12 +341,7 @@ static void build_string_header(header *header_element, const char *key_s, size_
     header_element->string_length = string_length;
 
     // Jump over the first two bytes and memcpy the data into the key.
-    memcpy(&header_element + 2, key_s, string_length);
-
-    // Jump over the entire string and create a null terminator.
-    //! this might crash. Gonna need a good ol' testing.
-    // char null_term = '\0';
-    // memcpy(&header_element + 2 + string_length, &null_term, 1);
+    strncpy(header_element->key_s, key_s, string_length);
 }
 
 /**
