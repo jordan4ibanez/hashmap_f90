@@ -26,17 +26,15 @@ struct hashmap *hashmap_new(
     size_t elsize, size_t cap, uint64_t seed0,
     uint64_t seed1,
     uint64_t (*hash)(const void *item, uint64_t seed0, uint64_t seed1),
-    int (*compare)(const void *a, const void *b, void *udata),
-    void (*elfree)(void *item),
-    void *udata);
+    int (*compare)(const void *a, const void *b),
+    void (*elfree)(void *item));
 
 struct hashmap *hashmap_new_with_allocator(
     size_t elsize,
     size_t cap,
     uint64_t (*hash)(const void *item),
-    int (*compare)(const void *a, const void *b, void *udata),
-    void (*elfree)(void *item),
-    void *udata);
+    int (*compare)(const void *a, const void *b),
+    void (*elfree)(void *item));
 
 void hashmap_free(struct hashmap *map);
 void hashmap_clear(struct hashmap *map, bool update_cap);
@@ -46,7 +44,7 @@ const void *hashmap_get(struct hashmap *map, const void *item);
 const void *hashmap_set(struct hashmap *map, const void *item);
 const void *hashmap_delete(struct hashmap *map, const void *item);
 const void *hashmap_probe(struct hashmap *map, uint64_t position);
-bool hashmap_scan(struct hashmap *map, bool (*iter)(const void *item, void *udata), void *udata);
+bool hashmap_scan(struct hashmap *map, bool (*iter)(const void *item));
 bool hashmap_iter(struct hashmap *map, size_t *i, void **item);
 const void *hashmap_get_with_hash(struct hashmap *map, const void *key, uint64_t hash);
 const void *hashmap_delete_with_hash(struct hashmap *map, const void *key, uint64_t hash);
@@ -77,9 +75,8 @@ struct hashmap
     size_t elsize;
     size_t cap;
     uint64_t (*hash)(const void *item);
-    int (*compare)(const void *a, const void *b, void *udata);
+    int (*compare)(const void *a, const void *b);
     void (*elfree)(void *item);
-    void *udata;
     size_t bucketsz;
     size_t nbuckets;
     size_t count;
@@ -145,9 +142,8 @@ static uint64_t get_hash(struct hashmap *map, const void *key)
 struct hashmap *hashmap_new_with_allocator(
     size_t elsize, size_t cap,
     uint64_t (*hash)(const void *item),
-    int (*compare)(const void *a, const void *b, void *udata),
-    void (*elfree)(void *item),
-    void *udata)
+    int (*compare)(const void *a, const void *b),
+    void (*elfree)(void *item))
 {
     size_t ncap = 16;
     if (cap < ncap)
@@ -180,7 +176,6 @@ struct hashmap *hashmap_new_with_allocator(
     map->hash = hash;
     map->compare = compare;
     map->elfree = elfree;
-    map->udata = udata;
     map->spare = ((char *)map) + sizeof(struct hashmap);
     map->edata = (char *)map->spare + bucketsz;
     map->cap = cap;
@@ -220,13 +215,12 @@ struct hashmap *hashmap_new_with_allocator(
 struct hashmap *hashmap_new(
     size_t elsize, size_t cap, uint64_t seed0,
     uint64_t seed1,
-    uint64_t (*hash)(const void *item, uint64_t seed0, uint64_t seed1),
-    int (*compare)(const void *a, const void *b, void *udata),
-    void (*elfree)(void *item),
-    void *udata)
+    uint64_t (*hash)(const void *item),
+    int (*compare)(const void *a, const void *b),
+    void (*elfree)(void *item))
 {
     return hashmap_new_with_allocator(
-        elsize, cap, hash, compare, elfree, udata);
+        elsize, cap, hash, compare, elfree);
 }
 
 static void free_elements(struct hashmap *map)
@@ -275,7 +269,7 @@ void hashmap_clear(struct hashmap *map, bool update_cap)
 static bool resize0(struct hashmap *map, size_t new_cap)
 {
     struct hashmap *map2 = hashmap_new_with_allocator(map->elsize, new_cap, map->hash,
-                                                      map->compare, map->elfree, map->udata);
+                                                      map->compare, map->elfree);
     if (!map2)
         return false;
     for (size_t i = 0; i < map->nbuckets; i++)
@@ -356,7 +350,7 @@ const void *hashmap_set_with_hash(struct hashmap *map, const void *item,
         }
         bitem = bucket_item(bucket);
         if (entry->hash == bucket->hash && (!map->compare ||
-                                            map->compare(eitem, bitem, map->udata) == 0))
+                                            map->compare(eitem, bitem) == 0))
         {
             memcpy(map->spare, bitem, map->elsize);
             memcpy(bitem, eitem, map->elsize);
@@ -399,7 +393,7 @@ const void *hashmap_get_with_hash(struct hashmap *map, const void *key,
         if (bucket->hash == hash)
         {
             void *bitem = bucket_item(bucket);
-            if (!map->compare || map->compare(key, bitem, map->udata) == 0)
+            if (!map->compare || map->compare(key, bitem) == 0)
             {
                 return bitem;
             }
@@ -447,7 +441,7 @@ const void *hashmap_delete_with_hash(struct hashmap *map, const void *key,
         }
         void *bitem = bucket_item(bucket);
         if (bucket->hash == hash && (!map->compare ||
-                                     map->compare(key, bitem, map->udata) == 0))
+                                     map->compare(key, bitem) == 0))
         {
             memcpy(map->spare, bitem, map->elsize);
             bucket->dib = 0;
@@ -514,12 +508,12 @@ bool hashmap_oom(struct hashmap *map)
 // Param `iter` can return false to stop iteration early.
 // Returns false if the iteration has been stopped early.
 bool hashmap_scan(struct hashmap *map,
-                  bool (*iter)(const void *item, void *udata), void *udata)
+                  bool (*iter)(const void *item))
 {
     for (size_t i = 0; i < map->nbuckets; i++)
     {
         struct bucket *bucket = bucket_at(map, i);
-        if (bucket->dib && !iter(bucket_item(bucket), udata))
+        if (bucket->dib && !iter(bucket_item(bucket)))
         {
             return false;
         }
