@@ -140,7 +140,7 @@ void hashmap_set_load_factor(struct hashmap *map, double factor)
 
 static struct bucket *bucket_at(struct hashmap *map, size_t index)
 {
-    const size_t buckets = map->buckets;
+    const size_t buckets = (int64_t)map->buckets;
     const size_t bucketsz = map->bucketsz;
     return (struct bucket *)(((char *)buckets) + (bucketsz * index));
 }
@@ -330,7 +330,6 @@ void hashmap_clear(struct hashmap *map, bool update_cap)
 // memory then NULL is returned and hashmap_oom() returns true.
 const void *hashmap_set(struct hashmap *map, const void *item)
 {
-
     uint64_t hash = get_hash(map, item);
     hash = clip_hash(hash);
 
