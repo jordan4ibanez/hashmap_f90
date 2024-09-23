@@ -186,11 +186,13 @@ static uint64_t get_hash(struct hashmap *map, const void *key)
 // Param `elfree` is a function that frees a specific item. This should be NULL
 // unless you're storing some kind of reference data in the hash.
 struct hashmap *hashmap_new(
-    size_t initial_elsize, size_t cap,
+    size_t el_only_size, size_t cap,
     uint64_t (*hash)(const void *item),
     int (*compare)(const void *a, const void *b),
     void (*elfree)(void *item))
 {
+
+    const size_t elsize = HEADER_SIZE + el_only_size;
 
     size_t ncap = 16;
     if (cap < ncap)
@@ -206,8 +208,6 @@ struct hashmap *hashmap_new(
         cap = ncap;
     }
 
-
-
     size_t bucketsz = sizeof(struct bucket) + elsize;
     while (bucketsz & (sizeof(uintptr_t) - 1))
     {
@@ -216,12 +216,15 @@ struct hashmap *hashmap_new(
 
     // hashmap + spare + edata
     size_t size = sizeof(struct hashmap) + bucketsz * 2;
+
     struct hashmap *map = malloc(size);
     if (!map)
     {
         return NULL;
     }
+
     memset(map, 0, sizeof(struct hashmap));
+
     map->elsize = elsize;
     map->bucketsz = bucketsz;
     map->hash = hash;
