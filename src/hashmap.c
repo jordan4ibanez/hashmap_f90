@@ -98,7 +98,6 @@ struct hashmap
     size_t elsize;
     size_t cap;
     uint64_t (*hash)(const void *item);
-    int (*compare)(const void *a, const void *b);
     void (*elfree)(void *item);
     size_t bucketsz;
     size_t nbuckets;
