@@ -554,7 +554,7 @@ const void *hashmap_get_internal(struct hashmap *map, const header *header_eleme
             void *bitem = bucket_item(bucket);
             if (compare_function(header_element, bitem) == 0)
             {
-                return bitem;
+                return bitem + HEADER_SIZE;
             }
         }
         i = (i + 1) & map->mask;
