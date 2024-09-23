@@ -9,11 +9,11 @@ If you want to C the original github: https://github.com/tidwall/hashmap.c
 
 ### Current changes:
 
--Complete rebuild of the handling of the heap. 
+- Complete rebuild of the handling of the heap. 
 
--Original hashing algorithm has been ripped out and replaced with rapid_hash. Todo: put link here. 
+- Original hashing algorithm has been ripped out and replaced with rapid_hash. Todo: put link here. 
 
--Complete redesign to be highly ergonomic with Fortran. 
+- Complete redesign to be highly ergonomic with Fortran. 
 
 If you like what I do, and would like to support me: [My Patreon](https://www.patreon.com/jordan4ibanez)
 
