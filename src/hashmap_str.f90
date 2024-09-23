@@ -61,7 +61,8 @@ contains
     class(hashmap_string_key), intent(inout) :: this
     character(len = *, kind = c_char), intent(in) :: key
     class(*), intent(in), target :: raw_item
-    integer(c_int) :: key_length
+    integer(c_size_t) :: key_length
+    type(c_ptr) :: black_magic
     type(c_ptr) :: old_data_c_ptr
 
 
@@ -69,20 +70,13 @@ contains
 
     !? Safety check.
     if (key_length == 0) then
-      error stop "[Hashmap] ERROR: key cannot be NULL."
+      error stop "[Hashmap] Error: Key cannot be NULL."
     end if
 
-    !* ALLOCATE.
-    allocate(character(len = key_length, kind = c_char) :: new_element%key)
-
-    new_element%key = key
-    new_element%key_length = key_length
-    new_element%data => raw_item
+    black_magic = transfer(loc(raw_item), black_magic)
 
     !? Internally calls: memcpy.
-    old_data_c_ptr = internal_hashmap_set(this%map, c_loc(new_element))
-
-    !! DO NOT DEALLOCATE THE KEY, WE NEED IT.
+    old_data_c_ptr = internal_hashmap_set_str_key(this%map, key, key_length, black_magic)
 
     ! The old data was a null pointer. We don't have to do anything.
     if (.not. c_associated(old_data_c_ptr)) then
