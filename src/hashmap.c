@@ -56,7 +56,7 @@ void hashmap_set_load_factor(struct hashmap *map, double load_factor);
 // Memory layout including bucket:
 // [bucket][header][fortran data]
 // Total: 208 bytes.
-typedef struct
+struct header
 {
     // Allows hyper generic keys for each element.
     // If it's not a string, it's a uint64_t.
@@ -72,7 +72,7 @@ typedef struct
     // Then the integer key.
     // 8 bytes.
     uint64_t key_i;
-} header;
+};
 
 // Header size in bytes.
 const static size_t HEADER_SIZE = sizeof(header);
