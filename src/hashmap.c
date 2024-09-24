@@ -52,9 +52,11 @@ const void *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_
 const void *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i);
 const void *hashmap_delete_internal(struct hashmap *map, const header *header_element);
 
+bool hashmap_iter(struct hashmap *map, void **item);
+
 const void *hashmap_probe(struct hashmap *map, uint64_t position);
 bool hashmap_scan(struct hashmap *map, bool (*iter)(const void *item));
-bool hashmap_iter(struct hashmap *map, size_t *i, void **item);
+
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power);
 void hashmap_set_load_factor(struct hashmap *map, double load_factor);
 
@@ -100,6 +102,7 @@ struct hashmap
     size_t capacity;
     size_t bucketsz;
     size_t nbuckets;
+    size_t iterator_index;
     size_t count;
     size_t mask;
     size_t growat;
@@ -731,17 +734,18 @@ bool hashmap_scan(struct hashmap *map,
  * The function returns true if an item was retrieved; false if the end of the
  * iteration has been reached.
  */
-bool hashmap_iter(struct hashmap *map, size_t *i, void **item)
+bool hashmap_iter(struct hashmap *map, void **item)
 {
     struct bucket *bucket;
     do
     {
-        if (*i >= map->nbuckets)
+        if (map->iterator_index >= map->nbuckets)
         {
             return false;
         }
-        bucket = bucket_at(map, *i);
-        (*i)++;
+        // Jump over the header to get the element address.
+        bucket = bucket_at(map, map->iterator_index) + HEADER_SIZE;
+        (map->iterator_index)++;
     } while (!bucket->dib);
     *item = bucket_item(bucket);
     return true;
