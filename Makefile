@@ -43,8 +43,8 @@ test_valgrind:
 	                                                          --c-flag -g
 
 test_stack:
-	@MALLOC_CHECK_=2 fpm test --flag   -g --flag   -lmcheck --flag -fstack-protector \
-	                          --c-flag -g --c-flag -lmcheck --c-flag -fstack-protector
+	@MALLOC_CHECK_=2 fpm test --flag   -g --flag   -lmcheck --flag -fstack-protector --flag -ftrapv \
+	                          --c-flag -g --c-flag -lmcheck --c-flag -fstack-protector --c-flag -ftrapv
 
 
 #! CLEANING COMMANDS.
