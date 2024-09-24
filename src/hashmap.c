@@ -41,21 +41,20 @@ void hashmap_free(struct hashmap *map);
 void hashmap_clear(struct hashmap *map, bool update_cap);
 size_t hashmap_count(struct hashmap *map);
 bool hashmap_oom(struct hashmap *map);
-
+// Setters.
 const void *hashmap_set_str_key(struct hashmap *, const char *key_s, size_t string_length, const void *fortran_data);
 const void *hashmap_set_int_key(struct hashmap *, int64_t key_i_fort, const void *fortran_data);
 const void *hashmap_set_internal(struct hashmap *map, const header *stack_header, const void *fortran_data);
-
+// Getters.
 const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t string_length);
 const void *hashmap_get_int_key(struct hashmap *map, const int64_t key_i);
 const void *hashmap_get_internal(struct hashmap *map, const header *stack_header);
-
+// Deleters.
 const void *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_t string_length);
 const void *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i);
 const void *hashmap_delete_internal(struct hashmap *map, const header *stack_header);
-
+// Iteration.
 void hashmap_initialize_iterator(struct hashmap *map);
-
 bool hashmap_iter_str_key(struct hashmap *map, char **key_s, size_t *string_length, void **fortran_data);
 bool hashmap_iter_int_key(struct hashmap *map, int64_t *key_i, void **fortran_data);
 bool hashmap_iterate_internal(struct hashmap *map, void **item);
