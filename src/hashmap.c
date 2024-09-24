@@ -776,7 +776,7 @@ bool hashmap_iterate_str_key_kv(struct hashmap *map, char **key_s, size_t *strin
     {
         header *heap_header = (header *)element_pointer;
 
-        string_length = heap_header->string_length;
+        *string_length = heap_header->string_length;
         *key_s = heap_header->key_s;
 
         // Jump over the header and assign Fortran data.
@@ -801,7 +801,7 @@ bool hashmap_iterate_int_key_kv(struct hashmap *map, int64_t *key_i, void **fort
     {
         header *heap_header = (header *)element_pointer;
 
-        key_i = heap_header->key_i;
+        *key_i = heap_header->key_i;
 
         // Jump over the header and assign Fortran data.
         *fortran_data = element_pointer + HEADER_SIZE;
