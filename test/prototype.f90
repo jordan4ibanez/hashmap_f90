@@ -57,14 +57,14 @@ program prototype
   type(hashmap_string_key) :: map
   integer(c_int), pointer :: gotten_data
   type(c_ptr) :: raw_ptr
-  integer(c_int) :: i
+  integer(c_int) :: i, w, d
 
   ! z = 0
 
   !* Create the hashmap.
   map = new_hashmap_string_key(sizeof(10))
 
-  do i = 1,100
+  do i = 1,10000
     call map%set("hi"//int_to_string(i), i)
     ! if(map%has_key("hi"//int_to_string(i))) then
     !   print*,"got it"
@@ -73,18 +73,32 @@ program prototype
     ! end if
   end do
 
-  call map%initialize_iterator()
 
-  i = 0
+
+  w = 1
+  d = 0
 
   print*,map%count()
 
+  call map%initialize_iterator()
+
+  w = w + w
+
   do while (map%iterate(raw_ptr))
-    i = i + 1
-    print*,i
-    ! call c_f_pointer(raw_ptr, gotten_data)
+
+    w = (w + w)
+    ! print*,w
+
+    ! print*,i
+    call c_f_pointer(raw_ptr, gotten_data)
     ! print*,gotten_data
+    d = d + gotten_data
   end do
+
+  if (w /= d) then
+    print*,w, "vs", d
+    error stop
+  end if
 
   ! do i = 1,100
   !   call map%set("hi"//int_to_string(i), i)
