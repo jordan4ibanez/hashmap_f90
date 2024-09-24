@@ -232,7 +232,7 @@ static uint64_t get_hash(struct hashmap *map, const void *key)
 
 /**
  * hashmap_new returns a new hash map.
- * Param `elsize` is the size of each element in the tree. Every element that
+ * Param `raw_data_size` is the size of each element in the tree. Every element that
  * is inserted, deleted, or retrieved will be this size.
  * Param `cap` is the default lower capacity of the hashmap. Setting this to
  * zero will default to 16.
@@ -240,10 +240,10 @@ static uint64_t get_hash(struct hashmap *map, const void *key)
  * Param `elfree` is a function that frees a specific item. This should be NULL
  * unless you're storing some kind of reference data in the hash.
  */
-struct hashmap *hashmap_new(size_t el_only_size, size_t cap)
+struct hashmap *hashmap_new(size_t raw_data_size, size_t cap)
 {
 
-    const size_t elsize = HEADER_SIZE + el_only_size;
+    const size_t element_size = HEADER_SIZE + raw_data_size;
 
     size_t ncap = 16;
     if (cap < ncap)
@@ -259,7 +259,7 @@ struct hashmap *hashmap_new(size_t el_only_size, size_t cap)
         cap = ncap;
     }
 
-    size_t bucketsz = sizeof(struct bucket) + elsize;
+    size_t bucketsz = sizeof(struct bucket) + element_size;
     while (bucketsz & (sizeof(uintptr_t) - 1))
     {
         bucketsz++;
@@ -276,8 +276,8 @@ struct hashmap *hashmap_new(size_t el_only_size, size_t cap)
 
     memset(map, 0, sizeof(struct hashmap));
 
-    map->raw_element_size = el_only_size;
-    map->element_size = elsize;
+    map->raw_element_size = raw_data_size;
+    map->element_size = element_size;
     map->bucketsz = bucketsz;
     map->spare = ((char *)map) + sizeof(struct hashmap);
     map->edata = (char *)map->spare + bucketsz;
