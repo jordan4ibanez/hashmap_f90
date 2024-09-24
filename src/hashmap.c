@@ -95,9 +95,9 @@ struct bucket
 // hashmap is an open addressed hash map using robinhood hashing.
 struct hashmap
 {
-    size_t raw_el_size;
-    size_t elsize;
-    size_t cap;
+    size_t raw_element_size;
+    size_t element_size;
+    size_t capacity;
     size_t bucketsz;
     size_t nbuckets;
     size_t count;
@@ -279,12 +279,12 @@ struct hashmap *hashmap_new(size_t el_only_size, size_t cap)
 
     memset(map, 0, sizeof(struct hashmap));
 
-    map->raw_el_size = el_only_size;
-    map->elsize = elsize;
+    map->raw_element_size = el_only_size;
+    map->element_size = elsize;
     map->bucketsz = bucketsz;
     map->spare = ((char *)map) + sizeof(struct hashmap);
     map->edata = (char *)map->spare + bucketsz;
-    map->cap = cap;
+    map->capacity = cap;
     map->nbuckets = cap;
     map->mask = map->nbuckets - 1;
     map->buckets = malloc(map->bucketsz * map->nbuckets);
@@ -314,17 +314,17 @@ void hashmap_clear(struct hashmap *map, bool update_cap)
     map->count = 0;
     if (update_cap)
     {
-        map->cap = map->nbuckets;
+        map->capacity = map->nbuckets;
     }
-    else if (map->nbuckets != map->cap)
+    else if (map->nbuckets != map->capacity)
     {
-        void *new_buckets = malloc(map->bucketsz * map->cap);
+        void *new_buckets = malloc(map->bucketsz * map->capacity);
         if (new_buckets)
         {
             free(map->buckets);
             map->buckets = new_buckets;
         }
-        map->nbuckets = map->cap;
+        map->nbuckets = map->capacity;
     }
     memset(map->buckets, 0, map->bucketsz * map->nbuckets);
     map->mask = map->nbuckets - 1;
@@ -369,7 +369,7 @@ static void build_int_header(header *header_element, const int64_t key_i)
  */
 static bool resize(struct hashmap *map, size_t new_cap)
 {
-    struct hashmap *map2 = hashmap_new(map->elsize, new_cap);
+    struct hashmap *map2 = hashmap_new(map->element_size, new_cap);
 
     if (!map2)
     {
@@ -484,7 +484,7 @@ const void *hashmap_set_internal(struct hashmap *map, const header *header_eleme
     memcpy(eitem, header_element, HEADER_SIZE);
 
     // Then, jump over the entire header and copy the stack element
-    memcpy(eitem + HEADER_SIZE, raw_item, map->raw_el_size);
+    memcpy(eitem + HEADER_SIZE, raw_item, map->raw_element_size);
 
     void *bitem;
     size_t i = entry->hash & map->mask;
@@ -500,8 +500,8 @@ const void *hashmap_set_internal(struct hashmap *map, const header *header_eleme
         bitem = bucket_item(bucket);
         if (entry->hash == bucket->hash && (compare_function(eitem, bitem) == 0))
         {
-            memcpy(map->spare, bitem, map->elsize);
-            memcpy(bitem, eitem, map->elsize);
+            memcpy(map->spare, bitem, map->element_size);
+            memcpy(bitem, eitem, map->element_size);
             return map->spare;
         }
         if (bucket->dib < entry->dib)
@@ -631,7 +631,7 @@ const void *hashmap_delete_internal(struct hashmap *map, const header *header_el
         void *bitem = bucket_item(bucket);
         if (bucket->hash == hash && (compare_function(header_element, bitem) == 0))
         {
-            memcpy(map->spare, bitem, map->elsize);
+            memcpy(map->spare, bitem, map->element_size);
             bucket->dib = 0;
             while (1)
             {
@@ -647,7 +647,7 @@ const void *hashmap_delete_internal(struct hashmap *map, const header *header_el
                 prev->dib--;
             }
             map->count--;
-            if (map->nbuckets > map->cap && map->count <= map->shrinkat)
+            if (map->nbuckets > map->capacity && map->count <= map->shrinkat)
             {
                 // Ignore the return value. It's ok for the resize operation to
                 // fail to allocate enough memory because a shrink operation
@@ -737,7 +737,9 @@ bool hashmap_iter(struct hashmap *map, size_t *i, void **item)
     do
     {
         if (*i >= map->nbuckets)
+        {
             return false;
+        }
         bucket = bucket_at(map, *i);
         (*i)++;
     } while (!bucket->dib);
