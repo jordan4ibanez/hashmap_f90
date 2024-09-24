@@ -438,7 +438,7 @@ const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t s
 const void *hashmap_set_int_key(struct hashmap *map, const int64_t key_i_fort, const void *raw_item)
 {
     header header_element;
-    build_int_header(&header_element, (int64_t)key_i_fort);
+    build_int_header(&header_element, (uint64_t)key_i_fort);
 
     return hashmap_set_internal(map, &header_element, raw_item);
 }
