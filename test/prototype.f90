@@ -99,7 +99,8 @@ program prototype
   do
     call map%initialize_iterator()
     do while (map%iterate_kv(string_pointer, raw_ptr))
-      print*,string_pointer
+      call c_f_pointer(raw_ptr, gotten_data)
+      print*,string_pointer, len(string_pointer), gotten_data
     end do
   end do
 
