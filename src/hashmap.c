@@ -34,6 +34,7 @@ typedef struct header header;
 typedef struct bucket bucket;
 typedef struct hashmap hashmap;
 
+// fixme: make this section neater.
 struct hashmap *hashmap_new(size_t elsize, size_t cap);
 
 void hashmap_free(struct hashmap *map);
@@ -53,6 +54,7 @@ const void *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_
 const void *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i);
 const void *hashmap_delete_internal(struct hashmap *map, const header *stack_header);
 
+void hashmap_initialize_iterator(struct hashmap *map);
 bool hashmap_iter(struct hashmap *map, void **item);
 
 const void *hashmap_probe(struct hashmap *map, uint64_t position);
@@ -708,6 +710,16 @@ bool hashmap_scan(struct hashmap *map,
 }
 
 /**
+ * Initializes the iterator.
+ *
+ * This must be called before you begin iteration.
+ */
+void hashmap_initialize_iterator(struct hashmap *map)
+{
+    map->iterator_index = 0;
+}
+
+/**
  * hashmap_iter iterates one key at a time yielding a reference to an
  * entry at each iteration. Useful to write simple loops and avoid writing
  * dedicated callbacks and udata structures, as in hashmap_scan.
@@ -721,6 +733,8 @@ bool hashmap_scan(struct hashmap *map,
  * Note that if hashmap_delete() is called on the hashmap being iterated,
  * the buckets are rearranged and the iterator must be reset to 0, otherwise
  * unexpected results may be returned after deletion.
+ *
+ *? Implementation note: hashmap_delete() now resets the iterator automatically.
  *
  * This function has not been tested for thread safety.
  *
