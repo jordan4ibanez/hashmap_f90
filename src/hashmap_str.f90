@@ -30,7 +30,7 @@ module hashmap_str
     procedure :: count => str_hashmap_count
     procedure :: is_empty => str_hashmap_is_empty
     ! procedure :: clear => str_hashmap_clear
-    ! procedure :: iterate => str_hashmap_iterate
+    procedure :: iterate => str_hashmap_iterate
     ! procedure :: iterate_kv => str_hashmap_iterate_kv
   end type hashmap_string_key
 
@@ -166,30 +166,30 @@ contains
   end subroutine str_hashmap_delete
 
 
-!   !* Deallocate EVERYTHING including the underlying C memory.
-!   subroutine str_hashmap_free(this)
-!     implicit none
+  ! !* Deallocate EVERYTHING including the underlying C memory.
+  ! subroutine str_hashmap_free(this)
+  !   implicit none
 
-!     class(hashmap_string_key), intent(inout) :: this
-!     integer(c_int64_t) :: i
-!     type(c_ptr) :: generic_c_pointer
+  !   class(hashmap_string_key), intent(inout) :: this
+  !   integer(c_int64_t) :: i
+  !   type(c_ptr) :: generic_c_pointer
 
-!     i = 0
+  !   i = 0
 
-!     do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
+  !   do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
 
-!       ! Call the GC function.
-!       if (c_associated(this%gc_function)) then
-!         call str_run_gc(this%gc_function, generic_c_pointer)
-!       end if
+  !     ! Call the GC function.
+  !     if (c_associated(this%gc_function)) then
+  !       call str_run_gc(this%gc_function, generic_c_pointer)
+  !     end if
 
-!       ! Free the old string key pointer.
-!       call str_free_string_key(generic_c_pointer)
-!     end do
+  !     ! Free the old string key pointer.
+  !     call str_free_string_key(generic_c_pointer)
+  !   end do
 
 
-!     call internal_hashmap_free(this%map)
-!   end subroutine str_hashmap_free
+  !   call internal_hashmap_free(this%map)
+  ! end subroutine str_hashmap_free
 
 
   !* Get the number of items in the hashmap.
@@ -240,32 +240,23 @@ contains
   ! end subroutine str_hashmap_clear
 
 
-!   !* Allows you to iterate through each element in the hashmap by direct pointer.
-!   !* This means: You can mutate the element in the hashmap directly.
-!   !*
-!   !* Your iterator_index must start at 0, or else it's UB.
-!   !* DO NOT delete elements as you iterate.
-!   function str_hashmap_iterate(this, iterator_index, generic_pointer) result(has_item)
-!     implicit none
+  !* Allows you to iterate through each element in the hashmap by direct pointer.
+  !* This means: You can mutate the element in the hashmap directly.
+  !* If you delete items while you iterate, keep in mind the iteration restarts.
+  function str_hashmap_iterate(this, raw_c_pointer) result(has_item)
+    implicit none
 
-!     class(hashmap_string_key), intent(in) :: this
-!     integer(c_size_t), intent(inout) :: iterator_index
-!     class(*), intent(inout), pointer :: generic_pointer
-!     logical(c_bool) :: has_item
-!     type(c_ptr) :: raw_c_pointer
-!     type(element_string_key), pointer :: element_pointer
+    class(hashmap_string_key), intent(in) :: this
+    type(c_ptr), intent(inout) :: raw_c_pointer
+    logical(c_bool) :: has_item
 
-!     has_item = internal_hashmap_iter(this%map, iterator_index, raw_c_pointer)
+    has_item = internal_hashmap_iterate(this%map, raw_c_pointer)
 
-!     ! Nothing to do.
-!     if (.not. has_item) then
-!       return
-!     end if
-
-!     call c_f_pointer(raw_c_pointer, element_pointer)
-
-!     generic_pointer => element_pointer%data
-!   end function str_hashmap_iterate
+    ! Nothing to do.
+    if (.not. has_item) then
+      return
+    end if
+  end function str_hashmap_iterate
 
 
 !   !* Allows you to iterate through each element in the hashmap by key and direct pointer.
