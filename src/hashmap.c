@@ -340,9 +340,8 @@ static void build_string_header(header *header_element, const char *key_s, size_
     // Set header parameters.
     header_element->is_string = true;
     header_element->string_length = string_length;
-
-    // Jump over the first two bytes and memcpy the data into the key.
-    strncpy(header_element->key_s, key_s, string_length);
+    memcpy(header_element->key_s, key_s, string_length);
+    printf("%s\n", header_element->key_s);
 }
 
 /**
