@@ -738,7 +738,7 @@ void hashmap_initialize_iterator(struct hashmap *map)
  * iteration has been reached.
  */
 
-bool hashmap_iter_str_key(struct hashmap *map, char **key_s, void **fortran_data)
+bool hashmap_iter_str_key(struct hashmap *map, char **key_s, size_t *string_length, void **fortran_data)
 {
     // We must process the data given to use by the junction function.
 
@@ -747,6 +747,10 @@ bool hashmap_iter_str_key(struct hashmap *map, char **key_s, void **fortran_data
     if (!hashmap_iter(map, &pure_generic))
     {
         return false;
+    }
+    else
+    {
+        header *heap_header = (header *)pure_generic;
     }
 }
 
