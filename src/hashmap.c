@@ -622,6 +622,10 @@ const void *hashmap_delete_internal(struct hashmap *map, const header *header_el
     uint64_t hash = get_hash(map, header_element);
     hash = clip_hash(hash);
 
+    // If you call hashmap_delete_*() while iterating,
+    // the iteration will start over.
+    map->iterator_index = 0;
+
     map->oom = false;
     size_t i = hash & map->mask;
     while (1)
