@@ -121,41 +121,34 @@ struct hashmap
 /**
  * Compares two headers.
  */
-int compare_function(const void *a, const void *b)
+int compare_function(const header *header_a, const header *header_b)
 {
-    // This will take in 2 [ header ] pointers.
-    header *head_a = (header *)a;
-    header *head_b = (header *)b;
-
     // If this goes wrong, uh oh.
-    assert(head_a->is_string && head_b->is_string);
+    assert(header_a->is_string && header_b->is_string);
 
-    if (head_a->is_string)
+    if (header_a->is_string)
     {
         // Simple length check.
-        if (head_a->string_length != head_b->string_length)
+        if (header_a->string_length != header_b->string_length)
         {
             return 1;
         }
 
         // Then we can just compare the bytes directly.
-        return strncmp((const char *)&head_a->key_s, (const char *)&head_b->key_s, head_a->string_length);
+        return strncmp((const char *)&header_a->key_s, (const char *)&header_b->key_s, header_a->string_length);
     }
     else
     {
         // 0 is true and -1,1 is false in strncmp due to the way it was designed.
-        return head_a->key_i != head_b->key_i;
+        return header_a->key_i != header_b->key_i;
     }
 }
 
 /**
  * Hashes the header key.
  */
-uint64_t hash_function(const void *a)
+uint64_t hash_function(const header *header_pointer)
 {
-    // This will be getting a header pointer.
-    header *header_pointer = (header *)a;
-
     if (header_pointer->is_string)
     {
         return rapidhash(&header_pointer->key_s, header_pointer->string_length);
