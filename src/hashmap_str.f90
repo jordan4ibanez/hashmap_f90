@@ -32,7 +32,7 @@ module hashmap_str
     ! procedure :: clear => str_hashmap_clear
     procedure :: initialize_iterator => str_hashmap_initialize_iterator
     procedure :: iterate => str_hashmap_iterate
-    ! procedure :: iterate_kv => str_hashmap_iterate_kv
+    procedure :: iterate_kv => str_hashmap_iterate_kv
   end type hashmap_string_key
 
 
@@ -269,36 +269,32 @@ contains
   end subroutine str_hashmap_initialize_iterator
 
 
-!   !* Allows you to iterate through each element in the hashmap by key and direct pointer.
-!   !* This means: You can mutate the element in the hashmap directly.
-!   !*
-!   !* If you mutate the key during iteration, good luck.
-!   !*
-!   !* Your iterator_index must start at 0, or else it's UB.
-!   !* DO NOT delete elements as you iterate.
-!   function str_hashmap_iterate_kv(this, iterator_index, key_pointer, generic_pointer) result(has_item)
-!     implicit none
+  !* Allows you to iterate through each element in the hashmap by key and direct pointer.
+  !* This means: You can mutate the element in the hashmap directly.
+  !*
+  !* If you mutate the key during iteration, good luck.
+  !*
+  !* If you delete items as you iterate, this restarts the iteration.
+  function str_hashmap_iterate_kv(this, string_pointer, raw_c_pointer) result(has_item)
+    implicit none
 
-!     class(hashmap_string_key), intent(in) :: this
-!     integer(c_size_t), intent(inout) :: iterator_index
-!     character(len = :, kind = c_char), intent(inout), pointer :: key_pointer
-!     class(*), intent(inout), pointer :: generic_pointer
-!     logical(c_bool) :: has_item
-!     type(c_ptr) :: raw_c_pointer
-!     type(element_string_key), pointer :: element_pointer
+    class(hashmap_string_key), intent(in) :: this
+    character(len = *, kind = c_char), dimension(:), intent(inout), pointer :: string_pointer
+    type(c_ptr), intent(inout) :: raw_c_pointer
+    type(c_ptr) :: c_str_pointer
+    integer(c_size_t) :: string_length
+    logical(c_bool) :: has_item
 
-!     has_item = internal_hashmap_iter(this%map, iterator_index, raw_c_pointer)
 
-!     ! Nothing to do.
-!     if (.not. has_item) then
-!       return
-!     end if
+    has_item = internal_hashmap_iterate_str_key_kv(this%map, c_str_pointer, string_length, raw_c_pointer)
 
-!     call c_f_pointer(raw_c_pointer, element_pointer)
+    ! Nothing to do.
+    if (.not. has_item) then
+      return
+    end if
 
-!     key_pointer => element_pointer%key
-!     generic_pointer => element_pointer%data
-!   end function str_hashmap_iterate_kv
+    call c_f_pointer(c_str_pointer, string_pointer, [string_length])
+  end function str_hashmap_iterate_kv
 
 
 ! !! INTRINSIC HASHMAP FUNCTIONS. ===========================================================================
