@@ -58,143 +58,40 @@ program prototype
   integer(c_int), pointer :: gotten_data
   type(c_ptr) :: raw_ptr
   integer(c_int) :: i, w, d
+  integer(c_int128_t) :: q, f
 
   ! z = 0
 
   !* Create the hashmap.
   map = new_hashmap_string_key(sizeof(10))
 
-  do i = 1,10000
+  do i = 1,100
     call map%set("hi"//int_to_string(i), i)
-    ! if(map%has_key("hi"//int_to_string(i))) then
-    !   print*,"got it"
-    ! else
-    !   error stop "wat"
-    ! end if
+
+    if (map%get("hi"//int_to_string(i), raw_ptr)) then
+      call c_f_pointer(raw_ptr, gotten_data)
+      print*,gotten_data
+    end if
+
+    print*,map%count()
+
+    if (.not. map%has_key("hi"//int_to_string(i))) then
+      print*,"FAILED"
+    end if
+
+    ! call map%delete("hi"//int_to_string(i))
+
+    print*,map%count()
+
+    if (map%has_key("hi"//int_to_string(i))) then
+      print*,"FAILED"
+    end if
   end do
 
-
-
-  w = 1
-  d = 0
-
-  print*,map%count()
-
-  call map%initialize_iterator()
-
-  w = w + w
-
-  do while (map%iterate(raw_ptr))
-
-    w = (w + w)
-    ! print*,w
-
-    ! print*,i
+  do while(map%iterate(raw_ptr))
     call c_f_pointer(raw_ptr, gotten_data)
-    ! print*,gotten_data
-    d = d + gotten_data
+
+    print*,gotten_data
   end do
-
-  if (w /= d) then
-    print*,w, "vs", d
-    error stop
-  end if
-
-  ! do i = 1,100
-  !   call map%set("hi"//int_to_string(i), i)
-
-  !   if (map%get("hi"//int_to_string(i), raw_ptr)) then
-  !     call c_f_pointer(raw_ptr, gotten_data)
-  !     print*,gotten_data
-  !   end if
-
-  !   print*,map%count()
-
-  !   if (.not. map%has_key("hi"//int_to_string(i))) then
-  !     print*,"FAILED"
-  !   end if
-
-  !   call map%delete("hi"//int_to_string(i))
-
-  !   print*,map%count()
-
-  !   if (map%has_key("hi"//int_to_string(i))) then
-  !     print*,"FAILED"
-  !   end if
-
-  ! end do
-
-
-
-
-  ! ! print*,"stage 1"
-  ! do i = 1+z,5000+z
-
-  !   !* Create our memory.
-  !   allocate(test_data)
-  !   allocate(test_data%i)
-
-  !   test_data%i = i
-
-  !   !* Put it into the hashmap.
-  !   !*
-  !   !* Uses memcpy under the hood.
-  !   call map%set("hi"//int_to_string(i), test_data)
-
-  !   !* Example getting.
-  !   if (map%get("hi"//int_to_string(i), generic_pointer)) then
-  !     ! print*,"got you"
-  !     select type (generic_pointer)
-  !      type is (cool)
-  !       ! print*,generic_pointer%i
-  !     end select
-  !   end if
-  ! end do
-
-  ! !* MAKE SURE, that your iterator starts at 0.
-  ! index = 0
-
-  ! ! print*,"stage 2"
-
-  ! !* Iterate the hashmap.
-  ! !*
-  ! !* NEVER delete elements while iterating!
-  ! do while(map%iterate(index, generic_pointer))
-  !   select type(generic_pointer)
-  !    type is (cool)
-  !     ! print*,generic_pointer%i
-  !   end select
-  ! end do
-
-
-  ! !* We can remove the elements we just added because we already knew their keys.
-  ! !*
-  ! !* Will automatically call your GC function.
-  ! ! do i = 1+z,5000+z
-  ! !   call map%delete(int(i, c_int64_t))
-  ! ! end do
-
-  ! !* But if you want to be thorough and wipe the hashmap, you can simply clear it.
-  ! !*
-  ! !* Will automatically call your GC function.
-  ! ! call map%clear()
-
-  ! ! print*,"stage 3"
-
-  ! !* We can finally free the hashmap.
-  ! !*
-  ! !* This WILL DESTROY the underlying C hashmap data!
-  ! !* DO NOT use the hashmap after this is called, until you have created it again.
-  ! !*
-  ! !* Will automatically call your GC function.
-  ! call map%free()
-
-  ! ! print*,"nap time"
-
-  ! !* I just thought it would be neat to let you see it print out chunk by chunk.
-  ! ! call sleep(1)
-
-  ! z = z + 5000
-! end do
 
 end program prototype
