@@ -66,10 +66,13 @@ program prototype
 
   do i = 1,100
     call map%set("hi"//int_to_string(i), 10)
-    ! if(map%has_key("hi")) then
-    !   print*,"got it"
-    ! end if
+    if(map%has_key("hi"//int_to_string(i))) then
+      print*,"got it"
+    else
+      error stop "wat"
+    end if
   end do
+
   ! do i = 1,100
   !   call map%set("hi"//int_to_string(i), i)
 
