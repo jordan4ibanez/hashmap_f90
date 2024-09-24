@@ -97,8 +97,11 @@ struct bucket
 // hashmap is an open addressed hash map using robinhood hashing.
 struct hashmap
 {
+    // This is the sizeof the Fortran data type alone.
     size_t raw_data_size;
+    // The size of the [ header | Fortran data type ].
     size_t element_size;
+
     size_t capacity;
     size_t bucketsz;
     size_t nbuckets;
