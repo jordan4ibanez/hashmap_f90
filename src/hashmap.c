@@ -29,6 +29,7 @@
 // Forward declaration.
 typedef struct header header;
 typedef struct bucket bucket;
+typedef struct hashmap hashmap;
 
 struct hashmap *hashmap_new(size_t elsize, size_t cap);
 
