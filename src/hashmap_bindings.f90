@@ -76,6 +76,16 @@ module hashmap_bindings
     end subroutine internal_hashmap_initialize_iterator
 
 
+    function internal_hashmap_iterate(map, fortran_data) result(has_item) bind(c, name = "hashmap_iterate")
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: map
+      type(c_ptr), intent(inout) :: fortran_data
+      logical(c_bool) :: has_item
+    end function internal_hashmap_iterate
+
+
     function internal_hashmap_iterate_str_key_kv(map, key_s, string_length, fortran_data) result(has_item) bind(c, name = "hashmap_iterate_str_key_kv")
       use, intrinsic :: iso_c_binding
       implicit none

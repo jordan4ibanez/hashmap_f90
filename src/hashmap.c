@@ -55,6 +55,7 @@ const void *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i);
 const void *hashmap_delete_internal(struct hashmap *map, const header *stack_header);
 // Iteration.
 void hashmap_initialize_iterator(struct hashmap *map);
+bool hashmap_iterate(struct hashmap *map, void **fortran_data);
 bool hashmap_iterate_str_key_kv(struct hashmap *map, char **key_s, size_t *string_length, void **fortran_data);
 bool hashmap_iterate_int_key_kv(struct hashmap *map, int64_t *key_i, void **fortran_data);
 bool hashmap_iterate_internal(struct hashmap *map, void **item);
