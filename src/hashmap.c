@@ -819,8 +819,7 @@ bool hashmap_iterate_internal(struct hashmap *map, void **item)
         {
             return false;
         }
-        // Jump over the header to get the element address.
-        bucket = bucket_at(map, map->iterator_index) + HEADER_SIZE;
+        bucket = bucket_at(map, map->iterator_index);
         (map->iterator_index)++;
     } while (!bucket->dib);
     *item = bucket_item(bucket);
