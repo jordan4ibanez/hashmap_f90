@@ -65,12 +65,25 @@ program prototype
   map = new_hashmap_string_key(sizeof(10))
 
   do i = 1,100
-    call map%set("hi"//int_to_string(i), 10)
-    if(map%has_key("hi"//int_to_string(i))) then
-      print*,"got it"
-    else
-      error stop "wat"
-    end if
+    call map%set("hi"//int_to_string(i), i)
+    ! if(map%has_key("hi"//int_to_string(i))) then
+    !   print*,"got it"
+    ! else
+    !   error stop "wat"
+    ! end if
+  end do
+
+  call map%initialize_iterator()
+
+  i = 0
+
+  print*,map%count()
+
+  do while (map%iterate(raw_ptr))
+    i = i + 1
+    print*,i
+    ! call c_f_pointer(raw_ptr, gotten_data)
+    ! print*,gotten_data
   end do
 
   ! do i = 1,100
