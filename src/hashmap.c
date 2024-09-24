@@ -720,15 +720,11 @@ void hashmap_initialize_iterator(struct hashmap *map)
 }
 
 /**
+ *! THIS DOCUMENTATION NOW PERTAINS TO EVERYTHING BELOW THIS SECTION.
+
  * hashmap_iter iterates one key at a time yielding a reference to an
  * entry at each iteration. Useful to write simple loops and avoid writing
  * dedicated callbacks and udata structures, as in hashmap_scan.
- *
- * map is a hash map handle. i is a pointer to a size_t cursor that
- * should be initialized to 0 at the beginning of the loop. item is a void
- * pointer pointer that is populated with the retrieved item. Note that this
- * is NOT a copy of the item stored in the hash map and can be directly
- * modified.
  *
  * Note that if hashmap_delete() is called on the hashmap being iterated,
  * the buckets are rearranged and the iterator must be reset to 0, otherwise
@@ -741,7 +737,21 @@ void hashmap_initialize_iterator(struct hashmap *map)
  * The function returns true if an item was retrieved; false if the end of the
  * iteration has been reached.
  */
-bool hashmap_iter(struct hashmap *map, void **item)
+
+bool hashmap_iter_str_key(struct hashmap *map, char **key_s, void **fortran_data)
+{
+    // We must process the data given to use by the junction function.
+
+    void *pure_generic = NULL;
+
+    if (!hashmap_iter(map, &pure_generic))
+    {
+        return false;
+    }
+}
+
+// Funnel end point. (junction)
+bool hashmap_iterate_internal(struct hashmap *map, void **item)
 {
     struct bucket *bucket;
     do
