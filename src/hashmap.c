@@ -746,20 +746,19 @@ bool hashmap_iterate(struct hashmap *map, void **fortran_data)
 {
     // We must process the data given to use by the junction function.
 
-    printf("iteration\n");
-    // void *element_pointer = NULL;
+    void *element_pointer = NULL;
 
-    // if (!hashmap_iterate_internal(map, &element_pointer))
-    // {
-    //     return false;
-    // }
-    // else
-    // {
-    // Jump over the header and assign Fortran data.
-    // *fortran_data = element_pointer + HEADER_SIZE;
+    if (!hashmap_iterate_internal(map, &element_pointer))
+    {
+        return false;
+    }
+    else
+    {
+        // Jump over the header and assign Fortran data.
+        *fortran_data = element_pointer + HEADER_SIZE;
 
-    return true;
-    // }
+        return true;
+    }
 }
 
 // Key and value.

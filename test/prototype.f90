@@ -64,42 +64,41 @@ program prototype
   !* Create the hashmap.
   map = new_hashmap_string_key(sizeof(10))
 
-  ! do i = 1,10000
-  !   call map%set("hi"//int_to_string(i), i)
-  !   ! if(map%has_key("hi"//int_to_string(i))) then
-  !   !   print*,"got it"
-  !   ! else
-  !   !   error stop "wat"
-  !   ! end if
-  ! end do
+  do i = 1,10000
+    call map%set("hi"//int_to_string(i), i)
+    ! if(map%has_key("hi"//int_to_string(i))) then
+    !   print*,"got it"
+    ! else
+    !   error stop "wat"
+    ! end if
+  end do
 
 
 
   w = 1
+  d = 0
 
-  ! print*,map%count()
+  print*,map%count()
 
   call map%initialize_iterator()
 
+  w = w + w
 
   do while (map%iterate(raw_ptr))
 
-    w = w + w
-    print*,w
+    w = (w + w)
+    ! print*,w
 
     ! print*,i
-    ! call c_f_pointer(raw_ptr, gotten_data)
+    call c_f_pointer(raw_ptr, gotten_data)
     ! print*,gotten_data
-    ! print*,gotten_data
-    ! d = d + gotten_data
+    d = d + gotten_data
   end do
 
-  print*,w
-
-  ! if (w /= d) then
-  !   print*,w, "vs", d
-  !   error stop
-  ! end if
+  if (w /= d) then
+    print*,w, "vs", d
+    error stop
+  end if
 
   ! do i = 1,100
   !   call map%set("hi"//int_to_string(i), i)
