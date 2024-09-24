@@ -236,12 +236,6 @@ static uint64_t get_hash(struct hashmap *map, const void *key)
  * is inserted, deleted, or retrieved will be this size.
  * Param `cap` is the default lower capacity of the hashmap. Setting this to
  * zero will default to 16.
- * Param `hash` is a function that generates a hash value for an item. It's
- * important that you provide a good hash function, otherwise it will perform
- * poorly or be vulnerable to Denial-of-service attacks. This implementation
- * comes with two helper functions `hashmap_sip()` and `hashmap_murmur()`.
- * Param `compare` is a function that compares items in the tree. See the
- * qsort stdlib function for an example of how this function works.
  * The hashmap must be freed with hashmap_free().
  * Param `elfree` is a function that frees a specific item. This should be NULL
  * unless you're storing some kind of reference data in the hash.
