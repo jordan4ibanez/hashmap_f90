@@ -30,6 +30,7 @@ module hashmap_str
     procedure :: count => str_hashmap_count
     procedure :: is_empty => str_hashmap_is_empty
     ! procedure :: clear => str_hashmap_clear
+    procedure :: initialize_iterator => str_hashmap_initialize_iterator
     procedure :: iterate => str_hashmap_iterate
     ! procedure :: iterate_kv => str_hashmap_iterate_kv
   end type hashmap_string_key
@@ -257,6 +258,15 @@ contains
       return
     end if
   end function str_hashmap_iterate
+
+
+  subroutine str_hashmap_initialize_iterator(this)
+    implicit none
+
+    class(hashmap_string_key), intent(in) :: this
+
+    call internal_hashmap_initialize_iterator(this%map)
+  end subroutine str_hashmap_initialize_iterator
 
 
 !   !* Allows you to iterate through each element in the hashmap by key and direct pointer.
