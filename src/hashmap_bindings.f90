@@ -68,8 +68,11 @@ module hashmap_bindings
     end subroutine internal_hashmap_clear
 
 
-    subroutine internal_hashmap_initialize_iterator()
+    subroutine internal_hashmap_initialize_iterator(map) bind(c, name = "hashmap_initialize_iterator")
+      use, intrinsic :: iso_c_binding
+      implicit none
 
+      type(c_ptr), intent(in), value :: map
     end subroutine internal_hashmap_initialize_iterator
 
 
