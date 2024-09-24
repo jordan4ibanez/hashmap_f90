@@ -112,7 +112,7 @@ struct hashmap
     size_t shrinkat;
     uint8_t loadfactor;
     uint8_t growpower;
-    bool oom;
+    bool out_of_memory;
     void *buckets;
     void *spare;
     void *edata;
@@ -462,12 +462,12 @@ const void *hashmap_set_internal(struct hashmap *map, const header *stack_header
 
     hash = clip_hash(hash);
 
-    map->oom = false;
+    map->out_of_memory = false;
     if (map->count >= map->growat)
     {
         if (!resize(map, map->nbuckets * (1 << map->growpower)))
         {
-            map->oom = true;
+            map->out_of_memory = true;
             return NULL;
         }
     }
@@ -621,7 +621,7 @@ const void *hashmap_delete_internal(struct hashmap *map, const header *stack_hea
     // the iteration will start over.
     map->iterator_index = 0;
 
-    map->oom = false;
+    map->out_of_memory = false;
     size_t i = hash & map->mask;
     while (1)
     {
@@ -691,7 +691,7 @@ void hashmap_free(struct hashmap *map)
  */
 bool hashmap_oom(struct hashmap *map)
 {
-    return map->oom;
+    return map->out_of_memory;
 }
 
 /**
