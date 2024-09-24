@@ -1,11 +1,13 @@
-// String length limit example:
-// "This is an example of how long your string key can be. If you don't think this is long enough then I think you might want to rethink your implementation. I still need to type something here :)"
-//
-// Copyright 2020 Joshua J Baker. All rights reserved.
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file.
-//
-// Reworked into this monstrosity by jordan4ibanez.
+/**
+ * String length limit example:
+ * "This is an example of how long your string key can be. If you don't think this is long enough then I think you might want to rethink your implementation. I still need to type something here :)"
+ *
+ * Copyright 2020 Joshua J Baker. All rights reserved.
+ * Use of this source code is governed by an MIT-style
+ * license that can be found in the LICENSE file.
+ *
+ * Reworked into this monstrosity by jordan4ibanez.
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -56,10 +58,12 @@ bool hashmap_iter(struct hashmap *map, size_t *i, void **item);
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power);
 void hashmap_set_load_factor(struct hashmap *map, double load_factor);
 
-// Header is a piece of raw data that identifies the element in the bucket.
-// Memory layout including bucket:
-// [bucket][header][fortran data]
-// Total: 208 bytes.
+/**
+ * Header is a piece of raw data that identifies the element in the bucket.
+ * Memory layout including bucket:
+ * [bucket][header][fortran data]
+ * Total: 208 bytes.
+ */
 struct header
 {
     // Allows hyper generic keys for each element.
@@ -656,15 +660,19 @@ const void *hashmap_delete_internal(struct hashmap *map, const header *header_el
     }
 }
 
-// hashmap_count returns the number of items in the hash map.
+/**
+ * hashmap_count returns the number of items in the hash map.
+ */
 size_t hashmap_count(struct hashmap *map)
 {
     return map->count;
 }
 
-// hashmap_free frees the hash map
-// Every item is called with the element-freeing function given in hashmap_new,
-// if present, to free any data referenced in the elements of the hashmap.
+/**
+ * hashmap_free frees the hash map
+ * Every item is called with the element-freeing function given in hashmap_new,
+ * if present, to free any data referenced in the elements of the hashmap.
+ */
 void hashmap_free(struct hashmap *map)
 {
     if (!map)
@@ -675,16 +683,20 @@ void hashmap_free(struct hashmap *map)
     free(map);
 }
 
-// hashmap_oom returns true if the last hashmap_set() call failed due to the
-// system being out of memory.
+/**
+ * hashmap_oom returns true if the last hashmap_set() call failed due to the
+ * system being out of memory.
+ */
 bool hashmap_oom(struct hashmap *map)
 {
     return map->oom;
 }
 
-// hashmap_scan iterates over all items in the hash map
-// Param `iter` can return false to stop iteration early.
-// Returns false if the iteration has been stopped early.
+/**
+ * hashmap_scan iterates over all items in the hash map
+ * Param `iter` can return false to stop iteration early.
+ * Returns false if the iteration has been stopped early.
+ */
 bool hashmap_scan(struct hashmap *map,
                   bool (*iter)(const void *item))
 {
@@ -699,24 +711,26 @@ bool hashmap_scan(struct hashmap *map,
     return true;
 }
 
-// hashmap_iter iterates one key at a time yielding a reference to an
-// entry at each iteration. Useful to write simple loops and avoid writing
-// dedicated callbacks and udata structures, as in hashmap_scan.
-//
-// map is a hash map handle. i is a pointer to a size_t cursor that
-// should be initialized to 0 at the beginning of the loop. item is a void
-// pointer pointer that is populated with the retrieved item. Note that this
-// is NOT a copy of the item stored in the hash map and can be directly
-// modified.
-//
-// Note that if hashmap_delete() is called on the hashmap being iterated,
-// the buckets are rearranged and the iterator must be reset to 0, otherwise
-// unexpected results may be returned after deletion.
-//
-// This function has not been tested for thread safety.
-//
-// The function returns true if an item was retrieved; false if the end of the
-// iteration has been reached.
+/**
+ * hashmap_iter iterates one key at a time yielding a reference to an
+ * entry at each iteration. Useful to write simple loops and avoid writing
+ * dedicated callbacks and udata structures, as in hashmap_scan.
+ *
+ * map is a hash map handle. i is a pointer to a size_t cursor that
+ * should be initialized to 0 at the beginning of the loop. item is a void
+ * pointer pointer that is populated with the retrieved item. Note that this
+ * is NOT a copy of the item stored in the hash map and can be directly
+ * modified.
+ *
+ * Note that if hashmap_delete() is called on the hashmap being iterated,
+ * the buckets are rearranged and the iterator must be reset to 0, otherwise
+ * unexpected results may be returned after deletion.
+ *
+ * This function has not been tested for thread safety.
+ *
+ * The function returns true if an item was retrieved; false if the end of the
+ * iteration has been reached.
+ */
 bool hashmap_iter(struct hashmap *map, size_t *i, void **item)
 {
     struct bucket *bucket;
