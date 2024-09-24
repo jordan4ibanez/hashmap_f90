@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <inttypes.h>
 #include <assert.h>
 #include "rapid_hash/rapidhash.h"
 
