@@ -64,11 +64,11 @@ program prototype
   !* Create the hashmap.
   map = new_hashmap_string_key(sizeof(10))
 
-  do
-    call map%set("hi", 10)
-    if(map%has_key("hi")) then
-      print*,"got it"
-    end if
+  do i = 1,100
+    call map%set("hi"//int_to_string(i), 10)
+    ! if(map%has_key("hi")) then
+    !   print*,"got it"
+    ! end if
   end do
   ! do i = 1,100
   !   call map%set("hi"//int_to_string(i), i)

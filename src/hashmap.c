@@ -151,7 +151,7 @@ uint64_t hash_function(const header *header_pointer)
 {
     if (header_pointer->is_string)
     {
-        return rapidhash(&header_pointer->key_s, header_pointer->string_length);
+        return rapidhash(header_pointer->key_s, header_pointer->string_length);
     }
     else
     {
