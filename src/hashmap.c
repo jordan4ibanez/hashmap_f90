@@ -765,21 +765,21 @@ bool hashmap_iterate_str_key_kv(struct hashmap *map, char **key_s, size_t *strin
 {
     // We must process the data given to use by the junction function.
 
-    void *pure_generic = NULL;
+    void *element_pointer = NULL;
 
-    if (!hashmap_iterate_internal(map, &pure_generic))
+    if (!hashmap_iterate_internal(map, &element_pointer))
     {
         return false;
     }
     else
     {
-        header *heap_header = (header *)pure_generic;
+        header *heap_header = (header *)element_pointer;
 
         string_length = heap_header->string_length;
         *key_s = heap_header->key_s;
 
         // Jump over the header and assign Fortran data.
-        *fortran_data = pure_generic + HEADER_SIZE;
+        *fortran_data = element_pointer + HEADER_SIZE;
 
         return true;
     }
@@ -790,20 +790,20 @@ bool hashmap_iterate_int_key_kv(struct hashmap *map, int64_t *key_i, void **fort
 {
     // We must process the data given to use by the junction function.
 
-    void *pure_generic = NULL;
+    void *element_pointer = NULL;
 
-    if (!hashmap_iterate_internal(map, &pure_generic))
+    if (!hashmap_iterate_internal(map, &element_pointer))
     {
         return false;
     }
     else
     {
-        header *heap_header = (header *)pure_generic;
+        header *heap_header = (header *)element_pointer;
 
         key_i = heap_header->key_i;
 
         // Jump over the header and assign Fortran data.
-        *fortran_data = pure_generic + HEADER_SIZE;
+        *fortran_data = element_pointer + HEADER_SIZE;
 
         return true;
     }
