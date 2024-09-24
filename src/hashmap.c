@@ -236,12 +236,10 @@ static uint64_t get_hash(struct hashmap *map, const void *key)
 /**
  * hashmap_new returns a new hash map.
  * Param `fortran_data_size` is the size of each element in the tree. Every element that
- * is inserted, deleted, or retrieved will be this size.
+ * is inserted, deleted, or retrieved will be this size (plus the header).
  * Param `cap` is the default lower capacity of the hashmap. Setting this to
  * zero will default to 16.
  * The hashmap must be freed with hashmap_free().
- * Param `elfree` is a function that frees a specific item. This should be NULL
- * unless you're storing some kind of reference data in the hash.
  */
 struct hashmap *hashmap_new(size_t fortran_data_size, size_t cap)
 {
