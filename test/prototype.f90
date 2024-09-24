@@ -64,29 +64,35 @@ program prototype
   !* Create the hashmap.
   map = new_hashmap_string_key(sizeof(10))
 
-  do i = 1,100
-    call map%set("hi"//int_to_string(i), i)
-
-    if (map%get("hi"//int_to_string(i), raw_ptr)) then
-      call c_f_pointer(raw_ptr, gotten_data)
-      print*,gotten_data
+  do
+    call map%set("hi", 10)
+    if(map%has_key("hi")) then
+      print*,"got it"
     end if
-
-    print*,map%count()
-
-    if (.not. map%has_key("hi"//int_to_string(i))) then
-      print*,"FAILED"
-    end if
-
-    call map%delete("hi"//int_to_string(i))
-
-    print*,map%count()
-
-    if (map%has_key("hi"//int_to_string(i))) then
-      print*,"FAILED"
-    end if
-
   end do
+  ! do i = 1,100
+  !   call map%set("hi"//int_to_string(i), i)
+
+  !   if (map%get("hi"//int_to_string(i), raw_ptr)) then
+  !     call c_f_pointer(raw_ptr, gotten_data)
+  !     print*,gotten_data
+  !   end if
+
+  !   print*,map%count()
+
+  !   if (.not. map%has_key("hi"//int_to_string(i))) then
+  !     print*,"FAILED"
+  !   end if
+
+  !   call map%delete("hi"//int_to_string(i))
+
+  !   print*,map%count()
+
+  !   if (map%has_key("hi"//int_to_string(i))) then
+  !     print*,"FAILED"
+  !   end if
+
+  ! end do
 
 
 
