@@ -366,7 +366,7 @@ static void build_int_header(header *stack_header, const int64_t key_i)
  */
 static bool resize(struct hashmap *map, size_t new_cap)
 {
-    struct hashmap *map2 = hashmap_new(map->element_size, new_cap);
+    struct hashmap *map2 = hashmap_new(map->fortran_data_size, new_cap);
 
     if (!map2)
     {
