@@ -63,7 +63,7 @@ void hashmap_set_load_factor(struct hashmap *map, double load_factor);
 /**
  * Header is a piece of raw data that identifies the element in the bucket.
  * Memory layout including bucket:
- * [bucket][header][fortran data]
+ * [bucket][header][raw Fortran data]
  * Total: 208 bytes.
  */
 struct header
