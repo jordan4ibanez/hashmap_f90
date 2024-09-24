@@ -40,17 +40,17 @@ void hashmap_clear(struct hashmap *map, bool update_cap);
 size_t hashmap_count(struct hashmap *map);
 bool hashmap_oom(struct hashmap *map);
 
-const void *hashmap_set_str_key(struct hashmap *, const char *key_s, size_t string_length, const void *raw_item);
-const void *hashmap_set_int_key(struct hashmap *, int64_t key_i_fort, const void *raw_item);
-const void *hashmap_set_internal(struct hashmap *map, const header *header_element, const void *raw_item);
+const void *hashmap_set_str_key(struct hashmap *, const char *key_s, size_t string_length, const void *fortran_data);
+const void *hashmap_set_int_key(struct hashmap *, int64_t key_i_fort, const void *fortran_data);
+const void *hashmap_set_internal(struct hashmap *map, const header *stack_header, const void *fortran_data);
 
 const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t string_length);
 const void *hashmap_get_int_key(struct hashmap *map, const int64_t key_i);
-const void *hashmap_get_internal(struct hashmap *map, const header *header_element);
+const void *hashmap_get_internal(struct hashmap *map, const header *stack_header);
 
 const void *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_t string_length);
 const void *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i);
-const void *hashmap_delete_internal(struct hashmap *map, const header *header_element);
+const void *hashmap_delete_internal(struct hashmap *map, const header *stack_header);
 
 bool hashmap_iter(struct hashmap *map, void **item);
 
@@ -61,9 +61,9 @@ void hashmap_set_grow_by_power(struct hashmap *map, size_t power);
 void hashmap_set_load_factor(struct hashmap *map, double load_factor);
 
 /**
- * Header is a piece of raw data that identifies the element in the bucket.
+ * Header is a piece of data that identifies the element in the bucket.
  * Memory layout including bucket:
- * [bucket][header][raw Fortran data]
+ * [bucket][header][Fortran data]
  * Total: 208 bytes.
  */
 struct header
@@ -87,7 +87,7 @@ struct header
 // Header size in bytes.
 const static size_t HEADER_SIZE = sizeof(header);
 
-// Bucker is a container for elements.
+// Bucket is a container for elements.
 struct bucket
 {
     uint64_t hash : 48;
@@ -98,7 +98,7 @@ struct bucket
 struct hashmap
 {
     // This is the sizeof the Fortran data type alone.
-    size_t raw_data_size;
+    size_t fortran_data_size;
     // The size of the [ header | Fortran data type ].
     size_t element_size;
 
@@ -235,7 +235,7 @@ static uint64_t get_hash(struct hashmap *map, const void *key)
 
 /**
  * hashmap_new returns a new hash map.
- * Param `raw_data_size` is the size of each element in the tree. Every element that
+ * Param `fortran_data_size` is the size of each element in the tree. Every element that
  * is inserted, deleted, or retrieved will be this size.
  * Param `cap` is the default lower capacity of the hashmap. Setting this to
  * zero will default to 16.
@@ -243,10 +243,10 @@ static uint64_t get_hash(struct hashmap *map, const void *key)
  * Param `elfree` is a function that frees a specific item. This should be NULL
  * unless you're storing some kind of reference data in the hash.
  */
-struct hashmap *hashmap_new(size_t raw_data_size, size_t cap)
+struct hashmap *hashmap_new(size_t fortran_data_size, size_t cap)
 {
 
-    const size_t element_size = HEADER_SIZE + raw_data_size;
+    const size_t element_size = HEADER_SIZE + fortran_data_size;
 
     size_t ncap = 16;
     if (cap < ncap)
@@ -279,7 +279,7 @@ struct hashmap *hashmap_new(size_t raw_data_size, size_t cap)
 
     memset(map, 0, sizeof(struct hashmap));
 
-    map->raw_data_size = raw_data_size;
+    map->fortran_data_size = fortran_data_size;
     map->element_size = element_size;
     map->bucketsz = bucketsz;
     map->spare = ((char *)map) + sizeof(struct hashmap);
@@ -335,33 +335,33 @@ void hashmap_clear(struct hashmap *map, bool update_cap)
 /**
  *! THIS IS INTERNAL ONLY.
  *
- * Builds a header element built for string key hashmaps.
+ * Builds a header for string key hashmaps.
  *
  * The header is meant to be on the stack.
  */
-static void build_string_header(header *header_element, const char *key_s, size_t string_length)
+static void build_string_header(header *stack_header, const char *key_s, size_t string_length)
 {
     // Set header parameters.
-    header_element->is_string = true;
-    header_element->string_length = string_length;
+    stack_header->is_string = true;
+    stack_header->string_length = string_length;
     // We have a length component, we will not utilize a null terminator.
     // If you try to print this, you SHOULD get the key followed by garbage.
-    memcpy(header_element->key_s, key_s, string_length);
-    // printf("%s\n", header_element->key_s);
+    memcpy(stack_header->key_s, key_s, string_length);
+    // printf("%s\n", stack_header->key_s);
 }
 
 /**
  *! THIS IS INTERNAL ONLY.
  *
- * Builds a header element built for int key hashmaps.
+ * Builds a header for int key hashmaps.
  *
  * The header is meant to be on the stack.
  */
-static void build_int_header(header *header_element, const int64_t key_i)
+static void build_int_header(header *stack_header, const int64_t key_i)
 {
     // Set header parameters.
-    header_element->is_string = false;
-    header_element->key_i = key_i;
+    stack_header->is_string = false;
+    stack_header->key_i = key_i;
 }
 
 /**
@@ -416,16 +416,16 @@ static bool resize(struct hashmap *map, size_t new_cap)
 /**
  * Set the item with a string key.
  *
- * I highly recommend you only use stack elements for the raw_item. (the item can contain Fortran/C pointers)
+ * I highly recommend you only use stack elements for the fortran_data. (the item can contain Fortran/C pointers)
  */
-const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t string_length, const void *raw_item)
+const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t string_length, const void *fortran_data)
 {
     //! The string length will be checked in fortran.
 
-    header header_element;
-    build_string_header(&header_element, key_s, string_length);
+    header stack_header;
+    build_string_header(&stack_header, key_s, string_length);
 
-    return hashmap_set_internal(map, &header_element, raw_item);
+    return hashmap_set_internal(map, &stack_header, fortran_data);
 }
 
 /**
@@ -433,14 +433,14 @@ const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t s
  *
  * Fortran does not have unsigned types (yet) so we're going to use a straight up cast.
  *
- * I highly recommend you only use stack elements for the raw_item. (the item can contain Fortran/C pointers)
+ * I highly recommend you only use stack elements for the fortran_data. (the item can contain Fortran/C pointers)
  */
-const void *hashmap_set_int_key(struct hashmap *map, const int64_t key_i_fort, const void *raw_item)
+const void *hashmap_set_int_key(struct hashmap *map, const int64_t key_i_fort, const void *fortran_data)
 {
-    header header_element;
-    build_int_header(&header_element, (uint64_t)key_i_fort);
+    header stack_header;
+    build_int_header(&stack_header, (uint64_t)key_i_fort);
 
-    return hashmap_set_internal(map, &header_element, raw_item);
+    return hashmap_set_internal(map, &stack_header, fortran_data);
 }
 
 /**
@@ -454,13 +454,13 @@ const void *hashmap_set_int_key(struct hashmap *map, const int64_t key_i_fort, c
  * may allocate memory. If the system is unable to allocate additional
  * memory then NULL is returned and hashmap_oom() returns true.
  *
- * Implementation note: I would keep raw_item on the stack in Fortran. (the item can contain Fortran/C pointers)
+ * Implementation note: I would keep fortran_data on the stack in Fortran. (the item can contain Fortran/C pointers)
  */
-const void *hashmap_set_internal(struct hashmap *map, const header *header_element, const void *raw_item)
+const void *hashmap_set_internal(struct hashmap *map, const header *stack_header, const void *fortran_data)
 {
 
     // The hackjob of 2024.
-    uint64_t hash = get_hash(map, header_element);
+    uint64_t hash = get_hash(map, stack_header);
 
     hash = clip_hash(hash);
 
@@ -481,10 +481,10 @@ const void *hashmap_set_internal(struct hashmap *map, const header *header_eleme
     void *eitem = bucket_item(entry);
 
     // First copy the header over.
-    memcpy(eitem, header_element, HEADER_SIZE);
+    memcpy(eitem, stack_header, HEADER_SIZE);
 
     // Then, jump over the entire header and copy the stack element
-    memcpy(eitem + HEADER_SIZE, raw_item, map->raw_data_size);
+    memcpy(eitem + HEADER_SIZE, fortran_data, map->fortran_data_size);
 
     void *bitem;
     size_t i = entry->hash & map->mask;
@@ -521,10 +521,10 @@ const void *hashmap_set_internal(struct hashmap *map, const header *header_eleme
  */
 const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t key_len)
 {
-    header header_element;
-    build_string_header(&header_element, key_s, key_len);
+    header stack_header;
+    build_string_header(&stack_header, key_s, key_len);
 
-    return hashmap_get_internal(map, &header_element);
+    return hashmap_get_internal(map, &stack_header);
 }
 
 /**
@@ -532,10 +532,10 @@ const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t k
  */
 const void *hashmap_get_int_key(struct hashmap *map, const int64_t key_i)
 {
-    header header_element;
-    build_int_header(&header_element, (uint64_t)key_i);
+    header stack_header;
+    build_int_header(&stack_header, (uint64_t)key_i);
 
-    return hashmap_get_internal(map, &header_element);
+    return hashmap_get_internal(map, &stack_header);
 }
 
 /**
@@ -544,9 +544,9 @@ const void *hashmap_get_int_key(struct hashmap *map, const int64_t key_i)
  * hashmap_get returns the item based on the provided key. If the item is not
  * found then NULL is returned.
  */
-const void *hashmap_get_internal(struct hashmap *map, const header *header_element)
+const void *hashmap_get_internal(struct hashmap *map, const header *stack_header)
 {
-    uint64_t hash = get_hash(map, header_element);
+    uint64_t hash = get_hash(map, stack_header);
     hash = clip_hash(hash);
 
     size_t i = hash & map->mask;
@@ -558,7 +558,7 @@ const void *hashmap_get_internal(struct hashmap *map, const header *header_eleme
         if (bucket->hash == hash)
         {
             void *bitem = bucket_item(bucket);
-            if (compare_function(header_element, bitem) == 0)
+            if (compare_function(stack_header, bitem) == 0)
             {
                 return bitem + HEADER_SIZE;
             }
@@ -588,10 +588,10 @@ const void *hashmap_probe(struct hashmap *map, uint64_t position)
  */
 const void *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_t string_length)
 {
-    header header_element;
-    build_string_header(&header_element, key_s, string_length);
+    header stack_header;
+    build_string_header(&stack_header, key_s, string_length);
 
-    return hashmap_delete_internal(map, &header_element);
+    return hashmap_delete_internal(map, &stack_header);
 }
 
 /**
@@ -599,10 +599,10 @@ const void *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_
  */
 const void *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i)
 {
-    header header_element;
-    build_int_header(&header_element, (uint64_t)key_i);
+    header stack_header;
+    build_int_header(&stack_header, (uint64_t)key_i);
 
-    return hashmap_delete_internal(map, &header_element);
+    return hashmap_delete_internal(map, &stack_header);
 }
 
 /**
@@ -614,9 +614,9 @@ const void *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i)
  * hashmap_delete removes an item from the hash map and returns it. If the
  * item is not found then NULL is returned.
  */
-const void *hashmap_delete_internal(struct hashmap *map, const header *header_element)
+const void *hashmap_delete_internal(struct hashmap *map, const header *stack_header)
 {
-    uint64_t hash = get_hash(map, header_element);
+    uint64_t hash = get_hash(map, stack_header);
     hash = clip_hash(hash);
 
     // If you call hashmap_delete_*() while iterating,
@@ -633,7 +633,7 @@ const void *hashmap_delete_internal(struct hashmap *map, const header *header_el
             return NULL;
         }
         void *bitem = bucket_item(bucket);
-        if (bucket->hash == hash && (compare_function(header_element, bitem) == 0))
+        if (bucket->hash == hash && (compare_function(stack_header, bitem) == 0))
         {
             memcpy(map->spare, bitem, map->element_size);
             bucket->dib = 0;
