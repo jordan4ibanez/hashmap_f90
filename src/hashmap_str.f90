@@ -21,6 +21,8 @@ module hashmap_str
     private
     type(c_ptr) :: map = c_null_ptr
     type(c_funptr) :: gc_function = c_null_funptr
+    ! This is a massive hackjob which will slow down key/value iteration.
+    character(len = :, kind = c_char), pointer :: internal_string_pointer => null()
   contains
     procedure :: set => str_hashmap_set
     procedure :: get => str_hashmap_get
@@ -278,13 +280,12 @@ contains
   function str_hashmap_iterate_kv(this, string_pointer, raw_c_pointer) result(has_item)
     implicit none
 
-    class(hashmap_string_key), intent(in) :: this
-    character(len = *, kind = c_char), dimension(:), intent(inout), pointer :: string_pointer
+    class(hashmap_string_key), intent(inout) :: this
+    character(len = :, kind = c_char), intent(inout), pointer :: string_pointer
     type(c_ptr), intent(inout) :: raw_c_pointer
     type(c_ptr) :: c_str_pointer
     integer(c_size_t) :: string_length
     logical(c_bool) :: has_item
-
 
     has_item = internal_hashmap_iterate_str_key_kv(this%map, c_str_pointer, string_length, raw_c_pointer)
 
@@ -293,7 +294,12 @@ contains
       return
     end if
 
-    call c_f_pointer(c_str_pointer, string_pointer, [string_length])
+    ! This is either not wiping the heap, with extremely undefined behavior,
+    ! or it's reshaping the pointer every time.
+    allocate(character(len = string_length, kind = c_char) :: string_pointer)
+    deallocate(string_pointer)
+
+    call c_f_pointer(c_str_pointer, string_pointer)
   end function str_hashmap_iterate_kv
 
 

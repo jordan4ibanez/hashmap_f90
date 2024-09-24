@@ -57,6 +57,7 @@ program prototype
   type(hashmap_string_key) :: map
   integer(c_int), pointer :: gotten_data
   type(c_ptr) :: raw_ptr
+  character(len = :, kind = c_char), pointer :: string_pointer
   integer(c_int) :: i, w, d
   integer(c_int128_t) :: q, f
 
@@ -70,10 +71,10 @@ program prototype
 
     if (map%get("hi"//int_to_string(i), raw_ptr)) then
       call c_f_pointer(raw_ptr, gotten_data)
-      print*,gotten_data
+      ! print*,gotten_data
     end if
 
-    print*,map%count()
+    ! print*,map%count()
 
     if (.not. map%has_key("hi"//int_to_string(i))) then
       print*,"FAILED"
@@ -81,17 +82,26 @@ program prototype
 
     ! call map%delete("hi"//int_to_string(i))
 
-    print*,map%count()
+    ! print*,map%count()
 
     if (map%has_key("hi"//int_to_string(i))) then
-      print*,"FAILED"
+      ! print*,"FAILED"
     end if
   end do
 
+  call map%initialize_iterator()
+
   do while(map%iterate(raw_ptr))
     call c_f_pointer(raw_ptr, gotten_data)
-
-    print*,gotten_data
+    ! print*,gotten_data
   end do
+
+  do
+    call map%initialize_iterator()
+    do while (map%iterate_kv(string_pointer, raw_ptr))
+      print*,string_pointer
+    end do
+  end do
+
 
 end program prototype
