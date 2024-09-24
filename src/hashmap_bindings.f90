@@ -91,7 +91,7 @@ module hashmap_bindings
       implicit none
 
       type(c_ptr), intent(in), value :: map
-      character(len = *, kind = c_char), intent(inout) :: key_s
+      type(c_ptr), intent(inout) :: key_s
       integer(c_size_t), intent(inout) :: string_length
       type(c_ptr), intent(inout) :: fortran_data
       logical(c_bool) :: has_item
