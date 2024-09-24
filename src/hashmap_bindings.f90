@@ -68,15 +68,21 @@ module hashmap_bindings
     end subroutine internal_hashmap_clear
 
 
-    function internal_hashmap_iterate(map, i, item) result(has_item) bind(c, name = "hashmap_iter")
+    subroutine internal_hashmap_initialize_iterator()
+
+    end subroutine internal_hashmap_initialize_iterator
+
+
+    function internal_hashmap_iterate_str_key(map, key_s, string_length, fortran_data) result(has_item) bind(c, name = "hashmap_iterate_str_key")
       use, intrinsic :: iso_c_binding
       implicit none
 
       type(c_ptr), intent(in), value :: map
-      integer(c_size_t), intent(inout) :: i
-      type(c_ptr), intent(inout) :: item
+      character(len = *, kind = c_char), intent(inout) :: key_s
+      integer(c_size_t), intent(inout) :: string_length
+      type(c_ptr), intent(inout) :: fortran_data
       logical(c_bool) :: has_item
-    end function internal_hashmap_iter
+    end function internal_hashmap_iterate_str_key
 
 
 ! !? FUNCTION BLUEPRINTS. ===========================================================================
