@@ -55,9 +55,9 @@ const void *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i);
 const void *hashmap_delete_internal(struct hashmap *map, const header *stack_header);
 // Iteration.
 void hashmap_initialize_iterator(struct hashmap *map);
-bool hashmap_iter_str_key(struct hashmap *map, char **key_s, size_t *string_length, void **fortran_data);
-bool hashmap_iter_int_key(struct hashmap *map, int64_t *key_i, void **fortran_data);
-bool hashmap_iter_internal(struct hashmap *map, void **item);
+bool hashmap_iterate_str_key(struct hashmap *map, char **key_s, size_t *string_length, void **fortran_data);
+bool hashmap_iterate_int_key(struct hashmap *map, int64_t *key_i, void **fortran_data);
+bool hashmap_iterate_internal(struct hashmap *map, void **item);
 
 const void *hashmap_probe(struct hashmap *map, uint64_t position);
 bool hashmap_scan(struct hashmap *map, bool (*iter)(const void *item));
@@ -740,13 +740,13 @@ void hashmap_initialize_iterator(struct hashmap *map)
  * iteration has been reached.
  */
 
-bool hashmap_iter_str_key(struct hashmap *map, char **key_s, size_t *string_length, void **fortran_data)
+bool hashmap_iterate_str_key(struct hashmap *map, char **key_s, size_t *string_length, void **fortran_data)
 {
     // We must process the data given to use by the junction function.
 
     void *pure_generic = NULL;
 
-    if (!hashmap_iter_internal(map, &pure_generic))
+    if (!hashmap_iterate_internal(map, &pure_generic))
     {
         return false;
     }
@@ -764,13 +764,13 @@ bool hashmap_iter_str_key(struct hashmap *map, char **key_s, size_t *string_leng
     }
 }
 
-bool hashmap_iter_int_key(struct hashmap *map, int64_t *key_i, void **fortran_data)
+bool hashmap_iterate_int_key(struct hashmap *map, int64_t *key_i, void **fortran_data)
 {
     // We must process the data given to use by the junction function.
 
     void *pure_generic = NULL;
 
-    if (!hashmap_iter_internal(map, &pure_generic))
+    if (!hashmap_iterate_internal(map, &pure_generic))
     {
         return false;
     }
@@ -788,7 +788,7 @@ bool hashmap_iter_int_key(struct hashmap *map, int64_t *key_i, void **fortran_da
 }
 
 // Funnel end point. (junction)
-bool hashmap_iter_internal(struct hashmap *map, void **item)
+bool hashmap_iterate_internal(struct hashmap *map, void **item)
 {
     struct bucket *bucket;
     do
