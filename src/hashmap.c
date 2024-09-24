@@ -57,7 +57,7 @@ const void *hashmap_delete_internal(struct hashmap *map, const header *stack_hea
 void hashmap_initialize_iterator(struct hashmap *map);
 bool hashmap_iter_str_key(struct hashmap *map, char **key_s, size_t *string_length, void **fortran_data);
 bool hashmap_iter_int_key(struct hashmap *map, int64_t *key_i, void **fortran_data);
-bool hashmap_iterate_internal(struct hashmap *map, void **item);
+bool hashmap_iter_internal(struct hashmap *map, void **item);
 
 const void *hashmap_probe(struct hashmap *map, uint64_t position);
 bool hashmap_scan(struct hashmap *map, bool (*iter)(const void *item));
@@ -746,7 +746,7 @@ bool hashmap_iter_str_key(struct hashmap *map, char **key_s, size_t *string_leng
 
     void *pure_generic = NULL;
 
-    if (!hashmap_iter(map, &pure_generic))
+    if (!hashmap_iter_internal(map, &pure_generic))
     {
         return false;
     }
@@ -757,7 +757,7 @@ bool hashmap_iter_str_key(struct hashmap *map, char **key_s, size_t *string_leng
         string_length = heap_header->string_length;
         *key_s = heap_header->key_s;
 
-        // Jump over the header and assign fortran data.
+        // Jump over the header and assign Fortran data.
         *fortran_data = pure_generic + HEADER_SIZE;
 
         return true;
@@ -770,7 +770,7 @@ bool hashmap_iter_int_key(struct hashmap *map, int64_t *key_i, void **fortran_da
 
     void *pure_generic = NULL;
 
-    if (!hashmap_iter(map, &pure_generic))
+    if (!hashmap_iter_internal(map, &pure_generic))
     {
         return false;
     }
@@ -780,7 +780,7 @@ bool hashmap_iter_int_key(struct hashmap *map, int64_t *key_i, void **fortran_da
 
         key_i = heap_header->key_i;
 
-        // Jump over the header and assign fortran data.
+        // Jump over the header and assign Fortran data.
         *fortran_data = pure_generic + HEADER_SIZE;
 
         return true;
@@ -788,7 +788,7 @@ bool hashmap_iter_int_key(struct hashmap *map, int64_t *key_i, void **fortran_da
 }
 
 // Funnel end point. (junction)
-bool hashmap_iterate_internal(struct hashmap *map, void **item)
+bool hashmap_iter_internal(struct hashmap *map, void **item)
 {
     struct bucket *bucket;
     do
