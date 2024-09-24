@@ -740,6 +740,7 @@ void hashmap_initialize_iterator(struct hashmap *map)
  * iteration has been reached.
  */
 
+// Key and value.
 bool hashmap_iterate_str_key_kv(struct hashmap *map, char **key_s, size_t *string_length, void **fortran_data)
 {
     // We must process the data given to use by the junction function.
@@ -764,6 +765,7 @@ bool hashmap_iterate_str_key_kv(struct hashmap *map, char **key_s, size_t *strin
     }
 }
 
+// Key and value.
 bool hashmap_iterate_int_key_kv(struct hashmap *map, int64_t *key_i, void **fortran_data)
 {
     // We must process the data given to use by the junction function.
