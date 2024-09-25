@@ -1,16 +1,15 @@
-module concurrent_hashmap_str
+module hashmap_str
   use, intrinsic :: iso_c_binding
-  use :: hashmap_types
   use :: hashmap_bindings
-  use :: thread_mutex
+  use :: hashmap_base_functions
   implicit none
 
 
   private
 
 
-  public :: concurrent_hashmap_string_key
-  public :: new_concurrent_hashmap_string_key
+  public :: hashmap_string_key
+  public :: new_hashmap_string_key
 
 
   ! todo list:
@@ -18,82 +17,69 @@ module concurrent_hashmap_str
   ! hashmap_scan     # callback based iteration over all items in hash map
 
   !* Fortran hashmap wrapper.
-  !* Thread safe.
   !* String key.
-  type :: concurrent_hashmap_string_key
+  type :: hashmap_string_key
     private
     type(c_ptr) :: map = c_null_ptr
     type(c_funptr) :: gc_function = c_null_funptr
-    type(mutex_rwlock), pointer :: mutex
-    type(c_ptr) :: mutex_c_ptr
   contains
-    procedure :: set => concurrent_str_hashmap_set
-    procedure :: get => concurrent_str_hashmap_get
-    procedure :: has_key => concurrent_str_hashmap_has_key
-    procedure :: delete => concurrent_str_hashmap_delete
-    procedure :: free => concurrent_str_hashmap_free
-    procedure :: count => concurrent_str_hashmap_count
-    procedure :: is_empty => concurrent_str_hashmap_is_empty
-    procedure :: clear => concurrent_str_hashmap_clear
-    procedure :: iterate => concurrent_str_hashmap_iterate
-    procedure :: iterate_kv => concurrent_str_hashmap_iterate_kv
-    procedure :: lock => concurrent_str_hashmap_lock
-    procedure :: unlock => concurrent_str_hashmap_unlock
-  end type concurrent_hashmap_string_key
+    procedure :: set => str_hashmap_set
+    procedure :: get => str_hashmap_get
+    procedure :: has_key => str_hashmap_has_key
+    procedure :: delete => str_hashmap_delete
+    procedure :: free => str_hashmap_free
+    procedure :: count => str_hashmap_count
+    procedure :: is_empty => str_hashmap_is_empty
+    procedure :: clear => str_hashmap_clear
+    procedure :: iterate_with_func => str_hashmap_iterate_with_func
+    procedure :: iterate_with_func_discard => str_hashmap_iterate_with_func_discard
+    procedure :: initialize_iterator => str_hashmap_initialize_iterator
+    procedure :: iterate => str_hashmap_iterate
+    procedure :: iterate_kv => str_hashmap_iterate_kv
+  end type hashmap_string_key
 
 
 contains
 
 
   !* Hashmap string key constructor.
-  function new_concurrent_hashmap_string_key(optional_gc_function) result(h)
+  function new_hashmap_string_key(element_size, optional_gc_function) result(h)
     implicit none
 
-    type(concurrent_hashmap_string_key) :: h
-    procedure(gc_function_interface_string), optional :: optional_gc_function
+    integer(c_size_t), intent(in), value :: element_size
+    procedure(gc_function_interface), optional :: optional_gc_function
+    type(hashmap_string_key) :: h
 
-    h%map = internal_hashmap_new(56_8, 0_8, 0_8, 0_8, c_funloc(concurrent_str_hashing_function), c_funloc(concurrent_str_compare_function), c_null_funptr, c_null_ptr)
+    h%map = internal_hashmap_new(element_size, 0_8)
 
     if (present(optional_gc_function)) then
       h%gc_function = c_funloc(optional_gc_function)
     end if
-
-    h%mutex => thread_create_mutex_pointer()
-    h%mutex_c_ptr = c_loc(h%mutex)
-  end function new_concurrent_hashmap_string_key
+  end function new_hashmap_string_key
 
 
   !* Set a value in the hashmap with a string key.
-  subroutine concurrent_str_hashmap_set(this, key, generic_pointer)
+  subroutine str_hashmap_set(this, key_s, raw_item)
     implicit none
 
-    class(concurrent_hashmap_string_key), intent(inout) :: this
-    character(len = *, kind = c_char), intent(in) :: key
-    class(*), intent(in), target :: generic_pointer
-    integer(c_int) :: key_length
-    type(element_string_key), target :: new_element
+    class(hashmap_string_key), intent(inout) :: this
+    character(len = *, kind = c_char), intent(in) :: key_s
+    class(*), intent(in), target :: raw_item
+    integer(c_size_t) :: key_length
+    type(c_ptr) :: black_magic
     type(c_ptr) :: old_data_c_ptr
-    type(element_string_key), pointer :: old_data
 
-
-    key_length = len(key)
+    key_length = len(key_s)
 
     !? Safety check.
     if (key_length == 0) then
-      error stop "[Hashmap] ERROR: key cannot be NULL."
+      error stop "[Hashmap] Error: Key cannot be NULL."
     end if
 
-    !* ALLOCATE.
-    allocate(character(len = key_length, kind = c_char) :: new_element%key)
-
-    new_element%key = key
-    new_element%key_length = key_length
-    new_element%data => generic_pointer
+    black_magic = transfer(loc(raw_item), black_magic)
 
     !? Internally calls: memcpy.
-    old_data_c_ptr = internal_hashmap_set(this%map, c_loc(new_element))
-
-    !! DO NOT DEALLOCATE THE KEY, WE NEED IT.
+    old_data_c_ptr = internal_hashmap_set_str_key(this%map, key_s, key_length, black_magic)
 
     ! The old data was a null pointer. We don't have to do anything.
     if (.not. c_associated(old_data_c_ptr)) then
@@ -102,115 +88,74 @@ contains
 
     ! If a GC function was assigned.
     if (c_associated(this%gc_function)) then
-      call concurrent_str_run_gc(this%gc_function, old_data_c_ptr)
+      call str_run_gc(this%gc_function, old_data_c_ptr)
     end if
-
-    ! Clean up the old string key.
-    call c_f_pointer(old_data_c_ptr, old_data)
-    deallocate(old_data%key)
-  end subroutine concurrent_str_hashmap_set
+  end subroutine str_hashmap_set
 
 
   !* Get a value in the hashmap with a string key.
-  function concurrent_str_hashmap_get(this, key, generic_pointer) result(is_some)
+  function str_hashmap_get(this, key_s, gotten_c_ptr) result(is_some)
     implicit none
 
-    class(concurrent_hashmap_string_key), intent(inout) :: this
-    character(len = *, kind = c_char), intent(in) :: key
-    class(*), intent(inout), pointer :: generic_pointer
+    class(hashmap_string_key), intent(inout) :: this
+    character(len = *, kind = c_char), intent(in) :: key_s
+    type(c_ptr), intent(inout) :: gotten_c_ptr
     logical(c_bool) :: is_some
-    type(c_ptr) :: old_data_c_ptr
-    integer(c_int) :: key_length
-    type(element_string_key), target :: element_key
-    type(element_string_key), pointer :: element_pointer
+    integer(c_size_t) :: key_length
 
     is_some = .false.
 
-    key_length = len(key)
+    key_length = len(key_s)
 
-    !* ALLOCATE.
-    allocate(character(len = key_length, kind = c_char) :: element_key%key)
-
-    element_key%key = key
-    element_key%key_length = key_length
-
-    !? Grabs a C pointer or NULL upon failure.
-    old_data_c_ptr = internal_hashmap_get(this%map, c_loc(element_key))
-
-    !* DEALLOCATE.
-    deallocate(element_key%key)
-
-    ! It's a null pointer.
-    if (.not. c_associated(old_data_c_ptr)) then
-      return
+    !? Safety check.
+    if (key_length == 0) then
+      error stop "[Hashmap] Error: Key cannot be NULL."
     end if
 
-    !* We can finally point STRAIGHT AT IT!
-    call c_f_pointer(old_data_c_ptr, element_pointer)
-    generic_pointer => element_pointer%data
+    !? Grabs a C pointer or NULL upon failure.
+    gotten_c_ptr = internal_hashmap_get_str_key(this%map, key_s, key_length )
 
-    is_some = .true.
-  end function concurrent_str_hashmap_get
+    ! We can simply check if it's NULL.
+    is_some = c_associated(gotten_c_ptr)
+  end function str_hashmap_get
 
 
   !* Check if a hashmap has a key.
-  function concurrent_str_hashmap_has_key(this, key) result(has)
+  function str_hashmap_has_key(this, key_s) result(has)
     implicit none
 
-    class(concurrent_hashmap_string_key), intent(inout) :: this
-    character(len = *, kind = c_char), intent(in) :: key
+    class(hashmap_string_key), intent(inout) :: this
+    character(len = *, kind = c_char), intent(in) :: key_s
     logical(c_bool) :: has
-    integer(c_int) :: key_length
+    integer(c_size_t) :: string_length
     type(c_ptr) :: data_c_ptr
-    type(element_string_key), target :: element_key
 
     has = .false.
 
-    key_length = len(key)
-
-    !* ALLOCATE.
-    allocate(character(len = key_length, kind = c_char) :: element_key%key)
-
-    element_key%key = key
-    element_key%key_length = key_length
+    string_length = len(key_s)
 
     !? Grabs a C pointer or NULL upon failure.
-    data_c_ptr = internal_hashmap_get(this%map, c_loc(element_key))
-
-    !* DEALLOCATE.
-    deallocate(element_key%key)
+    data_c_ptr = internal_hashmap_get_str_key(this%map, key_s, string_length)
 
     ! We can simply check if it's NULL.
-    if (c_associated(data_c_ptr)) then
-      has = .true.
-    end if
-  end function concurrent_str_hashmap_has_key
+    has = c_associated(data_c_ptr)
+  end function str_hashmap_has_key
 
 
   !* Delete a value in the hashmap with a string key.
   !* If it doesn't exist, this is a no-op.
-  subroutine concurrent_str_hashmap_delete(this, key)
+  subroutine str_hashmap_delete(this, key_s)
     implicit none
 
-    class(concurrent_hashmap_string_key), intent(inout) :: this
-    character(len = *, kind = c_char), intent(in) :: key
+    class(hashmap_string_key), intent(inout) :: this
+    character(len = *, kind = c_char), intent(in) :: key_s
     type(c_ptr) :: old_data_c_ptr
-    integer(c_int) :: key_length
-    type(element_string_key), target :: element_key
+    integer(c_size_t) :: string_length
 
-    key_length = len(key)
-
-    !* ALLOCATE.
-    allocate(character(len = key_length, kind = c_char) :: element_key%key)
-
-    element_key%key = key
-    element_key%key_length = key_length
+    string_length = len(key_s)
 
     !? Grabs a C pointer or NULL upon failure.
-    old_data_c_ptr = internal_hashmap_delete(this%map, c_loc(element_key))
-
-    !* DEALLOCATE.
-    deallocate(element_key%key)
+    old_data_c_ptr = internal_hashmap_delete_str_key(this%map, key_s, string_length)
 
     ! It's a null pointer.
     if (.not. c_associated(old_data_c_ptr)) then
@@ -219,117 +164,141 @@ contains
 
     ! If a GC function was assigned.
     if (c_associated(this%gc_function)) then
-      call concurrent_str_run_gc(this%gc_function, old_data_c_ptr)
+      call str_run_gc(this%gc_function, old_data_c_ptr)
     end if
-
-    ! Free the old string key pointer.
-    call concurrent_str_free_string_key(old_data_c_ptr)
-  end subroutine concurrent_str_hashmap_delete
+  end subroutine str_hashmap_delete
 
 
   !* Deallocate EVERYTHING including the underlying C memory.
-  subroutine concurrent_str_hashmap_free(this)
+  subroutine str_hashmap_free(this)
     implicit none
 
-    class(concurrent_hashmap_string_key), intent(inout) :: this
-    integer(c_int64_t) :: i
+    class(hashmap_string_key), intent(inout) :: this
     type(c_ptr) :: generic_c_pointer
 
-    i = 0
-
-    do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
-
-      ! Call the GC function.
-      if (c_associated(this%gc_function)) then
-        call concurrent_str_run_gc(this%gc_function, generic_c_pointer)
-      end if
-
-      ! Free the old string key pointer.
-      call concurrent_str_free_string_key(generic_c_pointer)
-    end do
+    ! Call the GC function if set.
+    if (c_associated(this%gc_function)) then
+      do while(internal_hashmap_iterate(this%map, generic_c_pointer))
+        call str_run_gc(this%gc_function, generic_c_pointer)
+      end do
+    end if
 
     call internal_hashmap_free(this%map)
-
-    call thread_destroy_mutex_pointer(this%mutex)
-    this%mutex => null()
-    this%mutex_c_ptr = c_null_ptr
-  end subroutine concurrent_str_hashmap_free
+  end subroutine str_hashmap_free
 
 
   !* Get the number of items in the hashmap.
-  function concurrent_str_hashmap_count(this) result(count)
+  function str_hashmap_count(this) result(count)
     implicit none
 
-    class(concurrent_hashmap_string_key), intent(in) :: this
+    class(hashmap_string_key), intent(in) :: this
     integer(c_int64_t) :: count
 
     count = internal_hashmap_count(this%map)
-  end function concurrent_str_hashmap_count
+  end function str_hashmap_count
 
 
   !* Check if a hashmap is empty.
-  function concurrent_str_hashmap_is_empty(this) result(is_empty)
+  function str_hashmap_is_empty(this) result(is_empty)
     implicit none
 
-    class(concurrent_hashmap_string_key), intent(in) :: this
+    class(hashmap_string_key), intent(in) :: this
     logical(c_bool) :: is_empty
 
     is_empty = (this%count() == 0)
-  end function concurrent_str_hashmap_is_empty
+  end function str_hashmap_is_empty
 
 
   !* Clear the hashmap.
-  subroutine concurrent_str_hashmap_clear(this)
+  subroutine str_hashmap_clear(this, update_capacity)
     implicit none
 
-    class(concurrent_hashmap_string_key), intent(in) :: this
-    integer(c_int64_t) :: i
+    class(hashmap_string_key), intent(in) :: this
+    logical, intent(in), value, optional :: update_capacity
     type(c_ptr) :: generic_c_pointer
+    logical(c_bool) :: c_update_capacity
+
+    ! Call the GC function if set.
+    if (c_associated(this%gc_function)) then
+      call this%initialize_iterator()
+      do while(internal_hashmap_iterate(this%map, generic_c_pointer))
+        call str_run_gc(this%gc_function, generic_c_pointer)
+      end do
+    end if
+
+    if (present(update_capacity)) then
+      c_update_capacity = update_capacity
+    else
+      !? Note: Defined to true by default for auto memory mangement.
+      !? If you want to clear and fire back into it, set this to false.
+      c_update_capacity = .true.
+    end if
+
+    call internal_hashmap_clear(this%map, c_update_capacity)
+  end subroutine str_hashmap_clear
 
 
-    i = 0
+  !* Send a function into the hashmap and iterate with it.
+  !* Returns .true. if there was an early return.
+  !* You can use this to find something in the hashmap. :)
+  function str_hashmap_iterate_with_func(this, iter_func) result(early_return)
+    implicit none
 
-    do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
+    class(hashmap_string_key), intent(in) :: this
+    procedure(iterate_with_func_c_interface) :: iter_func
+    logical(c_bool) :: early_return
+    type(c_funptr) :: c_func_pointer
 
-      ! Call the GC function.
-      if (c_associated(this%gc_function)) then
-        call concurrent_str_run_gc(this%gc_function, generic_c_pointer)
-      end if
+    c_func_pointer = c_funloc(iter_func)
 
-      ! Free the old string key pointer.
-      call concurrent_str_free_string_key(generic_c_pointer)
-    end do
+    early_return = internal_hashmap_iterate_with_func(this%map, c_func_pointer)
+  end function str_hashmap_iterate_with_func
 
-    call internal_hashmap_clear(this%map, logical(.true., kind = c_bool))
-  end subroutine concurrent_str_hashmap_clear
+
+  !* Send a function into the hashmap and iterate with it.
+  !* This version does not return a value.
+  subroutine str_hashmap_iterate_with_func_discard(this, iter_func)
+    implicit none
+
+    class(hashmap_string_key), intent(in) :: this
+    procedure(iterate_with_func_c_interface) :: iter_func
+    logical(c_bool) :: discard
+    type(c_funptr) :: c_func_pointer
+
+    c_func_pointer = c_funloc(iter_func)
+
+    discard = internal_hashmap_iterate_with_func(this%map, c_func_pointer)
+  end subroutine str_hashmap_iterate_with_func_discard
+
+
+  !* Initializes the internal iterator.
+  !* If this is not called before *_hashmap_iterate* it is UB.
+  subroutine str_hashmap_initialize_iterator(this)
+    implicit none
+
+    class(hashmap_string_key), intent(in) :: this
+
+    call internal_hashmap_initialize_iterator(this%map)
+  end subroutine str_hashmap_initialize_iterator
 
 
   !* Allows you to iterate through each element in the hashmap by direct pointer.
   !* This means: You can mutate the element in the hashmap directly.
-  !*
-  !* Your iterator_index must start at 0, or else it's UB.
-  !* DO NOT delete elements as you iterate.
-  function concurrent_str_hashmap_iterate(this, iterator_index, generic_pointer) result(has_item)
+  !* If you delete items while you iterate, keep in mind the iteration restarts.
+  function str_hashmap_iterate(this, raw_c_pointer) result(has_item)
     implicit none
 
-    class(concurrent_hashmap_string_key), intent(in) :: this
-    integer(c_size_t), intent(inout) :: iterator_index
-    class(*), intent(inout), pointer :: generic_pointer
+    class(hashmap_string_key), intent(in) :: this
+    type(c_ptr), intent(inout) :: raw_c_pointer
     logical(c_bool) :: has_item
-    type(c_ptr) :: raw_c_pointer
-    type(element_string_key), pointer :: element_pointer
 
-    has_item = internal_hashmap_iter(this%map, iterator_index, raw_c_pointer)
+    has_item = internal_hashmap_iterate(this%map, raw_c_pointer)
 
     ! Nothing to do.
     if (.not. has_item) then
       return
     end if
-
-    call c_f_pointer(raw_c_pointer, element_pointer)
-
-    generic_pointer => element_pointer%data
-  end function concurrent_str_hashmap_iterate
+  end function str_hashmap_iterate
 
 
   !* Allows you to iterate through each element in the hashmap by key and direct pointer.
@@ -337,168 +306,26 @@ contains
   !*
   !* If you mutate the key during iteration, good luck.
   !*
-  !* Your iterator_index must start at 0, or else it's UB.
-  !* DO NOT delete elements as you iterate.
-  function concurrent_str_hashmap_iterate_kv(this, iterator_index, key_pointer, generic_pointer) result(has_item)
+  !* If you delete items as you iterate, this restarts the iteration.
+  function str_hashmap_iterate_kv(this, string_pointer, raw_c_pointer) result(has_item)
     implicit none
 
-    class(concurrent_hashmap_string_key), intent(in) :: this
-    integer(c_size_t), intent(inout) :: iterator_index
-    character(len = *, kind = c_char), intent(inout), pointer :: key_pointer
-    class(*), intent(inout), pointer :: generic_pointer
+    class(hashmap_string_key), intent(inout) :: this
+    character(len = :, kind = c_char), intent(inout), pointer :: string_pointer
+    type(c_ptr), intent(inout) :: raw_c_pointer
+    type(c_ptr) :: c_str_pointer
+    integer(c_size_t) :: string_length
     logical(c_bool) :: has_item
-    type(c_ptr) :: raw_c_pointer
-    type(element_string_key), pointer :: element_pointer
 
-    has_item = internal_hashmap_iter(this%map, iterator_index, raw_c_pointer)
+    has_item = internal_hashmap_iterate_str_key_kv(this%map, c_str_pointer, string_length, raw_c_pointer)
 
     ! Nothing to do.
     if (.not. has_item) then
       return
     end if
 
-    call c_f_pointer(raw_c_pointer, element_pointer)
-
-    key_pointer => element_pointer%key
-    generic_pointer => element_pointer%data
-  end function concurrent_str_hashmap_iterate_kv
+    call raw_string_cast(string_pointer, c_str_pointer, string_length)
+  end function str_hashmap_iterate_kv
 
 
-!! INTRINSIC HASHMAP FUNCTIONS. ===========================================================================
-
-
-  recursive function concurrent_str_hashing_function(item_pointer, seed_0, seed_1) result(hash) bind(c)
-    implicit none
-
-    type(c_ptr), intent(in), value :: item_pointer
-    integer(c_int64_t), intent(in), value :: seed_0, seed_1
-    integer(c_int64_t) :: hash
-    type(element_string_key), pointer :: element_pointer
-
-    !? Safety check.
-    if (.not. c_associated(item_pointer)) then
-      error stop "[Hashmap] FATAL ERROR: item_pointer is NULL."
-    end if
-
-    call c_f_pointer(item_pointer, element_pointer)
-
-
-    !? Safety check.
-    if (.not. associated(element_pointer%key)) then
-      error stop "[Hashmap] FATAL ERROR: element_pointer key is NULL."
-    end if
-
-    ! print*,"key: ",element_pointer%key
-    hash = hashmap_xxhash3(c_loc(element_pointer%key), int(element_pointer%key_length, c_int64_t), seed_0, seed_1)
-    ! print*,"hash:", hash
-  end function concurrent_str_hashing_function
-
-
-  recursive function concurrent_str_compare_function(a, b, udata) result(failed) bind(c)
-    use, intrinsic :: iso_c_binding
-    implicit none
-
-    type(c_ptr), intent(in), value :: a, b, udata
-    logical(c_bool) :: failed
-    type(element_string_key), pointer :: element_pointer_a, element_pointer_b
-
-    !* A transfer.
-
-    !? Safety check.
-    if (.not. c_associated(a)) then
-      error stop "[Hashmap] FATAL ERROR: a is NULL."
-    end if
-
-    call c_f_pointer(a, element_pointer_a)
-
-    !? Safety check.
-    if (.not. associated(element_pointer_a%key)) then
-      error stop "[Hashmap] FATAL ERROR: a key is NULL."
-    end if
-
-    !* B transfer.
-
-    !? Safety check.
-    if (.not. c_associated(b)) then
-      error stop "[Hashmap] FATAL ERROR: b is NULL."
-    end if
-
-    call c_f_pointer(a, element_pointer_b)
-
-    !? Safety check.
-    if (.not. associated(element_pointer_b%key)) then
-      error stop "[Hashmap] FATAL ERROR: b key is NULL."
-    end if
-
-    !* Now check.
-    failed = .true.
-
-    if (element_pointer_a%key_length /= element_pointer_b%key_length) then
-      return
-    end if
-
-    if (element_pointer_a%key /= element_pointer_b%key) then
-      return
-    end if
-
-    if (.false.) then
-      print*,udata
-    end if
-
-    failed = .false.
-  end function concurrent_str_compare_function
-
-
-  !* Re-map the function pointer into the Fortran intrinsic behavior.
-  subroutine concurrent_str_run_gc(c_function_pointer, raw_c_element)
-    implicit none
-
-    type(c_funptr), intent(in), value :: c_function_pointer
-    type(c_ptr), intent(in), value :: raw_c_element
-    type(element_string_key), pointer :: element_pointer
-    procedure(gc_function_interface_string), pointer :: func
-
-    call c_f_procpointer(c_function_pointer, func)
-
-    call c_f_pointer(raw_c_element, element_pointer)
-
-    call func(element_pointer%data)
-  end subroutine concurrent_str_run_gc
-
-
-  !* Automatically free the string key.
-  subroutine concurrent_str_free_string_key(old_data_c_ptr)
-    implicit none
-
-    type(c_ptr) :: old_data_c_ptr
-    type(element_string_key), pointer :: old_data
-
-    ! Clean up the old string key.
-    call c_f_pointer(old_data_c_ptr, old_data)
-    deallocate(old_data%key)
-  end subroutine concurrent_str_free_string_key
-
-
-  !* Lock the hashmap mutex.
-  subroutine concurrent_str_hashmap_lock(this)
-    implicit none
-
-    class(concurrent_hashmap_string_key), intent(inout) :: this
-    integer(c_int) :: status
-
-    status = thread_write_lock(this%mutex_c_ptr)
-  end subroutine concurrent_str_hashmap_lock
-
-
-  !* Unlock the hashmap mutex.
-  subroutine concurrent_str_hashmap_unlock(this)
-    implicit none
-
-    class(concurrent_hashmap_string_key), intent(inout) :: this
-    integer(c_int) :: status
-
-    status = thread_unlock_lock(this%mutex_c_ptr)
-  end subroutine concurrent_str_hashmap_unlock
-
-
-end module concurrent_hashmap_str
+end module hashmap_str
