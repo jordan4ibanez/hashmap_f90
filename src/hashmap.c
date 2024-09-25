@@ -42,24 +42,24 @@ void hashmap_clear(struct hashmap *map, bool update_cap);
 size_t hashmap_count(struct hashmap *map);
 bool hashmap_out_of_memory(struct hashmap *map);
 // Setters.
-const void *hashmap_set_str_key(struct hashmap *, const char *key_s, size_t string_length, const void *fortran_data);
-const void *hashmap_set_int_key(struct hashmap *, int64_t key_i_fort, const void *fortran_data);
-const void *hashmap_set_internal(struct hashmap *map, const header *stack_header, const void *fortran_data);
+const char *hashmap_set_str_key(struct hashmap *, const char *key_s, size_t string_length, const char *fortran_data);
+const char *hashmap_set_int_key(struct hashmap *, int64_t key_i_fort, const char *fortran_data);
+const char *hashmap_set_internal(struct hashmap *map, const header *stack_header, const char *fortran_data);
 // Getters.
-const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t string_length);
-const void *hashmap_get_int_key(struct hashmap *map, const int64_t key_i);
-const void *hashmap_get_internal(struct hashmap *map, const header *stack_header);
+const char *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t string_length);
+const char *hashmap_get_int_key(struct hashmap *map, const int64_t key_i);
+const char *hashmap_get_internal(struct hashmap *map, const header *stack_header);
 // Deleters.
-const void *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_t string_length);
-const void *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i);
-const void *hashmap_delete_internal(struct hashmap *map, const header *stack_header);
+const char *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_t string_length);
+const char *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i);
+const char *hashmap_delete_internal(struct hashmap *map, const header *stack_header);
 // Iteration.
-bool hashmap_iterate_with_func(struct hashmap *map, bool (*iter_func)(const void *item));
+bool hashmap_iterate_with_func(struct hashmap *map, bool (*iter_func)(const char *item));
 void hashmap_initialize_iterator(struct hashmap *map);
-bool hashmap_iterate(struct hashmap *map, void **fortran_data);
-bool hashmap_iterate_str_key_kv(struct hashmap *map, char **key_s, size_t *string_length, void **fortran_data);
-bool hashmap_iterate_int_key_kv(struct hashmap *map, int64_t *key_i, void **fortran_data);
-bool hashmap_iterate_internal(struct hashmap *map, void **item);
+bool hashmap_iterate(struct hashmap *map, char **fortran_data);
+bool hashmap_iterate_str_key_kv(struct hashmap *map, char **key_s, size_t *string_length, char **fortran_data);
+bool hashmap_iterate_int_key_kv(struct hashmap *map, int64_t *key_i, char **fortran_data);
+bool hashmap_iterate_internal(struct hashmap *map, char **item);
 
 /**
  * Header is a piece of data that identifies the element in the bucket.
@@ -114,9 +114,9 @@ struct hashmap
     uint8_t loadfactor;
     uint8_t growpower;
     bool out_of_memory;
-    void *buckets;
-    void *spare;
-    void *edata;
+    char *buckets;
+    char *spare;
+    char *edata;
 };
 
 /**
@@ -212,7 +212,7 @@ static struct bucket *bucket_at(struct hashmap *map, size_t index)
     return (struct bucket *)(((char *)buckets) + (bucketsz * index));
 }
 
-static void *bucket_item(struct bucket *entry)
+static char *bucket_item(struct bucket *entry)
 {
     return ((char *)entry) + sizeof(struct bucket);
 }
@@ -222,7 +222,7 @@ static uint64_t clip_hash(uint64_t hash)
     return hash & 0xFFFFFFFFFFFF;
 }
 
-static uint64_t get_hash(struct hashmap *map, const void *key)
+static uint64_t get_hash(struct hashmap *map, const char *key)
 {
     return clip_hash(hash_function(key));
 }
@@ -310,7 +310,7 @@ void hashmap_clear(struct hashmap *map, bool update_cap)
     }
     else if (map->nbuckets != map->capacity)
     {
-        void *new_buckets = malloc(map->bucketsz * map->capacity);
+        char *new_buckets = malloc(map->bucketsz * map->capacity);
         if (new_buckets)
         {
             free(map->buckets);
@@ -410,7 +410,7 @@ static bool resize(struct hashmap *map, size_t new_cap)
  *
  * I highly recommend you only use stack elements for the fortran_data. (the item can contain Fortran/C pointers)
  */
-const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t string_length, const void *fortran_data)
+const char *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t string_length, const char *fortran_data)
 {
     //! The string length will be checked in fortran.
 
@@ -427,7 +427,7 @@ const void *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t s
  *
  * I highly recommend you only use stack elements for the fortran_data. (the item can contain Fortran/C pointers)
  */
-const void *hashmap_set_int_key(struct hashmap *map, const int64_t key_i_fort, const void *fortran_data)
+const char *hashmap_set_int_key(struct hashmap *map, const int64_t key_i_fort, const char *fortran_data)
 {
     header stack_header;
     build_int_header(&stack_header, (uint64_t)key_i_fort);
@@ -448,7 +448,7 @@ const void *hashmap_set_int_key(struct hashmap *map, const int64_t key_i_fort, c
  *
  * Implementation note: I would keep fortran_data on the stack in Fortran. (the item can contain Fortran/C pointers)
  */
-const void *hashmap_set_internal(struct hashmap *map, const header *stack_header, const void *fortran_data)
+const char *hashmap_set_internal(struct hashmap *map, const header *stack_header, const char *fortran_data)
 {
 
     // The hackjob of 2024.
@@ -470,7 +470,7 @@ const void *hashmap_set_internal(struct hashmap *map, const header *stack_header
     entry->hash = hash;
     entry->dib = 1;
 
-    void *eitem = bucket_item(entry);
+    char *eitem = bucket_item(entry);
 
     // First copy the header over.
     memcpy(eitem, stack_header, HEADER_SIZE);
@@ -478,7 +478,7 @@ const void *hashmap_set_internal(struct hashmap *map, const header *stack_header
     // Then, jump over the entire header and copy the stack element
     memcpy(eitem + HEADER_SIZE, fortran_data, map->fortran_data_size);
 
-    void *bitem;
+    char *bitem;
     size_t i = entry->hash & map->mask;
     while (1)
     {
@@ -511,7 +511,7 @@ const void *hashmap_set_internal(struct hashmap *map, const header *stack_header
 /**
  * Get an item from a string key hashmap. Or null.
  */
-const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t key_len)
+const char *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t key_len)
 {
     header stack_header;
     build_string_header(&stack_header, key_s, key_len);
@@ -522,7 +522,7 @@ const void *hashmap_get_str_key(struct hashmap *map, const char *key_s, size_t k
 /**
  * Get an item from an int key hashmap. Or null.
  */
-const void *hashmap_get_int_key(struct hashmap *map, const int64_t key_i)
+const char *hashmap_get_int_key(struct hashmap *map, const int64_t key_i)
 {
     header stack_header;
     build_int_header(&stack_header, (uint64_t)key_i);
@@ -536,7 +536,7 @@ const void *hashmap_get_int_key(struct hashmap *map, const int64_t key_i)
  * hashmap_get returns the item based on the provided key. If the item is not
  * found then NULL is returned.
  */
-const void *hashmap_get_internal(struct hashmap *map, const header *stack_header)
+const char *hashmap_get_internal(struct hashmap *map, const header *stack_header)
 {
     uint64_t hash = get_hash(map, stack_header);
     hash = clip_hash(hash);
@@ -549,7 +549,7 @@ const void *hashmap_get_internal(struct hashmap *map, const header *stack_header
             return NULL;
         if (bucket->hash == hash)
         {
-            void *bitem = bucket_item(bucket);
+            char *bitem = bucket_item(bucket);
             if (compare_function(stack_header, bitem) == 0)
             {
                 return bitem + HEADER_SIZE;
@@ -562,7 +562,7 @@ const void *hashmap_get_internal(struct hashmap *map, const header *stack_header
 /**
  * Delete an element in a string key hashmap.
  */
-const void *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_t string_length)
+const char *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_t string_length)
 {
     header stack_header;
     build_string_header(&stack_header, key_s, string_length);
@@ -573,7 +573,7 @@ const void *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_
 /**
  * Delete an element in a string key hashmap.
  */
-const void *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i)
+const char *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i)
 {
     header stack_header;
     build_int_header(&stack_header, (uint64_t)key_i);
@@ -590,7 +590,7 @@ const void *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i)
  * hashmap_delete removes an item from the hash map and returns it. If the
  * item is not found then NULL is returned.
  */
-const void *hashmap_delete_internal(struct hashmap *map, const header *stack_header)
+const char *hashmap_delete_internal(struct hashmap *map, const header *stack_header)
 {
     uint64_t hash = get_hash(map, stack_header);
     hash = clip_hash(hash);
@@ -608,7 +608,7 @@ const void *hashmap_delete_internal(struct hashmap *map, const header *stack_hea
         {
             return NULL;
         }
-        void *bitem = bucket_item(bucket);
+        char *bitem = bucket_item(bucket);
         if (bucket->hash == hash && (compare_function(stack_header, bitem) == 0))
         {
             memcpy(map->spare, bitem, map->element_size);
@@ -679,7 +679,7 @@ bool hashmap_out_of_memory(struct hashmap *map)
  *
  * You could use this to find something in the hashmap. :)
  */
-bool hashmap_iterate_with_func(struct hashmap *map, bool (*iter_func)(const void *item))
+bool hashmap_iterate_with_func(struct hashmap *map, bool (*iter_func)(const char *item))
 {
     for (size_t i = 0; i < map->nbuckets; i++)
     {
@@ -724,11 +724,11 @@ void hashmap_initialize_iterator(struct hashmap *map)
  */
 
 // Value only. Any hashmap type.
-bool hashmap_iterate(struct hashmap *map, void **fortran_data)
+bool hashmap_iterate(struct hashmap *map, char **fortran_data)
 {
     // We must process the data given to use by the junction function.
 
-    void *element_pointer = NULL;
+    char *element_pointer = NULL;
 
     if (!hashmap_iterate_internal(map, &element_pointer))
     {
@@ -744,11 +744,11 @@ bool hashmap_iterate(struct hashmap *map, void **fortran_data)
 }
 
 // Key and value.
-bool hashmap_iterate_str_key_kv(struct hashmap *map, char **key_s, size_t *string_length, void **fortran_data)
+bool hashmap_iterate_str_key_kv(struct hashmap *map, char **key_s, size_t *string_length, char **fortran_data)
 {
     // We must process the data given to use by the junction function.
 
-    void *element_pointer = NULL;
+    char *element_pointer = NULL;
 
     if (!hashmap_iterate_internal(map, &element_pointer))
     {
@@ -769,11 +769,11 @@ bool hashmap_iterate_str_key_kv(struct hashmap *map, char **key_s, size_t *strin
 }
 
 // Key and value.
-bool hashmap_iterate_int_key_kv(struct hashmap *map, int64_t *key_i, void **fortran_data)
+bool hashmap_iterate_int_key_kv(struct hashmap *map, int64_t *key_i, char **fortran_data)
 {
     // We must process the data given to use by the junction function.
 
-    void *element_pointer = NULL;
+    char *element_pointer = NULL;
 
     if (!hashmap_iterate_internal(map, &element_pointer))
     {
@@ -793,7 +793,7 @@ bool hashmap_iterate_int_key_kv(struct hashmap *map, int64_t *key_i, void **fort
 }
 
 // Funnel end point. (junction)
-bool hashmap_iterate_internal(struct hashmap *map, void **item)
+bool hashmap_iterate_internal(struct hashmap *map, char **item)
 {
     struct bucket *bucket;
     do
