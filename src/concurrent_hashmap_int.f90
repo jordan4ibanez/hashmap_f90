@@ -26,7 +26,7 @@ module concurrent_hashmap_int
     procedure :: get => concurrent_int_hashmap_get
     procedure :: has_key => concurrent_int_hashmap_has_key
     procedure :: delete => concurrent_int_hashmap_delete
-    procedure :: free => concurrent_int_hashmap_free
+    procedure :: destroy => concurrent_int_hashmap_destroy
     procedure :: count => concurrent_int_hashmap_count
     procedure :: is_empty => concurrent_int_hashmap_is_empty
     procedure :: clear => concurrent_int_hashmap_clear
@@ -152,7 +152,7 @@ contains
 
 
   !* Deallocate EVERYTHING including the underlying C memory.
-  subroutine concurrent_int_hashmap_free(this)
+  subroutine concurrent_int_hashmap_destroy(this)
     implicit none
 
     class(concurrent_hashmap_integer_key), intent(inout) :: this
@@ -169,7 +169,7 @@ contains
 
     call thread_destroy_mutex_pointer(this%mutex)
     this%mutex_c_ptr = c_null_ptr
-  end subroutine concurrent_int_hashmap_free
+  end subroutine concurrent_int_hashmap_destroy
 
 
   !* Get the number of items in the hashmap.

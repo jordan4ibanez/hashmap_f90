@@ -23,7 +23,7 @@ module hashmap_int
     procedure :: get => int_hashmap_get
     procedure :: has_key => int_hashmap_has_key
     procedure :: delete => int_hashmap_delete
-    procedure :: free => int_hashmap_free
+    procedure :: destroy => int_hashmap_destroy
     procedure :: count => int_hashmap_count
     procedure :: is_empty => int_hashmap_is_empty
     procedure :: clear => int_hashmap_clear
@@ -144,7 +144,7 @@ contains
 
 
   !* Deallocate EVERYTHING including the underlying C memory.
-  subroutine int_hashmap_free(this)
+  subroutine int_hashmap_destroy(this)
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
@@ -158,7 +158,7 @@ contains
     end if
 
     call internal_hashmap_free(this%map)
-  end subroutine int_hashmap_free
+  end subroutine int_hashmap_destroy
 
 
   !* Get the number of items in the hashmap.

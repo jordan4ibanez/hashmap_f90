@@ -26,7 +26,7 @@ module concurrent_hashmap_str
     procedure :: get => concurrent_str_hashmap_get
     procedure :: has_key => concurrent_str_hashmap_has_key
     procedure :: delete => concurrent_str_hashmap_delete
-    procedure :: free => concurrent_str_hashmap_free
+    procedure :: destroy => concurrent_str_hashmap_destroy
     procedure :: count => concurrent_str_hashmap_count
     procedure :: is_empty => concurrent_str_hashmap_is_empty
     procedure :: clear => concurrent_str_hashmap_clear
@@ -171,7 +171,7 @@ contains
 
 
   !* Deallocate EVERYTHING including the underlying C memory.
-  subroutine concurrent_str_hashmap_free(this)
+  subroutine concurrent_str_hashmap_destroy(this)
     implicit none
 
     class(concurrent_hashmap_string_key), intent(inout) :: this
@@ -185,7 +185,7 @@ contains
     end if
 
     call internal_hashmap_free(this%map)
-  end subroutine concurrent_str_hashmap_free
+  end subroutine concurrent_str_hashmap_destroy
 
 
   !* Get the number of items in the hashmap.
