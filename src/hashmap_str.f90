@@ -30,6 +30,7 @@ module hashmap_str
     procedure :: count => str_hashmap_count
     procedure :: is_empty => str_hashmap_is_empty
     procedure :: clear => str_hashmap_clear
+    procedure :: iterate_with_func => str_hashmap_iterate_with_func
     procedure :: initialize_iterator => str_hashmap_initialize_iterator
     procedure :: iterate => str_hashmap_iterate
     procedure :: iterate_kv => str_hashmap_iterate_kv
@@ -233,6 +234,23 @@ contains
 
     call internal_hashmap_clear(this%map, c_update_capacity)
   end subroutine str_hashmap_clear
+
+
+  !* Send a function into the hashmap and iterate with it.
+  !* Returns .true. if there was an early return.
+  !* You can use this to find something in the hashmap. :)
+  function str_hashmap_iterate_with_func(this, iter_func) result(early_return)
+    implicit none
+
+    class(hashmap_string_key), intent(in) :: this
+    procedure(iterate_with_func_c_interface) :: iter_func
+    logical(c_bool) :: early_return
+    type(c_funptr) :: c_func_pointer
+
+    c_func_pointer = c_funloc(iter_func)
+
+    early_return = internal_hashmap_iterate_with_func(this%map, c_func_pointer)
+  end function str_hashmap_iterate_with_func
 
 
   !* Initializes the internal iterator.
