@@ -2,6 +2,7 @@ module concurrent_hashmap_str
   use, intrinsic :: iso_c_binding
   use :: hashmap_bindings
   use :: hashmap_base_functions
+  use :: thread_mutex
   implicit none
 
 
@@ -18,6 +19,8 @@ module concurrent_hashmap_str
     private
     type(c_ptr) :: map = c_null_ptr
     type(c_funptr) :: gc_function = c_null_funptr
+    type(mutex_rwlock), pointer :: mutex
+    type(c_ptr) :: mutex_c_ptr
   contains
     procedure :: set => concurrent_str_hashmap_set
     procedure :: get => concurrent_str_hashmap_get
@@ -32,6 +35,8 @@ module concurrent_hashmap_str
     procedure :: initialize_iterator => concurrent_str_hashmap_initialize_iterator
     procedure :: iterate => concurrent_str_hashmap_iterate
     procedure :: iterate_kv => concurrent_str_hashmap_iterate_kv
+    procedure :: lock => concurrent_str_hashmap_lock
+    procedure :: unlock => concurrent_str_hashmap_unlock
   end type concurrent_hashmap_string_key
 
 
@@ -322,6 +327,28 @@ contains
 
     call raw_string_cast(string_pointer, c_str_pointer, string_length)
   end function concurrent_str_hashmap_iterate_kv
+
+
+  !* Lock the hashmap mutex.
+  subroutine concurrent_str_hashmap_lock(this)
+    implicit none
+
+    class(concurrent_hashmap_string_key), intent(inout) :: this
+    integer(c_int) :: status
+
+    status = thread_write_lock(this%mutex_c_ptr)
+  end subroutine concurrent_str_hashmap_lock
+
+
+  !* Unlock the hashmap mutex.
+  subroutine concurrent_str_hashmap_unlock(this)
+    implicit none
+
+    class(concurrent_hashmap_string_key), intent(inout) :: this
+    integer(c_int) :: status
+
+    status = thread_unlock_lock(this%mutex_c_ptr)
+  end subroutine concurrent_str_hashmap_unlock
 
 
 end module concurrent_hashmap_str
