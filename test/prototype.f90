@@ -4,6 +4,8 @@ module my_prototype_module
 
 
   !* Our cool type. 8)
+  !* Notice: No GC is required here because we aren't
+  !* pointing at anything.
   type :: cool
     integer(c_int) :: i = 0
   end type cool
