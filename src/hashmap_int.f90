@@ -1,7 +1,7 @@
 module hashmap_int
   use, intrinsic :: iso_c_binding
-  use :: hashmap_types
   use :: hashmap_bindings
+  use :: hashmap_base_functions
   implicit none
 
 
