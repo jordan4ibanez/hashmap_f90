@@ -695,31 +695,25 @@ bool hashmap_oom(struct hashmap *map)
 
 /**
  * hashmap_iterate_with_func iterates over all items in the hash map
- * Param `iter` can return true to stop iteration early.
- * Returns false if the iteration has been stopped early.
+ * Param `iter_func` can return true to stop iteration early.
+ * Returns true if the iteration has been stopped early.
  *
  * You could use this to find something in the hashmap. :)
  */
-bool hashmap_iterate_with_func(struct hashmap *map,
-                               bool (*iter)(const void *item))
+bool hashmap_iterate_with_func(struct hashmap *map, bool (*iter_func)(const void *item))
 {
     for (size_t i = 0; i < map->nbuckets; i++)
     {
         struct bucket *bucket = bucket_at(map, i);
 
-        if (bucket->dib)
+        // If dib is 0 this will short circuit and skip eval of iter_func.
+        if (bucket->dib && iter_func(bucket_item(bucket)))
         {
-            if (iter(bucket_item(bucket)))
-            {
-                return false;
-            }
-        }
-        else
-        {
-            return false;
+            return true;
         }
     }
-    return true;
+
+    return false;
 }
 
 /**
