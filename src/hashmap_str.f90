@@ -28,7 +28,7 @@ module hashmap_str
     procedure :: get => str_hashmap_get
     procedure :: has_key => str_hashmap_has_key
     procedure :: delete => str_hashmap_delete
-    ! procedure :: free => str_hashmap_free
+    procedure :: free => str_hashmap_free
     procedure :: count => str_hashmap_count
     procedure :: is_empty => str_hashmap_is_empty
     ! procedure :: clear => str_hashmap_clear
@@ -169,30 +169,25 @@ contains
   end subroutine str_hashmap_delete
 
 
-  ! !* Deallocate EVERYTHING including the underlying C memory.
-  ! subroutine str_hashmap_free(this)
-  !   implicit none
+  !* Deallocate EVERYTHING including the underlying C memory.
+  subroutine str_hashmap_free(this)
+    implicit none
 
-  !   class(hashmap_string_key), intent(inout) :: this
-  !   integer(c_int64_t) :: i
-  !   type(c_ptr) :: generic_c_pointer
+    class(hashmap_string_key), intent(inout) :: this
+    integer(c_int64_t) :: i
+    type(c_ptr) :: generic_c_pointer
 
-  !   i = 0
+    i = 0
 
-  !   do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
+    ! Call the GC function if available.
+    if (c_associated(this%gc_function)) then
+      do while(internal_hashmap_iterate(this%map, generic_c_pointer))
+        call str_run_gc(this%gc_function, generic_c_pointer)
+      end do
+    end if
 
-  !     ! Call the GC function.
-  !     if (c_associated(this%gc_function)) then
-  !       call str_run_gc(this%gc_function, generic_c_pointer)
-  !     end if
-
-  !     ! Free the old string key pointer.
-  !     call str_free_string_key(generic_c_pointer)
-  !   end do
-
-
-  !   call internal_hashmap_free(this%map)
-  ! end subroutine str_hashmap_free
+    call internal_hashmap_free(this%map)
+  end subroutine str_hashmap_free
 
 
   !* Get the number of items in the hashmap.
