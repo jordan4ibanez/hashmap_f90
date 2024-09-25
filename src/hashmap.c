@@ -61,7 +61,7 @@ bool hashmap_iterate_int_key_kv(struct hashmap *map, int64_t *key_i, void **fort
 bool hashmap_iterate_internal(struct hashmap *map, void **item);
 
 const void *hashmap_probe(struct hashmap *map, uint64_t position);
-bool hashmap_iterate_with_func(struct hashmap *map, bool (*iter)(const void *item));
+bool hashmap_iterate_with_func(struct hashmap *map, bool (*iter_func)(const void *item));
 
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power);
 void hashmap_set_load_factor(struct hashmap *map, double load_factor);
