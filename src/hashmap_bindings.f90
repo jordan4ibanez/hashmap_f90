@@ -63,6 +63,16 @@ module hashmap_bindings
     end function internal_hashmap_set_str_key
 
 
+    function internal_hashmap_set_int_key(map, key_i, raw_item) result(void_pointer) bind(c, name = "hashmap_set_int_key")
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: map, raw_item
+      integer(c_int64_t), intent(in), value :: key_i
+      type(c_ptr) :: void_pointer
+    end function internal_hashmap_set_int_key
+
+
     function internal_hashmap_get_str_key(map, key_s, string_length) result(void_pointer) bind(c, name = "hashmap_get_str_key")
       use, intrinsic :: iso_c_binding
       implicit none
@@ -74,6 +84,16 @@ module hashmap_bindings
     end function internal_hashmap_get_str_key
 
 
+    function internal_hashmap_get_int_key(map, key_i) result(void_pointer) bind(c, name = "hashmap_get_int_key")
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: map
+      integer(c_int64_t), intent(in), value :: key_i
+      type(c_ptr) :: void_pointer
+    end function internal_hashmap_get_int_key
+
+
     function internal_hashmap_delete_str_key(map, key_s, string_length) result(void_pointer) bind(c, name = "hashmap_delete_str_key")
       use, intrinsic :: iso_c_binding
       implicit none
@@ -83,6 +103,16 @@ module hashmap_bindings
       integer(c_size_t), intent(in), value :: string_length
       type(c_ptr) :: void_pointer
     end function internal_hashmap_delete_str_key
+
+
+    function internal_hashmap_delete_int_key(map, key_i) result(void_pointer) bind(c, name = "hashmap_delete_int_key")
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: map
+      integer(c_int64_t), intent(in), value :: key_i
+      type(c_ptr) :: void_pointer
+    end function internal_hashmap_delete_int_key
 
 
     function internal_hashmap_iterate_with_func(map, iter_func) result(early_return) bind(c, name = "hashmap_iterate_with_func")
@@ -123,6 +153,17 @@ module hashmap_bindings
       type(c_ptr), intent(inout) :: fortran_data
       logical(c_bool) :: has_item
     end function internal_hashmap_iterate_str_key_kv
+
+
+    function internal_hashmap_iterate_int_key_kv(map, key_i, fortran_data) result(has_item) bind(c, name = "hashmap_iterate_int_key_kv")
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: map
+      integer(c_int64_t), intent(in), value :: key_i
+      type(c_ptr), intent(inout) :: fortran_data
+      logical(c_bool) :: has_item
+    end function internal_hashmap_iterate_int_key_kv
 
 
 !? FUNCTION BLUEPRINTS. ===========================================================================
