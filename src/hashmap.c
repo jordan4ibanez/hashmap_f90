@@ -34,9 +34,9 @@ typedef struct header header;
 typedef struct bucket bucket;
 typedef struct hashmap hashmap;
 
-// fixme: make this section neater.
+// Constructor.
 struct hashmap *hashmap_new(size_t elsize, size_t cap);
-
+// Basic controls/info.
 void hashmap_free(struct hashmap *map);
 void hashmap_clear(struct hashmap *map, bool update_cap);
 size_t hashmap_count(struct hashmap *map);
@@ -54,14 +54,12 @@ const void *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_
 const void *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i);
 const void *hashmap_delete_internal(struct hashmap *map, const header *stack_header);
 // Iteration.
+bool hashmap_iterate_with_func(struct hashmap *map, bool (*iter_func)(const void *item));
 void hashmap_initialize_iterator(struct hashmap *map);
 bool hashmap_iterate(struct hashmap *map, void **fortran_data);
 bool hashmap_iterate_str_key_kv(struct hashmap *map, char **key_s, size_t *string_length, void **fortran_data);
 bool hashmap_iterate_int_key_kv(struct hashmap *map, int64_t *key_i, void **fortran_data);
 bool hashmap_iterate_internal(struct hashmap *map, void **item);
-
-const void *hashmap_probe(struct hashmap *map, uint64_t position);
-bool hashmap_iterate_with_func(struct hashmap *map, bool (*iter_func)(const void *item));
 
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power);
 void hashmap_set_load_factor(struct hashmap *map, double load_factor);
@@ -565,22 +563,6 @@ const void *hashmap_get_internal(struct hashmap *map, const header *stack_header
 }
 
 /**
- * hashmap_probe returns the item in the bucket at position or NULL if an item
- * is not set for that bucket. The position is 'moduloed' by the number of
- * buckets in the hashmap.
- */
-const void *hashmap_probe(struct hashmap *map, uint64_t position)
-{
-    size_t i = position & map->mask;
-    struct bucket *bucket = bucket_at(map, i);
-    if (!bucket->dib)
-    {
-        return NULL;
-    }
-    return bucket_item(bucket);
-}
-
-/**
  * Delete an element in a string key hashmap.
  */
 const void *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_t string_length)
@@ -712,7 +694,6 @@ bool hashmap_iterate_with_func(struct hashmap *map, bool (*iter_func)(const void
             return true;
         }
     }
-
     return false;
 }
 
