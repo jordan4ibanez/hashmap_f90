@@ -63,6 +63,8 @@ contains
 
 
   !* Set a value in the hashmap with a integer key.
+  !* This will memcpy your data into the hashmap.
+  !* Recommendation: use stack variables as they're a lot faster.
   subroutine concurrent_int_hashmap_set(this, key_i, raw_item)
     implicit none
 
