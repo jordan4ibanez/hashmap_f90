@@ -76,7 +76,7 @@ contains
 
     ! If a GC function was assigned.
     if (c_associated(this%gc_function)) then
-      call int_run_gc(this%gc_function, old_data_c_ptr)
+      call hashmap_run_gc(this%gc_function, old_data_c_ptr)
     end if
   end subroutine int_hashmap_set
 
@@ -138,7 +138,7 @@ contains
 
     ! If a GC function was assigned.
     if (c_associated(this%gc_function)) then
-      call int_run_gc(this%gc_function, old_data_c_ptr)
+      call hashmap_run_gc(this%gc_function, old_data_c_ptr)
     end if
   end subroutine int_hashmap_delete
 
@@ -153,7 +153,7 @@ contains
     ! Call the GC function if set.
     if (c_associated(this%gc_function)) then
       do while(internal_hashmap_iterate(this%map, generic_c_pointer))
-        call int_run_gc(this%gc_function, generic_c_pointer)
+        call hashmap_run_gc(this%gc_function, generic_c_pointer)
       end do
     end if
 
@@ -196,7 +196,7 @@ contains
     if (c_associated(this%gc_function)) then
       call this%initialize_iterator()
       do while(internal_hashmap_iterate(this%map, generic_c_pointer))
-        call int_run_gc(this%gc_function, generic_c_pointer)
+        call hashmap_run_gc(this%gc_function, generic_c_pointer)
       end do
     end if
 
