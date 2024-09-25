@@ -25,6 +25,15 @@ module hashmap_bindings
     end subroutine internal_hashmap_free
 
 
+    subroutine internal_hashmap_clear(map, update_capacity) bind(c, name = "hashmap_clear")
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: map
+      logical(c_bool), intent(in), value :: update_capacity
+    end subroutine internal_hashmap_clear
+
+
     function internal_hashmap_count(map) result(count) bind(c, name = "hashmap_count")
       use, intrinsic :: iso_c_binding
       implicit none
@@ -32,6 +41,15 @@ module hashmap_bindings
       type(c_ptr), intent(in), value :: map
       integer(c_size_t) :: count
     end function internal_hashmap_count
+
+
+    function internal_hashmap_out_of_memory(map) result(out_of_memory) bind(c, name = "hashmap_out_of_memory")
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: map
+      logical(c_bool) :: out_of_memory
+    end function internal_hashmap_out_of_memory
 
 
     function internal_hashmap_set_str_key(map, key_s, string_length, raw_item) result(void_pointer) bind(c, name = "hashmap_set_str_key")
@@ -65,15 +83,6 @@ module hashmap_bindings
       integer(c_size_t), intent(in), value :: string_length
       type(c_ptr) :: void_pointer
     end function internal_hashmap_delete_str_key
-
-
-    subroutine internal_hashmap_clear(map, update_capacity) bind(c, name = "hashmap_clear")
-      use, intrinsic :: iso_c_binding
-      implicit none
-
-      type(c_ptr), intent(in), value :: map
-      logical(c_bool), intent(in), value :: update_capacity
-    end subroutine internal_hashmap_clear
 
 
     function internal_hashmap_iterate_with_func(map, iter_func) result(early_return) bind(c, name = "hashmap_iterate_with_func")
