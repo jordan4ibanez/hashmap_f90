@@ -22,7 +22,7 @@ module hashmap_str
     procedure :: set => str_hashmap_set
     procedure :: get => str_hashmap_get
     procedure :: has_key => str_hashmap_has_key
-    procedure :: delete => str_hashmap_delete
+    procedure :: remove => str_hashmap_remove
     procedure :: destroy => str_hashmap_destroy
     procedure :: count => str_hashmap_count
     procedure :: is_empty => str_hashmap_is_empty
@@ -140,7 +140,8 @@ contains
 
   !* Delete a value in the hashmap with a string key.
   !* If it doesn't exist, this is a no-op.
-  subroutine str_hashmap_delete(this, key_s)
+  !* This calls the GC on the old data.
+  subroutine str_hashmap_remove(this, key_s)
     implicit none
 
     class(hashmap_string_key), intent(inout) :: this
@@ -162,7 +163,7 @@ contains
     if (c_associated(this%gc_function)) then
       call hashmap_run_gc(this%gc_function, old_data_c_ptr)
     end if
-  end subroutine str_hashmap_delete
+  end subroutine str_hashmap_remove
 
 
   !* Deallocate EVERYTHING including the underlying C memory.

@@ -22,7 +22,7 @@ module hashmap_int
     procedure :: set => int_hashmap_set
     procedure :: get => int_hashmap_get
     procedure :: has_key => int_hashmap_has_key
-    procedure :: delete => int_hashmap_delete
+    procedure :: remove => int_hashmap_remove
     procedure :: destroy => int_hashmap_destroy
     procedure :: count => int_hashmap_count
     procedure :: is_empty => int_hashmap_is_empty
@@ -121,7 +121,8 @@ contains
 
   !* Delete a value in the hashmap with a integer key.
   !* If it doesn't exist, this is a no-op.
-  subroutine int_hashmap_delete(this, key_i)
+  !* This calls the GC on the old data.
+  subroutine int_hashmap_remove(this, key_i)
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
@@ -140,7 +141,7 @@ contains
     if (c_associated(this%gc_function)) then
       call hashmap_run_gc(this%gc_function, old_data_c_ptr)
     end if
-  end subroutine int_hashmap_delete
+  end subroutine int_hashmap_remove
 
 
   !* Deallocate EVERYTHING including the underlying C memory.
