@@ -12,12 +12,8 @@ module hashmap_int
   public :: new_hashmap_integer_key
 
 
-  ! todo list:
-  !
-  ! hashmap_scan     # callback based iteration over all items in hash map
-
   !* Fortran hashmap wrapper.
-  !* i64 key.
+  !* Integer key.
   type :: hashmap_integer_key
     private
     type(c_ptr) :: map = c_null_ptr
@@ -31,6 +27,9 @@ module hashmap_int
     procedure :: count => int_hashmap_count
     procedure :: is_empty => int_hashmap_is_empty
     procedure :: clear => int_hashmap_clear
+    procedure :: iterate_with_func => int_hashmap_iterate_with_func
+    procedure :: iterate_with_func_discard => int_hashmap_iterate_with_func_discard
+    procedure :: initialize_iterator => int_hashmap_initialize_iterator
     procedure :: iterate => int_hashmap_iterate
     procedure :: iterate_kv => int_hashmap_iterate_kv
   end type hashmap_integer_key
