@@ -165,7 +165,7 @@ uint64_t hash_function(const header *header_pointer)
 
 void hashmap_set_grow_by_power(struct hashmap *map, size_t power)
 {
-    // Limit the power to range: 1-16.
+    // Clamp grow power range: 1-16. results: [ 2-65536 ] multiplicitive.
     if (power < 1)
     {
         map->growpower = 1;
