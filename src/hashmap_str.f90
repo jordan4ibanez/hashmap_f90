@@ -21,8 +21,6 @@ module hashmap_str
     private
     type(c_ptr) :: map = c_null_ptr
     type(c_funptr) :: gc_function = c_null_funptr
-    ! This is a massive hackjob which will slow down key/value iteration.
-    character(len = :, kind = c_char), pointer :: internal_string_pointer => null()
   contains
     procedure :: set => str_hashmap_set
     procedure :: get => str_hashmap_get
@@ -67,7 +65,6 @@ contains
     integer(c_size_t) :: key_length
     type(c_ptr) :: black_magic
     type(c_ptr) :: old_data_c_ptr
-
 
     key_length = len(key_s)
 
@@ -174,10 +171,7 @@ contains
     implicit none
 
     class(hashmap_string_key), intent(inout) :: this
-    integer(c_int64_t) :: i
     type(c_ptr) :: generic_c_pointer
-
-    i = 0
 
     ! Call the GC function if set.
     if (c_associated(this%gc_function)) then
