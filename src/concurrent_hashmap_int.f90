@@ -2,6 +2,7 @@ module concurrent_hashmap_int
   use, intrinsic :: iso_c_binding
   use :: hashmap_bindings
   use :: hashmap_base_functions
+  use :: thread_mutex
   implicit none
 
 
@@ -18,6 +19,8 @@ module concurrent_hashmap_int
     private
     type(c_ptr) :: map = c_null_ptr
     type(c_funptr) :: gc_function = c_null_funptr
+    type(mutex_rwlock), pointer :: mutex
+    type(c_ptr) :: mutex_c_ptr
   contains
     procedure :: set => concurrent_int_hashmap_set
     procedure :: get => concurrent_int_hashmap_get
@@ -32,6 +35,8 @@ module concurrent_hashmap_int
     procedure :: initialize_iterator => concurrent_int_hashmap_initialize_iterator
     procedure :: iterate => concurrent_int_hashmap_iterate
     procedure :: iterate_kv => concurrent_int_hashmap_iterate_kv
+    procedure :: lock => concurrent_int_hashmap_lock
+    procedure :: unlock => concurrent_int_hashmap_unlock
   end type concurrent_hashmap_integer_key
 
 
@@ -51,6 +56,9 @@ contains
     if (present(optional_gc_function)) then
       h%gc_function = c_funloc(optional_gc_function)
     end if
+
+    h%mutex => thread_create_mutex_pointer()
+    h%mutex_c_ptr = c_loc(h%mutex)
   end function new_concurrent_hashmap_integer_key
 
 
@@ -158,6 +166,9 @@ contains
     end if
 
     call internal_hashmap_free(this%map)
+
+    call thread_destroy_mutex_pointer(this%mutex)
+    this%mutex_c_ptr = c_null_ptr
   end subroutine concurrent_int_hashmap_free
 
 
@@ -296,6 +307,28 @@ contains
       return
     end if
   end function concurrent_int_hashmap_iterate_kv
+
+
+  !* Lock the hashmap mutex.
+  subroutine concurrent_int_hashmap_lock(this)
+    implicit none
+
+    class(concurrent_hashmap_integer_key), intent(inout) :: this
+    integer(c_int) :: status
+
+    status = thread_write_lock(this%mutex_c_ptr)
+  end subroutine concurrent_int_hashmap_lock
+
+
+  !* Unlock the hashmap mutex.
+  subroutine concurrent_int_hashmap_unlock(this)
+    implicit none
+
+    class(concurrent_hashmap_integer_key), intent(inout) :: this
+    integer(c_int) :: status
+
+    status = thread_unlock_lock(this%mutex_c_ptr)
+  end subroutine concurrent_int_hashmap_unlock
 
 
 end module concurrent_hashmap_int
