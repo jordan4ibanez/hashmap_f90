@@ -328,18 +328,4 @@ contains
   end function str_hashmap_iterate_kv
 
 
-  subroutine raw_string_cast(string_pointer, c_str_pointer, str_len)
-    implicit none
-
-    character(len = :, kind = c_char), intent(inout), pointer :: string_pointer
-    type(c_ptr), intent(in), value :: c_str_pointer
-    integer(c_size_t), intent(in), value :: str_len
-    character(len = str_len, kind = c_char), pointer :: black_magic
-
-    call c_f_pointer(c_str_pointer, black_magic)
-
-    string_pointer => black_magic
-  end subroutine raw_string_cast
-
-
 end module hashmap_str

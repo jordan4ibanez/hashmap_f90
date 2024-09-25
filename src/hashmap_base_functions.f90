@@ -7,6 +7,21 @@ module hashmap_base_functions
 contains
 
 
+  !* Do some pointer magic to point a string pointer into the hashmap heap.
+  subroutine raw_string_cast(string_pointer, c_str_pointer, str_len)
+    implicit none
+
+    character(len = :, kind = c_char), intent(inout), pointer :: string_pointer
+    type(c_ptr), intent(in), value :: c_str_pointer
+    integer(c_size_t), intent(in), value :: str_len
+    character(len = str_len, kind = c_char), pointer :: black_magic
+
+    call c_f_pointer(c_str_pointer, black_magic)
+
+    string_pointer => black_magic
+  end subroutine raw_string_cast
+
+
   !* Re-map the function pointer into the Fortran intrinsic behavior.
   subroutine int_run_gc(c_function_pointer, raw_c_element)
     implicit none
