@@ -101,25 +101,6 @@ module hashmap_bindings
 ! !? FUNCTION BLUEPRINTS. ===========================================================================
 
 
-!     recursive function hash_function_c_interface(item_pointer, seed_0, seed_1) result(hash) bind(c)
-!       use, intrinsic :: iso_c_binding
-!       implicit none
-
-!       type(c_ptr), intent(in), value :: item_pointer
-!       integer(c_int64_t), intent(in), value :: seed_0, seed_1
-!       integer(c_int64_t) :: hash
-!     end function hash_function_c_interface
-
-
-!     recursive function compare_function_c_interface(a, b, udata) result(comparitor) bind(c)
-!       use, intrinsic :: iso_c_binding
-!       implicit none
-
-!       type(c_ptr), intent(in), value :: a, b, udata
-!       logical(c_bool) :: comparitor
-!     end function compare_function_c_interface
-
-
     subroutine gc_function_interface(raw_c_element)
       use, intrinsic :: iso_c_binding
       implicit none
