@@ -40,7 +40,7 @@ struct hashmap *hashmap_new(size_t elsize, size_t cap);
 void hashmap_free(struct hashmap *map);
 void hashmap_clear(struct hashmap *map, bool update_cap);
 size_t hashmap_count(struct hashmap *map);
-bool hashmap_oom(struct hashmap *map);
+bool hashmap_out_of_memory(struct hashmap *map);
 // Setters.
 const void *hashmap_set_str_key(struct hashmap *, const char *key_s, size_t string_length, const void *fortran_data);
 const void *hashmap_set_int_key(struct hashmap *, int64_t key_i_fort, const void *fortran_data);
@@ -447,7 +447,7 @@ const void *hashmap_set_int_key(struct hashmap *map, const int64_t key_i_fort, c
  * hashmap_set inserts or replaces an item in the hash map. If an item is
  * replaced then it is returned otherwise NULL is returned. This operation
  * may allocate memory. If the system is unable to allocate additional
- * memory then NULL is returned and hashmap_oom() returns true.
+ * memory then NULL is returned and hashmap_out_of_memory() returns true.
  *
  * Implementation note: I would keep fortran_data on the stack in Fortran. (the item can contain Fortran/C pointers)
  */
@@ -667,10 +667,10 @@ void hashmap_free(struct hashmap *map)
 }
 
 /**
- * hashmap_oom returns true if the last hashmap_set() call failed due to the
+ * hashmap_out_of_memory returns true if the last hashmap_set() call failed due to the
  * system being out of memory.
  */
-bool hashmap_oom(struct hashmap *map)
+bool hashmap_out_of_memory(struct hashmap *map)
 {
     return map->out_of_memory;
 }
