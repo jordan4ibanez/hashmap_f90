@@ -59,23 +59,15 @@ contains
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
-    character(len = *, kind = c_char), intent(in) :: key_i
+    integer(c_int64_t), intent(in), value :: key_i
     class(*), intent(in), target :: raw_item
-    integer(c_size_t) :: key_length
     type(c_ptr) :: black_magic
     type(c_ptr) :: old_data_c_ptr
-
-    key_length = len(key_i)
-
-    !? Safety check.
-    if (key_length == 0) then
-      error stop "[Hashmap] Error: Key cannot be NULL."
-    end if
 
     black_magic = transfer(loc(raw_item), black_magic)
 
     !? Internally calls: memcpy.
-    old_data_c_ptr = internal_hashmap_set_int_key(this%map, key_i, key_length, black_magic)
+    old_data_c_ptr = internal_hashmap_set_int_key(this%map, key_i, black_magic)
 
     ! The old data was a null pointer. We don't have to do anything.
     if (.not. c_associated(old_data_c_ptr)) then
@@ -94,22 +86,14 @@ contains
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
-    character(len = *, kind = c_char), intent(in) :: key_i
+    integer(c_int64_t), intent(in), value :: key_i
     type(c_ptr), intent(inout) :: gotten_c_ptr
     logical(c_bool) :: is_some
-    integer(c_size_t) :: key_length
 
     is_some = .false.
 
-    key_length = len(key_i)
-
-    !? Safety check.
-    if (key_length == 0) then
-      error stop "[Hashmap] Error: Key cannot be NULL."
-    end if
-
     !? Grabs a C pointer or NULL upon failure.
-    gotten_c_ptr = internal_hashmap_get_int_key(this%map, key_i, key_length )
+    gotten_c_ptr = internal_hashmap_get_int_key(this%map, key_i)
 
     ! We can simply check if it's NULL.
     is_some = c_associated(gotten_c_ptr)
@@ -121,17 +105,14 @@ contains
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
-    character(len = *, kind = c_char), intent(in) :: key_i
+    integer(c_int64_t), intent(in), value :: key_i
     logical(c_bool) :: has
-    integer(c_size_t) :: integer_length
     type(c_ptr) :: data_c_ptr
 
     has = .false.
 
-    integer_length = len(key_i)
-
     !? Grabs a C pointer or NULL upon failure.
-    data_c_ptr = internal_hashmap_get_int_key(this%map, key_i, integer_length)
+    data_c_ptr = internal_hashmap_get_int_key(this%map, key_i)
 
     ! We can simply check if it's NULL.
     has = c_associated(data_c_ptr)
@@ -144,14 +125,11 @@ contains
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
-    character(len = *, kind = c_char), intent(in) :: key_i
+    integer(c_int64_t), intent(in), value :: key_i
     type(c_ptr) :: old_data_c_ptr
-    integer(c_size_t) :: integer_length
-
-    integer_length = len(key_i)
 
     !? Grabs a C pointer or NULL upon failure.
-    old_data_c_ptr = internal_hashmap_delete_int_key(this%map, key_i, integer_length)
+    old_data_c_ptr = internal_hashmap_delete_int_key(this%map, key_i)
 
     ! It's a null pointer.
     if (.not. c_associated(old_data_c_ptr)) then
@@ -307,20 +285,16 @@ contains
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
-    character(len = :, kind = c_char), intent(inout), pointer :: integer_pointer
+    integer(c_int64_t), intent(inout), pointer :: integer_pointer
     type(c_ptr), intent(inout) :: raw_c_pointer
-    type(c_ptr) :: c_int_pointer
-    integer(c_size_t) :: integer_length
     logical(c_bool) :: has_item
 
-    has_item = internal_hashmap_iterate_int_key_kv(this%map, c_int_pointer, integer_length, raw_c_pointer)
+    has_item = internal_hashmap_iterate_int_key_kv(this%map, integer_pointer, raw_c_pointer)
 
     ! Nothing to do.
     if (.not. has_item) then
       return
     end if
-
-    call raw_integer_cast(integer_pointer, c_int_pointer, integer_length)
   end function int_hashmap_iterate_kv
 
 
