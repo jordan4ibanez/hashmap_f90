@@ -86,14 +86,30 @@ program prototype
     end if
   end do
 
+  !* Iteration tutorial:
+
+  !? Remember, when you're using a regular iterator (non func)
+  !? you must initialize the iterator.
+  !*
+  !* I had two options with this:
+  !* 1.) Make you make an integer key and set it to 0 and pass it to the iterator.
+  !* 2.) Make you call a subroutine to reset it.
+  !*
+  !* 1 required more coding and you might still forget to initialize the integer.
+  !* 2 you just might forget to initialize the function.
+  !*
+  !* As you can see, this is a bit easier.
   call map%initialize_iterator()
 
   do while(map%iterate(raw_ptr))
     call c_f_pointer(raw_ptr, gotten_data)
-    ! print*,gotten_data
+    print*,gotten_data
   end do
 
 
+  !* You can also iterate through the hashmap by key and value.
+  !* This uses some pointer magic under the hood so it never allocates.
+  !* I would not attempt to change the key as that will yield severe UB.
   call map%initialize_iterator()
   do while (map%iterate_kv(string_pointer, raw_ptr))
     call c_f_pointer(raw_ptr, gotten_data)
@@ -102,10 +118,12 @@ program prototype
 
   !* This version when you're checking for something.
   if (map%iterate_with_func(iter_func_test)) then
+    ! This means that we've broken out of the iteration early.
     print*,"uh oh!"
   end if
 
   !* This version when you don't feel like initializing an iterator.
+  !* Or if you have a different design in mind.
   call map%iterate_with_func_discard(iter_func_test)
 
 
