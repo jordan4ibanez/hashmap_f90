@@ -1,6 +1,7 @@
 module hashmap_str
   use, intrinsic :: iso_c_binding
   use :: hashmap_bindings
+  use :: hashmap_base_functions
   implicit none
 
 
@@ -339,24 +340,6 @@ contains
 
     string_pointer => black_magic
   end subroutine raw_string_cast
-
-
-! !! INTRINSIC HASHMAP FUNCTIONS. ===========================================================================
-
-
-
-  !* Re-map the function pointer into the Fortran intrinsic behavior.
-  subroutine str_run_gc(c_function_pointer, raw_c_element)
-    implicit none
-
-    type(c_funptr), intent(in), value :: c_function_pointer
-    type(c_ptr), intent(in), value :: raw_c_element
-    procedure(gc_function_interface), pointer :: func
-
-    call c_f_procpointer(c_function_pointer, func)
-
-    call func(raw_c_element)
-  end subroutine str_run_gc
 
 
 end module hashmap_str
