@@ -12,10 +12,6 @@ module hashmap_str
   public :: new_hashmap_string_key
 
 
-  ! todo list:
-  !
-  ! hashmap_scan     # callback based iteration over all items in hash map
-
   !* Fortran hashmap wrapper.
   !* String key.
   type :: hashmap_string_key
