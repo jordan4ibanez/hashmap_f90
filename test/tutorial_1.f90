@@ -1,4 +1,4 @@
-module my_prototype_module
+module tutorial_1_module
   use, intrinsic :: iso_c_binding
   implicit none
 
@@ -43,11 +43,11 @@ contains
   end function iter_func_test
 
 
-end module my_prototype_module
+end module tutorial_1_module
 
 
-program prototype
-  use :: my_prototype_module
+program tutorial_1
+  use :: tutorial_1_module
   use :: hashmap_str
   use, intrinsic :: iso_c_binding
   implicit none
@@ -162,9 +162,10 @@ program prototype
   !* 2.) You're done with the map and want to free all the memory.
   !* This calls the GC.
   call map%destroy()
-  
 
+  !* Just don't call that twice.
+  !* Uncomment this to see what happens. :P
+  ! call map%destroy()
 
-
-
-end program prototype
+  !* Tutorial 2 shows you more things.
+end program tutorial_1
