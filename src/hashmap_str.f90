@@ -235,6 +235,17 @@ contains
   end subroutine str_hashmap_clear
 
 
+  !* Initializes the internal iterator.
+  !* If this is not called before *_hashmap_iterate* it is UB.
+  subroutine str_hashmap_initialize_iterator(this)
+    implicit none
+
+    class(hashmap_string_key), intent(in) :: this
+
+    call internal_hashmap_initialize_iterator(this%map)
+  end subroutine str_hashmap_initialize_iterator
+
+
   !* Allows you to iterate through each element in the hashmap by direct pointer.
   !* This means: You can mutate the element in the hashmap directly.
   !* If you delete items while you iterate, keep in mind the iteration restarts.
@@ -252,15 +263,6 @@ contains
       return
     end if
   end function str_hashmap_iterate
-
-
-  subroutine str_hashmap_initialize_iterator(this)
-    implicit none
-
-    class(hashmap_string_key), intent(in) :: this
-
-    call internal_hashmap_initialize_iterator(this%map)
-  end subroutine str_hashmap_initialize_iterator
 
 
   !* Allows you to iterate through each element in the hashmap by key and direct pointer.
