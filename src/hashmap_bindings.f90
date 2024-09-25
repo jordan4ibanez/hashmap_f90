@@ -98,7 +98,7 @@ module hashmap_bindings
     end function internal_hashmap_iterate_str_key_kv
 
 
-! !? FUNCTION BLUEPRINTS. ===========================================================================
+!? FUNCTION BLUEPRINTS. ===========================================================================
 
 
     subroutine gc_function_interface(raw_c_element)
@@ -107,6 +107,15 @@ module hashmap_bindings
 
       type(c_ptr), intent(in), value :: raw_c_element
     end subroutine gc_function_interface
+
+
+    recursive function iterate_with_func_c_interface(raw_c_element) result(stop_iterating) bind(c)
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: raw_c_element
+      logical(c_bool) :: stop_iterating
+    end function iterate_with_func_c_interface
 
 
   end interface
