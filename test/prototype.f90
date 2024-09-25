@@ -27,22 +27,16 @@ contains
   end function int_to_string
 
 
-  ! subroutine example_gc_function(raw_c_element)
-  !   implicit none
+  logical(c_bool) function iter_func_test(raw_c_ptr) result(early_return)
+    implicit none
 
-  !   type(c_ptr), intent(in), value :: raw_c_element
+    type(c_ptr), intent(in), value :: raw_c_ptr
+    integer(c_int), pointer :: gotten_data
 
-  !   if (.not. c_associated(raw_c_element)) then
+    call c_f_pointer(raw_c_ptr, gotten_data)
 
-  !   end if
-
-  !   select type (el)
-  !    type is (cool)
-  !     !* We free the Fortran memory here. :)
-  !     deallocate(el%i)
-  !     deallocate(el)
-  !   end select
-  ! end subroutine example_gc_function
+    print*,"hello from iter func: ", gotten_data
+  end function iter_func_test
 
 
 end module my_prototype_module
@@ -58,8 +52,7 @@ program prototype
   integer(c_int), pointer :: gotten_data
   type(c_ptr) :: raw_ptr
   character(len = :, kind = c_char), pointer :: string_pointer
-  integer(c_int) :: i, w, d
-  integer(c_int128_t) :: q, f
+  integer(c_int) :: i
 
   ! z = 0
 
@@ -96,13 +89,16 @@ program prototype
     ! print*,gotten_data
   end do
 
-  do
-    call map%initialize_iterator()
-    do while (map%iterate_kv(string_pointer, raw_ptr))
-      call c_f_pointer(raw_ptr, gotten_data)
-      print*,string_pointer, len(string_pointer), gotten_data
-    end do
+
+  call map%initialize_iterator()
+  do while (map%iterate_kv(string_pointer, raw_ptr))
+    call c_f_pointer(raw_ptr, gotten_data)
+    print*,string_pointer, len(string_pointer), gotten_data
   end do
+
+  if (map%iterate_with_func(iter_func_test)) then
+
+  end if
 
 
 end program prototype
