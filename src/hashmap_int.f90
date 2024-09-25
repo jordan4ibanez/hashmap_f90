@@ -39,13 +39,14 @@ contains
 
 
   !* Hashmap integer key constructor.
-  function new_hashmap_integer_key(optional_gc_function) result(h)
+  function new_hashmap_integer_key(element_size, optional_gc_function) result(h)
     implicit none
 
+    integer(c_size_t), intent(in), value :: element_size
+    procedure(gc_function_interface), optional :: optional_gc_function
     type(hashmap_integer_key) :: h
-    procedure(gc_function_interface_integer), optional :: optional_gc_function
 
-    h%map = internal_hashmap_new(32_8, 0_8, 0_8, 0_8, c_funloc(int_hashing_function), c_funloc(int_compare_function), c_null_funptr, c_null_ptr)
+    h%map = internal_hashmap_new(element_size, 0_8)
 
     if (present(optional_gc_function)) then
       h%gc_function = c_funloc(optional_gc_function)
@@ -53,21 +54,28 @@ contains
   end function new_hashmap_integer_key
 
 
-  !* Set a value in the hashmap with an integer key.
-  subroutine int_hashmap_set(this, key, generic_pointer)
+  !* Set a value in the hashmap with a integer key.
+  subroutine int_hashmap_set(this, key_i, raw_item)
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
-    integer(c_int64_t), intent(in), value :: key
-    class(*), intent(in), target :: generic_pointer
-    type(element_integer_key), target :: new_element
+    character(len = *, kind = c_char), intent(in) :: key_i
+    class(*), intent(in), target :: raw_item
+    integer(c_size_t) :: key_length
+    type(c_ptr) :: black_magic
     type(c_ptr) :: old_data_c_ptr
 
-    new_element%key = key
-    new_element%data => generic_pointer
+    key_length = len(key_i)
+
+    !? Safety check.
+    if (key_length == 0) then
+      error stop "[Hashmap] Error: Key cannot be NULL."
+    end if
+
+    black_magic = transfer(loc(raw_item), black_magic)
 
     !? Internally calls: memcpy.
-    old_data_c_ptr = internal_hashmap_set(this%map, c_loc(new_element))
+    old_data_c_ptr = internal_hashmap_set_int_key(this%map, key_i, key_length, black_magic)
 
     ! The old data was a null pointer. We don't have to do anything.
     if (.not. c_associated(old_data_c_ptr)) then
@@ -81,85 +89,78 @@ contains
   end subroutine int_hashmap_set
 
 
-  !* Get a value in the hashmap with an integer key.
-  function int_hashmap_get(this, key, generic_pointer) result(is_some)
+  !* Get a value in the hashmap with a integer key.
+  function int_hashmap_get(this, key_i, gotten_c_ptr) result(is_some)
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
-    integer(c_int64_t), intent(in), value :: key
-    class(*), intent(inout), pointer :: generic_pointer
+    character(len = *, kind = c_char), intent(in) :: key_i
+    type(c_ptr), intent(inout) :: gotten_c_ptr
     logical(c_bool) :: is_some
-    type(c_ptr) :: gotten_data
-    type(element_integer_key), target :: element_key
-    type(element_integer_key), pointer :: element_pointer
+    integer(c_size_t) :: key_length
 
     is_some = .false.
 
-    element_key%key = key
+    key_length = len(key_i)
 
-    !? Grabs a C pointer or NULL upon failure.
-    gotten_data = internal_hashmap_get(this%map, c_loc(element_key))
-
-    ! It's a null pointer.
-    if (.not. c_associated(gotten_data)) then
-      return
+    !? Safety check.
+    if (key_length == 0) then
+      error stop "[Hashmap] Error: Key cannot be NULL."
     end if
 
-    !* We can finally point STRAIGHT AT IT!
-    call c_f_pointer(gotten_data, element_pointer)
-    generic_pointer => element_pointer%data
+    !? Grabs a C pointer or NULL upon failure.
+    gotten_c_ptr = internal_hashmap_get_int_key(this%map, key_i, key_length )
 
-    is_some = .true.
+    ! We can simply check if it's NULL.
+    is_some = c_associated(gotten_c_ptr)
   end function int_hashmap_get
 
 
   !* Check if a hashmap has a key.
-  function int_hashmap_has_key(this, key) result(has)
+  function int_hashmap_has_key(this, key_i) result(has)
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
-    integer(c_int64_t), intent(in), value :: key
+    character(len = *, kind = c_char), intent(in) :: key_i
     logical(c_bool) :: has
+    integer(c_size_t) :: integer_length
     type(c_ptr) :: data_c_ptr
-    type(element_integer_key), target :: element_key
 
     has = .false.
 
-    element_key%key = key
+    integer_length = len(key_i)
 
     !? Grabs a C pointer or NULL upon failure.
-    data_c_ptr = internal_hashmap_get(this%map, c_loc(element_key))
+    data_c_ptr = internal_hashmap_get_int_key(this%map, key_i, integer_length)
 
     ! We can simply check if it's NULL.
-    if (c_associated(data_c_ptr)) then
-      has = .true.
-    end if
+    has = c_associated(data_c_ptr)
   end function int_hashmap_has_key
 
 
-  !* Delete a value in the hashmap with an integer key.
+  !* Delete a value in the hashmap with a integer key.
   !* If it doesn't exist, this is a no-op.
-  subroutine int_hashmap_delete(this, key)
+  subroutine int_hashmap_delete(this, key_i)
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
-    integer(c_int64_t), intent(in), value :: key
-    type(c_ptr) :: gotten_data
-    type(element_integer_key), target :: element_key
+    character(len = *, kind = c_char), intent(in) :: key_i
+    type(c_ptr) :: old_data_c_ptr
+    integer(c_size_t) :: integer_length
 
-    element_key%key = key
+    integer_length = len(key_i)
 
     !? Grabs a C pointer or NULL upon failure.
-    gotten_data = internal_hashmap_delete(this%map, c_loc(element_key))
+    old_data_c_ptr = internal_hashmap_delete_int_key(this%map, key_i, integer_length)
 
     ! It's a null pointer.
-    if (.not. c_associated(gotten_data)) then
+    if (.not. c_associated(old_data_c_ptr)) then
       return
     end if
 
     ! If a GC function was assigned.
     if (c_associated(this%gc_function)) then
-      call int_run_gc(this%gc_function, gotten_data)
+      call int_run_gc(this%gc_function, old_data_c_ptr)
     end if
   end subroutine int_hashmap_delete
 
@@ -169,12 +170,11 @@ contains
     implicit none
 
     class(hashmap_integer_key), intent(inout) :: this
-    integer(c_int64_t) :: i
     type(c_ptr) :: generic_c_pointer
 
+    ! Call the GC function if set.
     if (c_associated(this%gc_function)) then
-      i = 0
-      do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
+      do while(internal_hashmap_iterate(this%map, generic_c_pointer))
         call int_run_gc(this%gc_function, generic_c_pointer)
       end do
     end if
@@ -206,49 +206,94 @@ contains
 
 
   !* Clear the hashmap.
-  subroutine int_hashmap_clear(this)
+  subroutine int_hashmap_clear(this, update_capacity)
     implicit none
 
     class(hashmap_integer_key), intent(in) :: this
-    integer(c_int64_t) :: i
+    logical, intent(in), value, optional :: update_capacity
     type(c_ptr) :: generic_c_pointer
+    logical(c_bool) :: c_update_capacity
 
+    ! Call the GC function if set.
     if (c_associated(this%gc_function)) then
-      i = 0
-      do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
+      call this%initialize_iterator()
+      do while(internal_hashmap_iterate(this%map, generic_c_pointer))
         call int_run_gc(this%gc_function, generic_c_pointer)
       end do
     end if
 
-    call internal_hashmap_clear(this%map, logical(.true., kind = c_bool))
+    if (present(update_capacity)) then
+      c_update_capacity = update_capacity
+    else
+      !? Note: Defined to true by default for auto memory mangement.
+      !? If you want to clear and fire back into it, set this to false.
+      c_update_capacity = .true.
+    end if
+
+    call internal_hashmap_clear(this%map, c_update_capacity)
   end subroutine int_hashmap_clear
+
+
+  !* Send a function into the hashmap and iterate with it.
+  !* Returns .true. if there was an early return.
+  !* You can use this to find something in the hashmap. :)
+  function int_hashmap_iterate_with_func(this, iter_func) result(early_return)
+    implicit none
+
+    class(hashmap_integer_key), intent(in) :: this
+    procedure(iterate_with_func_c_interface) :: iter_func
+    logical(c_bool) :: early_return
+    type(c_funptr) :: c_func_pointer
+
+    c_func_pointer = c_funloc(iter_func)
+
+    early_return = internal_hashmap_iterate_with_func(this%map, c_func_pointer)
+  end function int_hashmap_iterate_with_func
+
+
+  !* Send a function into the hashmap and iterate with it.
+  !* This version does not return a value.
+  subroutine int_hashmap_iterate_with_func_discard(this, iter_func)
+    implicit none
+
+    class(hashmap_integer_key), intent(in) :: this
+    procedure(iterate_with_func_c_interface) :: iter_func
+    logical(c_bool) :: discard
+    type(c_funptr) :: c_func_pointer
+
+    c_func_pointer = c_funloc(iter_func)
+
+    discard = internal_hashmap_iterate_with_func(this%map, c_func_pointer)
+  end subroutine int_hashmap_iterate_with_func_discard
+
+
+  !* Initializes the internal iterator.
+  !* If this is not called before *_hashmap_iterate* it is UB.
+  subroutine int_hashmap_initialize_iterator(this)
+    implicit none
+
+    class(hashmap_integer_key), intent(in) :: this
+
+    call internal_hashmap_initialize_iterator(this%map)
+  end subroutine int_hashmap_initialize_iterator
 
 
   !* Allows you to iterate through each element in the hashmap by direct pointer.
   !* This means: You can mutate the element in the hashmap directly.
-  !*
-  !* Your iterator_index must start at 0, or else it's UB.
-  !* DO NOT delete elements as you iterate.
-  function int_hashmap_iterate(this, iterator_index, generic_pointer) result(has_item)
+  !* If you delete items while you iterate, keep in mind the iteration restarts.
+  function int_hashmap_iterate(this, raw_c_pointer) result(has_item)
     implicit none
 
     class(hashmap_integer_key), intent(in) :: this
-    integer(c_size_t), intent(inout) :: iterator_index
-    class(*), intent(inout), pointer :: generic_pointer
+    type(c_ptr), intent(inout) :: raw_c_pointer
     logical(c_bool) :: has_item
-    type(c_ptr) :: raw_c_pointer
-    type(element_integer_key), pointer :: element_pointer
 
-    has_item = internal_hashmap_iter(this%map, iterator_index, raw_c_pointer)
+    has_item = internal_hashmap_iterate(this%map, raw_c_pointer)
 
     ! Nothing to do.
     if (.not. has_item) then
       return
     end if
-
-    call c_f_pointer(raw_c_pointer, element_pointer)
-
-    generic_pointer => element_pointer%data
   end function int_hashmap_iterate
 
 
@@ -257,119 +302,26 @@ contains
   !*
   !* If you mutate the key during iteration, good luck.
   !*
-  !* Your iterator_index must start at 0, or else it's UB.
-  !* DO NOT delete elements as you iterate.
-  function int_hashmap_iterate_kv(this, iterator_index, key_pointer, generic_pointer) result(has_item)
+  !* If you delete items as you iterate, this restarts the iteration.
+  function int_hashmap_iterate_kv(this, integer_pointer, raw_c_pointer) result(has_item)
     implicit none
 
-    class(hashmap_integer_key), intent(in) :: this
-    integer(c_size_t), intent(inout) :: iterator_index
-    integer(c_int64_t), intent(inout), pointer :: key_pointer
-    class(*), intent(inout), pointer :: generic_pointer
+    class(hashmap_integer_key), intent(inout) :: this
+    character(len = :, kind = c_char), intent(inout), pointer :: integer_pointer
+    type(c_ptr), intent(inout) :: raw_c_pointer
+    type(c_ptr) :: c_int_pointer
+    integer(c_size_t) :: integer_length
     logical(c_bool) :: has_item
-    type(c_ptr) :: raw_c_pointer
-    type(element_integer_key), pointer :: element_pointer
 
-    has_item = internal_hashmap_iter(this%map, iterator_index, raw_c_pointer)
+    has_item = internal_hashmap_iterate_int_key_kv(this%map, c_int_pointer, integer_length, raw_c_pointer)
 
     ! Nothing to do.
     if (.not. has_item) then
       return
     end if
 
-    call c_f_pointer(raw_c_pointer, element_pointer)
-
-    key_pointer => element_pointer%key
-    generic_pointer => element_pointer%data
+    call raw_integer_cast(integer_pointer, c_int_pointer, integer_length)
   end function int_hashmap_iterate_kv
-
-
-!! INTRINSIC HASHMAP FUNCTIONS. ===========================================================================
-
-
-  recursive function int_hashing_function(item_pointer, seed_0, seed_1) result(hash) bind(c)
-    implicit none
-
-    type(c_ptr), intent(in), value :: item_pointer
-    integer(c_int64_t), intent(in), value :: seed_0, seed_1
-    integer(c_int64_t) :: hash
-    type(element_integer_key), pointer :: element_pointer
-
-    if (.false.) then
-      print*,seed_0,seed_1
-    end if
-
-    !? Safety check.
-    if (.not. c_associated(item_pointer)) then
-      error stop "[Hashmap] FATAL ERROR: item_pointer is NULL."
-    end if
-
-    call c_f_pointer(item_pointer, element_pointer)
-
-    !* That's probably as fast as you can go lol.
-    ! print*,"key: ",element_pointer%key
-    hash = element_pointer%key
-    ! print*,"hash:", hash
-  end function int_hashing_function
-
-
-  recursive function int_compare_function(a, b, udata) result(failed) bind(c)
-    use, intrinsic :: iso_c_binding
-    implicit none
-
-    type(c_ptr), intent(in), value :: a, b, udata
-    logical(c_bool) :: failed
-
-    type(element_integer_key), pointer :: element_pointer_a, element_pointer_b
-
-    !* A transfer.
-
-    !? Safety check.
-    if (.not. c_associated(a)) then
-      error stop "[Hashmap] FATAL ERROR: a is NULL."
-    end if
-
-    call c_f_pointer(a, element_pointer_a)
-
-    !* B transfer.
-
-    !? Safety check.
-    if (.not. c_associated(b)) then
-      error stop "[Hashmap] FATAL ERROR: b is NULL."
-    end if
-
-    call c_f_pointer(a, element_pointer_b)
-
-    !* Now check.
-    failed = .true.
-
-    if (element_pointer_a%key /= element_pointer_b%key) then
-      return
-    end if
-
-    if (.false.) then
-      print*,udata
-    end if
-
-    failed = .false.
-  end function int_compare_function
-
-
-  !* Re-map the function pointer into the Fortran intrinsic behavior.
-  subroutine int_run_gc(c_function_pointer, raw_c_element)
-    implicit none
-
-    type(c_funptr), intent(in), value :: c_function_pointer
-    type(c_ptr), intent(in), value :: raw_c_element
-    type(element_integer_key), pointer :: element_pointer
-    procedure(gc_function_interface_integer), pointer :: func
-
-    call c_f_procpointer(c_function_pointer, func)
-
-    call c_f_pointer(raw_c_element, element_pointer)
-
-    call func(element_pointer%data)
-  end subroutine int_run_gc
 
 
 end module hashmap_int
