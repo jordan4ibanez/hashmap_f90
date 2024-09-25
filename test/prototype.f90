@@ -58,35 +58,60 @@ program prototype
   character(len = :, kind = c_char), pointer :: string_pointer
   integer(c_int) :: i
 
-  ! z = 0
+
+  !* Basic usage.
+
 
   !* Create the hashmap.
   map = new_hashmap_string_key(sizeof(10))
 
+  !* We shall set 100 values.
   do i = 1,100
+
+    !* Set a value in the heap of the hashmap.
+    !* This utilizes memcpy under the hood, so you can utilize
+    !* the EXTREME performance of stack variables.
+    !* You can also utilize pointers, if you want, but that will
+    !* make it more complex for no reason.
+    !*
+    !* In tutorial 2 which uses the integer hashmap key type,
+    !* I'll show you how to GC derived types with Fortran pointers.
     call map%set("hi"//int_to_string(i), i)
 
+    !* We can get them immediately after they're set.
+    !* You can see this reads like a Rust if-let statement.
     if (map%get("hi"//int_to_string(i), raw_ptr)) then
       call c_f_pointer(raw_ptr, gotten_data)
-      ! print*,gotten_data
+      print*,gotten_data
     end if
 
-    ! print*,map%count()
-
+    !* This is just to show you it is double checking the hashmap
+    !* heap to ensure the value is there as I was prototyping it.
     if (.not. map%has_key("hi"//int_to_string(i))) then
-      print*,"FAILED"
+      error stop "FAILED"
     end if
 
-    ! call map%delete("hi"//int_to_string(i))
-
-    ! print*,map%count()
-
-    if (map%has_key("hi"//int_to_string(i))) then
-      ! print*,"FAILED"
-    end if
   end do
 
+  !* Let's get how many elements the hashmap has.
+  print*,map%count()
+
+  !* Now let us remove, how about, [hi55]
+  call map%remove("hi"//int_to_string(55))
+
+  !* Now let us enforce this has 99 elements.
+  if (map%count() /= 99) then
+    error stop "FAILED"
+  end if
+
+  !* But why stop there?
+  if (map%has_key("hi"//int_to_string(55))) then
+    error stop "FAILED"
+  end if
+
+
   !* Iteration tutorial:
+
 
   !? Remember, when you're using a regular iterator (non func)
   !? you must initialize the iterator.
@@ -101,6 +126,7 @@ program prototype
   !* As you can see, this is a bit easier.
   call map%initialize_iterator()
 
+  !* Now we can iterate with value only.
   do while(map%iterate(raw_ptr))
     call c_f_pointer(raw_ptr, gotten_data)
     print*,gotten_data
@@ -119,12 +145,26 @@ program prototype
   !* This version when you're checking for something.
   if (map%iterate_with_func(iter_func_test)) then
     ! This means that we've broken out of the iteration early.
-    print*,"uh oh!"
+    ! If you return true when changing the iterator func, you can make this print "got ya".
+    print*,"got ya!"
   end if
 
   !* This version when you don't feel like initializing an iterator.
   !* Or if you have a different design in mind.
   call map%iterate_with_func_discard(iter_func_test)
+
+  !* Now you have two options:
+
+  !* 1.) If you want to keep reusing the map but want to empty it:
+  !* This calls the GC.
+  call map%clear()
+
+  !* 2.) You're done with the map and want to free all the memory.
+  !* This calls the GC.
+  call map%destroy()
+  
+
+
 
 
 end program prototype
