@@ -686,7 +686,7 @@ bool hashmap_iterate_with_func(struct hashmap *map, bool (*iter_func)(const void
         struct bucket *bucket = bucket_at(map, i);
 
         // If dib is 0 this will short circuit and skip eval of iter_func.
-        if (bucket->dib && iter_func(bucket_item(bucket)))
+        if (bucket->dib && iter_func(bucket_item(bucket) + HEADER_SIZE))
         {
             return true;
         }
