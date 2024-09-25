@@ -207,11 +207,13 @@ contains
 
 
   !* Clear the hashmap.
-  subroutine str_hashmap_clear(this)
+  subroutine str_hashmap_clear(this, update_capacity)
     implicit none
 
     class(hashmap_string_key), intent(in) :: this
+    logical, intent(in), value, optional :: update_capacity
     type(c_ptr) :: generic_c_pointer
+    logical(c_bool) :: c_update_capacity
 
     ! Call the GC function if set.
     if (c_associated(this%gc_function)) then
@@ -221,7 +223,15 @@ contains
       end do
     end if
 
-    call internal_hashmap_clear(this%map, logical(.true., kind = c_bool))
+    if (present(update_capacity)) then
+      c_update_capacity = update_capacity
+    else
+      !? Note: Defined to true by default for auto memory mangement.
+      !? If you want to clear and fire back into it, set this to false.
+      c_update_capacity = .true.
+    end if
+
+    call internal_hashmap_clear(this%map, c_update_capacity)
   end subroutine str_hashmap_clear
 
 
