@@ -31,7 +31,7 @@ module hashmap_str
     procedure :: free => str_hashmap_free
     procedure :: count => str_hashmap_count
     procedure :: is_empty => str_hashmap_is_empty
-    ! procedure :: clear => str_hashmap_clear
+    procedure :: clear => str_hashmap_clear
     procedure :: initialize_iterator => str_hashmap_initialize_iterator
     procedure :: iterate => str_hashmap_iterate
     procedure :: iterate_kv => str_hashmap_iterate_kv
@@ -179,7 +179,7 @@ contains
 
     i = 0
 
-    ! Call the GC function if available.
+    ! Call the GC function if set.
     if (c_associated(this%gc_function)) then
       do while(internal_hashmap_iterate(this%map, generic_c_pointer))
         call str_run_gc(this%gc_function, generic_c_pointer)
@@ -212,30 +212,23 @@ contains
   end function str_hashmap_is_empty
 
 
-  ! !* Clear the hashmap.
-  ! subroutine str_hashmap_clear(this)
-  !   implicit none
+  !* Clear the hashmap.
+  subroutine str_hashmap_clear(this)
+    implicit none
 
-  !   class(hashmap_string_key), intent(in) :: this
-  !   integer(c_int64_t) :: i
-  !   type(c_ptr) :: generic_c_pointer
+    class(hashmap_string_key), intent(in) :: this
+    type(c_ptr) :: generic_c_pointer
 
+    ! Call the GC function if set.
+    if (c_associated(this%gc_function)) then
+      call this%initialize_iterator()
+      do while(internal_hashmap_iterate(this%map, generic_c_pointer))
+        call str_run_gc(this%gc_function, generic_c_pointer)
+      end do
+    end if
 
-  !   i = 0
-
-  !   do while(internal_hashmap_iter(this%map, i, generic_c_pointer))
-
-  !     ! Call the GC function.
-  !     if (c_associated(this%gc_function)) then
-  !       call str_run_gc(this%gc_function, generic_c_pointer)
-  !     end if
-
-  !     ! Free the old string key pointer.
-  !     call str_free_string_key(generic_c_pointer)
-  !   end do
-
-  !   call internal_hashmap_clear(this%map, logical(.true., kind = c_bool))
-  ! end subroutine str_hashmap_clear
+    call internal_hashmap_clear(this%map, logical(.true., kind = c_bool))
+  end subroutine str_hashmap_clear
 
 
   !* Allows you to iterate through each element in the hashmap by direct pointer.
