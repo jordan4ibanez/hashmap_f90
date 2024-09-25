@@ -96,9 +96,13 @@ program prototype
     print*,string_pointer, len(string_pointer), gotten_data
   end do
 
+  !* This version when you're checking for something.
   if (map%iterate_with_func(iter_func_test)) then
-
+    print*,"uh oh!"
   end if
+
+  !* This version when you don't feel like initializing an iterator.
+  call map%iterate_with_func_discard(iter_func_test)
 
 
 end program prototype

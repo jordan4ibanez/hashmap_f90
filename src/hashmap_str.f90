@@ -31,6 +31,7 @@ module hashmap_str
     procedure :: is_empty => str_hashmap_is_empty
     procedure :: clear => str_hashmap_clear
     procedure :: iterate_with_func => str_hashmap_iterate_with_func
+    procedure :: iterate_with_func_discard => str_hashmap_iterate_with_func_discard
     procedure :: initialize_iterator => str_hashmap_initialize_iterator
     procedure :: iterate => str_hashmap_iterate
     procedure :: iterate_kv => str_hashmap_iterate_kv
@@ -251,6 +252,22 @@ contains
 
     early_return = internal_hashmap_iterate_with_func(this%map, c_func_pointer)
   end function str_hashmap_iterate_with_func
+
+
+  !* Send a function into the hashmap and iterate with it.
+  !* This version does not return a value.
+  subroutine str_hashmap_iterate_with_func_discard(this, iter_func)
+    implicit none
+
+    class(hashmap_string_key), intent(in) :: this
+    procedure(iterate_with_func_c_interface) :: iter_func
+    logical(c_bool) :: discard
+    type(c_funptr) :: c_func_pointer
+
+    c_func_pointer = c_funloc(iter_func)
+
+    discard = internal_hashmap_iterate_with_func(this%map, c_func_pointer)
+  end subroutine str_hashmap_iterate_with_func_discard
 
 
   !* Initializes the internal iterator.
