@@ -36,6 +36,8 @@ contains
     call c_f_pointer(raw_c_ptr, gotten_data)
 
     print*,"hello from iter func: ", gotten_data
+
+    early_return = .false.
   end function iter_func_test
 
 
