@@ -68,6 +68,16 @@ module hashmap_bindings
     end subroutine internal_hashmap_clear
 
 
+    function internal_hashmap_iterate_with_func(map, iter_func) result(early_return) bind(c, name = "hashmap_iterate_with_func")
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: map
+      type(c_funptr), intent(in), value :: iter_func
+      logical(c_bool) :: early_return
+    end function internal_hashmap_iterate_with_func
+
+
     subroutine internal_hashmap_initialize_iterator(map) bind(c, name = "hashmap_initialize_iterator")
       use, intrinsic :: iso_c_binding
       implicit none
