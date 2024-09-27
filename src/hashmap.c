@@ -125,7 +125,7 @@ struct hashmap
 int compare_function(const header *header_a, const header *header_b)
 {
     // If this goes wrong, uh oh.
-    assert(header_a->is_string && header_b->is_string);
+    assert(header_a->is_string == header_b->is_string);
 
     if (header_a->is_string)
     {
