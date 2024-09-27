@@ -417,7 +417,16 @@ const char *hashmap_set_str_key(struct hashmap *map, const char *key_s, size_t s
     header stack_header;
     build_string_header(&stack_header, key_s, string_length);
 
-    return hashmap_set_internal(map, &stack_header, fortran_data);
+    const char *result = hashmap_set_internal(map, &stack_header, fortran_data);
+
+    if (result)
+    {
+        return result + HEADER_SIZE;
+    }
+    else
+    {
+        return result;
+    }
 }
 
 /**
@@ -432,7 +441,16 @@ const char *hashmap_set_int_key(struct hashmap *map, const int64_t key_i_fort, c
     header stack_header;
     build_int_header(&stack_header, (uint64_t)key_i_fort);
 
-    return hashmap_set_internal(map, &stack_header, fortran_data);
+    const char *result = hashmap_set_internal(map, &stack_header, fortran_data);
+
+    if (result)
+    {
+        return result + HEADER_SIZE;
+    }
+    else
+    {
+        return result;
+    }
 }
 
 /**
@@ -567,7 +585,16 @@ const char *hashmap_delete_str_key(struct hashmap *map, const char *key_s, size_
     header stack_header;
     build_string_header(&stack_header, key_s, string_length);
 
-    return hashmap_delete_internal(map, &stack_header);
+    const char *result = hashmap_delete_internal(map, &stack_header);
+
+    if (result)
+    {
+        return result + HEADER_SIZE;
+    }
+    else
+    {
+        return result;
+    }
 }
 
 /**
@@ -578,7 +605,16 @@ const char *hashmap_delete_int_key(struct hashmap *map, const int64_t key_i)
     header stack_header;
     build_int_header(&stack_header, (uint64_t)key_i);
 
-    return hashmap_delete_internal(map, &stack_header);
+    const char *result = hashmap_delete_internal(map, &stack_header);
+
+    if (result)
+    {
+        return result + HEADER_SIZE;
+    }
+    else
+    {
+        return result;
+    }
 }
 
 /**
