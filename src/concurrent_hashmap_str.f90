@@ -19,8 +19,7 @@ module concurrent_hashmap_str
     private
     type(c_ptr) :: map = c_null_ptr
     type(c_funptr) :: gc_function = c_null_funptr
-    type(mutex_rwlock), pointer :: mutex
-    type(c_ptr) :: mutex_c_ptr
+    type(c_ptr) :: mutex = c_null_ptr
   contains
     procedure :: set => concurrent_str_hashmap_set
     procedure :: get => concurrent_str_hashmap_get
@@ -56,6 +55,8 @@ contains
     if (present(optional_gc_function)) then
       h%gc_function = c_funloc(optional_gc_function)
     end if
+
+    h%mutex = thread_create_mutex()
   end function new_hashmap_string_key
 
 
@@ -188,6 +189,8 @@ contains
     end if
 
     call internal_hashmap_free(this%map)
+
+    call thread_destroy_mutex(this%mutex)
   end subroutine concurrent_str_hashmap_destroy
 
 
@@ -339,7 +342,7 @@ contains
     class(concurrent_hashmap_string_key), intent(inout) :: this
     integer(c_int) :: status
 
-    status = thread_write_lock(this%mutex_c_ptr)
+    status = thread_lock_mutex(this%mutex)
   end subroutine concurrent_str_hashmap_lock
 
 
@@ -350,7 +353,7 @@ contains
     class(concurrent_hashmap_string_key), intent(inout) :: this
     integer(c_int) :: status
 
-    status = thread_unlock_lock(this%mutex_c_ptr)
+    status = thread_unlock_mutex(this%mutex)
   end subroutine concurrent_str_hashmap_unlock
 
 
