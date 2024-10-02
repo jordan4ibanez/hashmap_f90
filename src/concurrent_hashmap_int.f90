@@ -19,7 +19,7 @@ module concurrent_hashmap_int
     private
     type(c_ptr) :: map = c_null_ptr
     type(c_funptr) :: gc_function = c_null_funptr
-    type(c_ptr) :: mutex
+    type(c_ptr) :: mutex = c_null_ptr
   contains
     procedure :: set => concurrent_int_hashmap_set
     procedure :: get => concurrent_int_hashmap_get
