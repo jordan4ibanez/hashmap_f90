@@ -222,7 +222,7 @@ static uint64_t clip_hash(uint64_t hash)
     return hash & 0xFFFFFFFFFFFF;
 }
 
-static uint64_t get_hash(struct hashmap *map, const char *key)
+static uint64_t get_hash(struct hashmap *map, const header *key)
 {
     return clip_hash(hash_function(key));
 }
@@ -484,7 +484,7 @@ const char *hashmap_set_internal(struct hashmap *map, const header *stack_header
         }
     }
 
-    struct bucket *entry = map->edata;
+    struct bucket *entry = (bucket *)map->edata;
     entry->hash = hash;
     entry->dib = 1;
 
@@ -508,7 +508,7 @@ const char *hashmap_set_internal(struct hashmap *map, const header *stack_header
             return NULL;
         }
         bitem = bucket_item(bucket);
-        if (entry->hash == bucket->hash && (compare_function(eitem, bitem) == 0))
+        if (entry->hash == bucket->hash && (compare_function((header *)eitem, (header *)bitem) == 0))
         {
             memcpy(map->spare, bitem, map->element_size);
             memcpy(bitem, eitem, map->element_size);
@@ -568,7 +568,7 @@ const char *hashmap_get_internal(struct hashmap *map, const header *stack_header
         if (bucket->hash == hash)
         {
             char *bitem = bucket_item(bucket);
-            if (compare_function(stack_header, bitem) == 0)
+            if (compare_function((header *)stack_header, (header *)bitem) == 0)
             {
                 return bitem + HEADER_SIZE;
             }
@@ -645,7 +645,7 @@ const char *hashmap_delete_internal(struct hashmap *map, const header *stack_hea
             return NULL;
         }
         char *bitem = bucket_item(bucket);
-        if (bucket->hash == hash && (compare_function(stack_header, bitem) == 0))
+        if (bucket->hash == hash && (compare_function((header *)stack_header, (header *)bitem) == 0))
         {
             memcpy(map->spare, bitem, map->element_size);
             bucket->dib = 0;
