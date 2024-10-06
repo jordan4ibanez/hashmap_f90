@@ -12,7 +12,7 @@ gdb:
 
 valgrind:
 	@./scripts/create_version_info.sh
-	@valgrind --trace-children=yes --leak-check=full fpm run --flag   -g \
+	@valgrind --trace-children=yes --leak-check=full --fair-sched=yes fpm run --flag   -g \
 	                                                         --c-flag -g
 
 
@@ -39,8 +39,7 @@ test_gdb:
 
 .PHONY: test_valgrind
 test_valgrind:
-	@valgrind --trace-children=yes --leak-check=full fpm test --flag   -g \
-	                                                          --c-flag -g
+	@./scripts/run_valgrind.sh
 
 test_stack:
 	@MALLOC_CHECK_=2 fpm test --flag   -g --flag   -lmcheck --flag -fstack-protector --flag -ftrapv \
