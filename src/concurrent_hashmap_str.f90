@@ -10,7 +10,7 @@ module concurrent_hashmap_str
 
 
   public :: concurrent_hashmap_string_key
-  public :: new_hashmap_string_key
+  public :: new_concurrent_hashmap_string_key
 
 
   !* Fortran hashmap wrapper.
@@ -43,7 +43,7 @@ contains
 
 
   !* Hashmap string key constructor.
-  function new_hashmap_string_key(element_size, optional_gc_function) result(h)
+  function new_concurrent_hashmap_string_key(element_size, optional_gc_function) result(h)
     implicit none
 
     integer(c_size_t), intent(in), value :: element_size
@@ -57,7 +57,7 @@ contains
     end if
 
     h%mutex = thread_create_mutex()
-  end function new_hashmap_string_key
+  end function new_concurrent_hashmap_string_key
 
 
   !* Set a value in the hashmap with a string key.
