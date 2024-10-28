@@ -264,10 +264,8 @@ struct hashmap *hashmap_new(size_t fortran_data_size, size_t cap)
     size_t size = sizeof(struct hashmap) + bucketsz * 2;
 
     struct hashmap *map = malloc(size);
-    if (!map)
-    {
-        return NULL;
-    }
+
+    assert(map);
 
     memset(map, 0, sizeof(struct hashmap));
 
