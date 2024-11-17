@@ -72,6 +72,8 @@ contains
     !? Safety check.
     if (key_length == 0) then
       error stop "[Hashmap] Error: Key cannot be NULL."
+    else if (key_length > 192) then
+      error stop "[Hashmap] Error: Key cannot be longer than 192."
     end if
 
     black_magic = transfer(loc(raw_item), black_magic)
@@ -108,6 +110,8 @@ contains
     !? Safety check.
     if (key_length == 0) then
       error stop "[Hashmap] Error: Key cannot be NULL."
+    else if (key_length > 192) then
+      error stop "[Hashmap] Error: Key cannot be longer than 192."
     end if
 
     !? Grabs a C pointer or NULL upon failure.
@@ -132,6 +136,13 @@ contains
 
     string_length = len(key_s)
 
+    !? Safety check.
+    if (string_length == 0) then
+      error stop "[Hashmap] Error: Key cannot be NULL."
+    else if (string_length > 192) then
+      error stop "[Hashmap] Error: Key cannot be longer than 192."
+    end if
+
     !? Grabs a C pointer or NULL upon failure.
     data_c_ptr = internal_hashmap_get_str_key(this%map, key_s, string_length)
 
@@ -152,6 +163,13 @@ contains
     integer(c_size_t) :: string_length
 
     string_length = len(key_s)
+
+    !? Safety check.
+    if (string_length == 0) then
+      error stop "[Hashmap] Error: Key cannot be NULL."
+    else if (string_length > 192) then
+      error stop "[Hashmap] Error: Key cannot be longer than 192."
+    end if
 
     !? Grabs a C pointer or NULL upon failure.
     old_data_c_ptr = internal_hashmap_delete_str_key(this%map, key_s, string_length)
