@@ -129,22 +129,22 @@ contains
     class(hashmap_string_key), intent(inout) :: this
     character(len = *, kind = c_char), intent(in) :: key_s
     logical(c_bool) :: has
-    integer(c_size_t) :: string_length
+    integer(c_size_t) :: key_length
     type(c_ptr) :: data_c_ptr
 
     has = .false.
 
-    string_length = len(key_s)
+    key_length = len(key_s)
 
     !? Safety check.
-    if (string_length == 0) then
+    if (key_length == 0) then
       error stop "[Hashmap] Error: Key cannot be NULL."
-    else if (string_length > 192) then
+    else if (key_length > 192) then
       error stop "[Hashmap] Error: Key cannot be longer than 192."
     end if
 
     !? Grabs a C pointer or NULL upon failure.
-    data_c_ptr = internal_hashmap_get_str_key(this%map, key_s, string_length)
+    data_c_ptr = internal_hashmap_get_str_key(this%map, key_s, key_length)
 
     ! We can simply check if it's NULL.
     has = c_associated(data_c_ptr)
@@ -160,19 +160,19 @@ contains
     class(hashmap_string_key), intent(inout) :: this
     character(len = *, kind = c_char), intent(in) :: key_s
     type(c_ptr) :: old_data_c_ptr
-    integer(c_size_t) :: string_length
+    integer(c_size_t) :: key_length
 
-    string_length = len(key_s)
+    key_length = len(key_s)
 
     !? Safety check.
-    if (string_length == 0) then
+    if (key_length == 0) then
       error stop "[Hashmap] Error: Key cannot be NULL."
-    else if (string_length > 192) then
+    else if (key_length > 192) then
       error stop "[Hashmap] Error: Key cannot be longer than 192."
     end if
 
     !? Grabs a C pointer or NULL upon failure.
-    old_data_c_ptr = internal_hashmap_delete_str_key(this%map, key_s, string_length)
+    old_data_c_ptr = internal_hashmap_delete_str_key(this%map, key_s, key_length)
 
     ! It's a null pointer.
     if (.not. c_associated(old_data_c_ptr)) then
@@ -332,17 +332,17 @@ contains
     character(len = :, kind = c_char), intent(inout), pointer :: string_pointer
     type(c_ptr), intent(inout) :: raw_c_pointer
     type(c_ptr) :: c_str_pointer
-    integer(c_size_t) :: string_length
+    integer(c_size_t) :: key_length
     logical(c_bool) :: has_item
 
-    has_item = internal_hashmap_iterate_str_key_kv(this%map, c_str_pointer, string_length, raw_c_pointer)
+    has_item = internal_hashmap_iterate_str_key_kv(this%map, c_str_pointer, key_length, raw_c_pointer)
 
     ! Nothing to do.
     if (.not. has_item) then
       return
     end if
 
-    call raw_string_cast(string_pointer, c_str_pointer, string_length)
+    call raw_string_cast(string_pointer, c_str_pointer, key_length)
   end function str_hashmap_iterate_kv
 
 
